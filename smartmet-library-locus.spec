@@ -1,9 +1,11 @@
-%define LIBNAME locus
+%define DIRNAME locus
+%define LIBNAME smartmet-%{DIRNAME}
+%define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
-Name: libsmartmet-%{LIBNAME}
-Version: 16.6.7
+Name: %{SPECNAME}
+Version: 16.12.20
 Release: 1%{?dist}.fmi
-License: FMI
+License: MIT
 Group: Development/Libraries
 URL: http://www.weatherproof.fi
 Source0: %{name}.tar.gz
@@ -11,11 +13,13 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 BuildRequires: boost-devel
 BuildRequires: libpqxx-devel >= 4.0.1
 BuildRequires: postgresql93-devel
-BuildRequires: libsmartmet-macgyver-devel >= 16.5.6
-Requires: libsmartmet-macgyver >= 16.5.6
+BuildRequires: smartmet-library-macgyver-devel >= 16.5.6
+Requires: smartmet-library-macgyver >= 16.5.6
 Requires: libpqxx >= 4.0.1
 Requires: postgresql93-libs
-Provides: %{LIBNAME}
+Provides: %{SPECNAME}
+Obsoletes: libsmartmet-locus < 16.12.20
+Obsoletes: libsmartmet-locus-debuginfo < 16.12.20
 
 
 %description
@@ -24,33 +28,40 @@ FMI locus library
 %prep
 rm -rf $RPM_BUILD_ROOT
 
-%setup -q -n %{LIBNAME}
+%setup -q -n %{DIRNAME}
  
 %build
 make %{_smp_mflags}
 
 %install
-%makeinstall includedir=%{buildroot}%{_includedir}
+%makeinstall
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(0775,root,root,0775)
-%{_libdir}/libsmartmet_%{LIBNAME}.so
+%{_libdir}/libsmartmet-%{DIRNAME}.so
 
-%package -n libsmartmet-%{LIBNAME}-devel
+%post -p /sbin/ldconfig
+%postun -p /sbin/ldconfig
+
+%package -n %{SPECNAME}-devel
 Summary: FMI Locus library development files
-Provides: %{LIBNAME}-devel
+Provides: %{SPECNAME}-devel
+Obsoletes: libsmartmet-locus-devel  < 16.12.20
 
-%description -n libsmartmet-%{LIBNAME}-devel
+%description -n %{SPECNAME}-devel
 FMI Locus library development files
 
-%files -n libsmartmet-%{LIBNAME}-devel
+%files -n %{SPECNAME}-devel
 %defattr(0664,root,root,0775)
-%{_includedir}/smartmet/%{LIBNAME}
+%{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Dec 20 2016 Mika Heiskanen <mika.heiskanen@fmi.fi> - 16.12.20-1.fmi
+- Switched to using open source naming conventions
+
 * Tue Jun  7 2016 Mika Heiskanen <mika.heiskanen@fmi.fi> - 16.6.7-1.fmi
 - Use gemini by default instead of popper
 

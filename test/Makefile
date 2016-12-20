@@ -17,7 +17,7 @@ INCLUDES = -I ../include \
 	-I /usr/include/smartmet
 
 
-LIBS = ../libsmartmet_locus.so
+LIBS = ../libsmartmet-locus.so
 
 all: $(PROG)
 clean:
@@ -30,6 +30,6 @@ test: $(PROG)
 	done
 
 
-$(PROG) : % : %.cpp ../libsmartmet_locus.so
+$(PROG) : % : %.cpp ../libsmartmet-locus.so
 	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)
 
