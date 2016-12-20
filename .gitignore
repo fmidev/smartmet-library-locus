@@ -1,0 +1,5 @@
+*~
+.sconsign.dblite
+libsmartmet_locus.*
+obj/
+test/*Test
