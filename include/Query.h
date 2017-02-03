@@ -32,6 +32,12 @@ class Query
         const std::string& thePass,
         const std::string& theDatabase);
 
+  Query(const std::string& theHost,
+        const std::string& theUser,
+        const std::string& thePass,
+        const std::string& theDatabase,
+        const std::string& thePort);
+
   ~Query();
 
   void SetDebug(bool theFlag);

@@ -4,6 +4,8 @@
 #include <boost/make_shared.hpp>
 #include <iostream>
 
+const std::string default_port = "5432";
+
 using namespace std;
 
 namespace Locus
@@ -19,23 +21,49 @@ Connection::Connection(const std::string& theHost,
   open(theHost, theUser, thePass, theDatabase, theClientEncoding);
 }
 
+Connection::Connection(const std::string& theHost,
+                       const std::string& theUser,
+                       const std::string& thePass,
+                       const std::string& theDatabase,
+                       const std::string& theClientEncoding,
+                       const std::string& thePort,
+                       bool theDebug /*= false*/)
+    : debug(theDebug), collate(false)
+{
+  open(theHost, theUser, thePass, theDatabase, theClientEncoding, thePort);
+}
+
 bool Connection::open(const std::string& theHost,
                       const std::string& theUser,
                       const std::string& thePass,
                       const std::string& theDatabase,
                       const std::string& theClientEncoding)
 {
+  return open(theHost, theUser, thePass, theDatabase, theClientEncoding, default_port);
+}
+
+bool Connection::open(const std::string& theHost,
+                      const std::string& theUser,
+                      const std::string& thePass,
+                      const std::string& theDatabase,
+                      const std::string& theClientEncoding,
+                      const std::string& thePort)
+{
   close();
 
   std::stringstream ss;
 
-  ss << "host=" << theHost << " dbname=" << theDatabase << " user=" << theUser
-     << " password=" << thePass
+  // clang-format off
+  ss << "host="      << theHost
+	 << " dbname="   << theDatabase
+	 << " port= "    << thePort
+	 << " user="     << theUser
+	 << " password=" << thePass
 #if 0
-	   << " client_encoding="
-	   << theClientEncoding
+	 << " client_encoding=" << theClientEncoding
 #endif
-      ;
+	;
+	// clang-format off
 
   try
   {

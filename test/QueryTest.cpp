@@ -65,8 +65,8 @@ void simple_name_search()
   if (ret[0].id != 658225)
     TEST_FAILED("ID of Helsinki should be 658225, not " +
                 boost::lexical_cast<std::string>(ret[0].id));
-  if (ret[0].elevation != 26)
-    TEST_FAILED("Elevation of Helsinki should be 26, not " +
+  if (ret[0].elevation != 10)
+    TEST_FAILED("Elevation of Helsinki should be 10, not " +
                 boost::lexical_cast<std::string>(ret[0].elevation));
 
   if (ret.back().country != "Suomi")

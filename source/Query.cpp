@@ -105,6 +105,23 @@ Query::Query(const string& theHost,
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Alternate host constructor
+ */
+// ----------------------------------------------------------------------
+
+Query::Query(const string& theHost,
+             const string& theUser,
+             const string& thePass,
+             const string& theDatabase,
+             const string& thePort)
+    : debug(false), recursive_query(false)
+{
+  /* Make a connection to the database */
+  conn.open(theHost, theUser, thePass, theDatabase, CLIENT_ENCODING, thePort);
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Destructor closes the PosrgreSQL connection
  */
 // ----------------------------------------------------------------------
