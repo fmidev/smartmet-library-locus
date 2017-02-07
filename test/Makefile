@@ -13,7 +13,7 @@ DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
 
 CC = g++
 CFLAGS = -DUNIX -D_REENTRANT -O0 -g $(MAINFLAGS)
-INCLUDES = -I ../include \
+INCLUDES = -I ../locus \
 	-I /usr/include/smartmet
 
 
