@@ -12,7 +12,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/locale/encoding.hpp>
 #include <boost/make_shared.hpp>
-#include <smartmet/macgyver/String.h>
+#include <macgyver/StringConversion.h>
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
