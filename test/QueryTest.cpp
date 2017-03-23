@@ -1,14 +1,20 @@
 #include <regression/tframe.h>
-#include "Query.h"
-#include "QueryOptions.h"
 #include <boost/lexical_cast.hpp>
 #include <iostream>
-#include <string>
 #include <sstream>
+#include <string>
+#include "Query.h"
+#include "QueryOptions.h"
 
 using namespace std;
 using namespace boost;
 using namespace Locus;
+
+#define DATABASE_HOST "smartmet-test"
+#define DATABASE_USER "fminames_user"
+#define DATABASE_PASS "fminames_pw"
+#define DATABASE_PORT "5444"
+#define DATABASE "fminames"
 
 // Some helpful debugging functions
 
@@ -46,14 +52,14 @@ namespace QueryTest
 
 void simple_name_search()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
   Query::return_type ret;
 
   QueryOptions options;
 
   ret = lq.FetchByName(options, "Helsinki");
 
-  if (ret.size() != 2) TEST_FAILED("Should find 2 matches for Helsinki");
+  if (ret.size() != 1) TEST_FAILED("Should find 1 match for Helsinki");
 
   if (ret[0].name != "Helsinki")
     TEST_FAILED("Name of first match should be Helsinki, not " + ret[0].name);
@@ -69,17 +75,12 @@ void simple_name_search()
     TEST_FAILED("Elevation of Helsinki should be 10, not " +
                 boost::lexical_cast<std::string>(ret[0].elevation));
 
-  if (ret.back().country != "Suomi")
-    TEST_FAILED("Country of second match should be Suomi, not " + ret.back().country);
-  if (ret.back().timezone != "Europe/Helsinki")
-    TEST_FAILED("Timezone of second match should be Europe/Helsinki, not" + ret.back().timezone);
-
   options.SetCountries("all");
   options.SetLanguage("%");
   ret = lq.FetchByName(options, "New York");
 
-  if (ret.size() != 12)
-    TEST_FAILED("Should find 12 matches for New York, not " +
+  if (ret.size() != 1)
+    TEST_FAILED("Should find 1 match for New York, not " +
                 boost::lexical_cast<std::string>(ret.size()));
 
   options.SetLanguage("fi");
@@ -100,7 +101,7 @@ void simple_name_search()
 
 void search_with_area()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
   Query::return_type ret;
 
   QueryOptions options;
@@ -110,20 +111,8 @@ void search_with_area()
     TEST_FAILED("Should find 1 Kumpula,Helsinki, not " + lexical_cast<string>(ret.size()));
 
   ret = lq.FetchByName(options, "Kumpula,Suomi");
-  if (ret.size() != 10)
-    TEST_FAILED("Should find 10 Kumpula,Suomi locations, not " +
-                boost::lexical_cast<std::string>(ret.size()));
-
-  options.SetCountries("all");
-  ret = lq.FetchByName(options, "Rome");
-  if (ret.size() < 29)
-    TEST_FAILED("There should be atleast 29 Romes in the world, not " +
-                boost::lexical_cast<std::string>(ret.size()));
-
-  options.SetLanguage("%");
-  ret = lq.FetchByName(options, "Rome,Italy");
-  if (ret.size() != 2)
-    TEST_FAILED("There should be Rome,Italy twice: ADM3 and PPLC, not " +
+  if (ret.size() != 8)
+    TEST_FAILED("Should find 8 Kumpula,Suomi locations, not " +
                 boost::lexical_cast<std::string>(ret.size()));
 
   options.SetCountries("fi");
@@ -147,7 +136,7 @@ void search_with_area()
 
 void escape()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
   Query::return_type ret;
 
   QueryOptions options;
@@ -189,7 +178,7 @@ void escape()
 
 void search_id()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
   Query::return_type ret;
 
   QueryOptions options;
@@ -210,7 +199,7 @@ void search_id()
 
 void multiple_matches()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
   Query::return_type ret;
 
   QueryOptions options;
@@ -242,7 +231,7 @@ void multiple_matches()
 
 void specific_variants()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
   Query::return_type ret;
 
   QueryOptions options;
@@ -251,8 +240,8 @@ void specific_variants()
 
   ret = lq.FetchByName(options, "Koski");
 
-  if (ret.size() != 12)
-    TEST_FAILED("Should find Koski 12 times, not " + boost::lexical_cast<string>(ret.size()) +
+  if (ret.size() != 9)
+    TEST_FAILED("Should find Koski 9 times, not " + boost::lexical_cast<string>(ret.size()) +
                 " times");
 
   if (ret[0].name != "Koski Tl")
@@ -273,24 +262,22 @@ void specific_variants()
 
 void specific_countries()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
   Query::return_type ret;
 
   QueryOptions options;
   options.SetCountries("cz,sk");
   options.SetSearchVariants(false);
 
-  ret = lq.FetchByName(options, "Praha");
+  ret = lq.FetchByName(options, "Prague");
 
   if (ret.size() != 1)
-    TEST_FAILED("Should find Praha 1 times, not " + lexical_cast<string>(ret.size()));
+    TEST_FAILED("Should find Praha 1 time, not " + lexical_cast<string>(ret.size()));
 
   if (ret[0].name != "Praha") TEST_FAILED("Name of first match should be Praha");
 
-  if (ret[0].timezone != "Europe/Bratislava")
-    TEST_FAILED("Timezone of first match should be Europe/Bratislava, not " + ret[0].timezone);
-
-  if (ret[0].country != "Slovakia") TEST_FAILED("Country of last match should be Slovakia");
+  if (ret[0].timezone != "Europe/Prague")
+    TEST_FAILED("Timezone of first match should be Europe/Prague, not " + ret[0].timezone);
 
   TEST_PASSED();
 }
@@ -299,7 +286,7 @@ void specific_countries()
 
 void specific_language()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
   Query::return_type ret;
 
   QueryOptions options;
@@ -314,7 +301,7 @@ void specific_language()
 
   options.SetCountries("fi");
   ret = lq.FetchByName(options, "Helsinki");
-  if (ret.size() != 2) TEST_FAILED("Should find Helsinki 2 times");
+  if (ret.size() != 1) TEST_FAILED("Should find Helsinki 1 time");
   if (ret[0].name != "Helsingfors")
     TEST_FAILED("Name of first match should be Helsingfors, not " + ret[0].name)
   if (ret[0].country != "Finland") TEST_FAILED("Country of first match should be Finland");
@@ -326,7 +313,7 @@ void specific_language()
 
 void specific_result_limit()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
   QueryOptions options;
   options.SetResultLimit(5);
 
@@ -342,46 +329,47 @@ void specific_result_limit()
 
 void specific_features()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
   Query::return_type ret;
 
   QueryOptions options;
   options.SetCountries("%");
-  options.SetFeatures("MT,PPLC");
+  options.SetFeatures("PPLC");
   ret = lq.FetchByName(options, "Praha");
 
-  if (ret.size() != 2) TEST_FAILED("Should find Praha 2 times");
+  if (ret.size() != 1) TEST_FAILED("Should find Praha 1 time");
 
   if (ret[0].name != "Praha") TEST_FAILED("Name of first match should be Praha");
   if (ret[0].feature != "PPLC") TEST_FAILED("First match should be the capital");
-
-  if (ret.back().name != "Praha") TEST_FAILED("Name of last match should be Praha");
-  if (ret.back().feature != "MT") TEST_FAILED("Second match should be a mountain");
 
   TEST_PASSED();
 }
 
 void specific_keywords()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
   Query::return_type ret;
 
   QueryOptions options;
   options.SetCountries("all");
   options.SetFeatures("all");
-  options.SetKeywords("mek");
+  options.SetKeywords("finavia");
 
-  ret = lq.FetchByName(options, "Joensuu");
+  ret = lq.FetchByName(options, "Kemi");
 
   if (ret.size() != 1)
-    TEST_FAILED("Should find 1 Joensuu with keyword 'mek' and name search, not " +
+    TEST_FAILED("Should find 1 Kemi with keyword 'finavia' and name search, not " +
                 lexical_cast<string>(ret.size()));
 
   ret = lq.FetchByLatLon(options, 62.6, 29.7667, 30);
 
   if (ret.size() != 1)
-    TEST_FAILED("Should find 1 Joensuu with keyword 'mek' and coordinate search, not " +
+    TEST_FAILED("Should find 1 Joensuu airport with keyword 'finavia' and coordinate search, not " +
                 lexical_cast<string>(ret.size()));
+
+  if (ret[0].name != "Joensuun lentoasema")
+    TEST_FAILED("Failed to find Joensuu airport with a coordinate search with keyword 'finavia'");
 
   TEST_PASSED();
 }
@@ -390,7 +378,8 @@ void specific_keywords()
 
 void simple_lonlat_search()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
   Query::return_type ret;
 
   QueryOptions options;
@@ -411,7 +400,8 @@ void simple_lonlat_search()
 
 void simple_latlon_search()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
   Query::return_type ret;
 
   QueryOptions options;
@@ -433,7 +423,8 @@ void simple_latlon_search()
 
 void specific_radius()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
   Query::return_type ret;
 
   QueryOptions options;
@@ -452,7 +443,8 @@ void specific_radius()
 
 void search_keyword()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
   Query::return_type ret;
 
   QueryOptions options;
@@ -466,19 +458,13 @@ void search_keyword()
     if (ret[i].name == "NULL")
       TEST_FAILED("Municipality name is NULL for index " + boost::lexical_cast<string>(i));
 
-  ret = lq.FetchByKeyword(options, "test");
-  if (ret.size() != 1)
-    TEST_FAILED("Keyword test should have only one location, got " +
-                boost::lexical_cast<string>(ret.size()));
-
-  if (ret[0].name != "name changed") TEST_FAILED("Overriding default name by keyword failed");
-
   TEST_PASSED();
 }
 
 void count_keywords()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
   Query::return_type ret;
 
   QueryOptions options;
@@ -494,24 +480,26 @@ void count_keywords()
 
 void search_in_autocompletemode()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
   Query::return_type ret;
 
   QueryOptions options;
 
   options.SetResultLimit(20);
-  ret = lq.FetchByName(options, "rova%");
+  ret = lq.FetchByName(options, "Ii%");
 
-  if (ret.size() == 0) TEST_FAILED("Found 0 results for autocomplete search rova%");
+  if (ret.size() == 0) TEST_FAILED("Found 0 results for autocomplete search Ii%");
 
-  if (ret[0].name != "Rovaniemi")
-    TEST_FAILED("Should find Rovaniemi first if autocomplete mode is off, not " + ret[0].name);
+  // Iisalmi has ~22000 people, Ii only 9300
+  if (ret[0].name != "Iisalmi")
+    TEST_FAILED("Should find Iisalmi first if autocomplete mode is off, not " + ret[0].name);
 
   options.SetAutocompleteMode(true);
 
-  ret = lq.FetchByName(options, "rova%");
+  ret = lq.FetchByName(options, "Ii%");
 
-  if (ret[0].name != "Rova") TEST_FAILED("Should find Rova first if autocomplete mode is on");
+  if (ret[0].name != "Ii") TEST_FAILED("Should find Ii first if autocomplete mode is on");
 
   TEST_PASSED();
 }
@@ -520,7 +508,8 @@ void search_in_autocompletemode()
 
 void latin1()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
   Query::return_type ret;
 
   QueryOptions options;
@@ -539,7 +528,8 @@ void latin1()
 
 void resolve_feature()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
   lq.SetDebug(true);
 
   QueryOptions options;
@@ -554,7 +544,8 @@ void resolve_feature()
 
 void resolve_name_variant()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
   lq.SetDebug(true);
 
   QueryOptions options;
@@ -570,7 +561,8 @@ void resolve_name_variant()
 
 void resolve_country()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
   lq.SetDebug(true);
 
   QueryOptions options;
@@ -586,7 +578,8 @@ void resolve_country()
 
 void resolve_municipality()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
   lq.SetDebug(true);
 
   QueryOptions options;
@@ -609,7 +602,8 @@ void resolve_municipality()
 
 void resolve_administrative()
 {
-  Query lq;
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
   lq.SetDebug(true);
 
   string admin = lq.ResolveAdministrative("13", "DE");
