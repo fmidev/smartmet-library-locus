@@ -6,22 +6,17 @@
 
 #include "Query.h"
 
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/case_conv.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/locale/encoding.hpp>
-#include <boost/make_shared.hpp>
 #include <macgyver/StringConversion.h>
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/locale/encoding.hpp>
+#include <boost/make_shared.hpp>
 #include <cmath>
 #include <stdexcept>
 
-const char* LOCATIONDBHOST = "gemini.fmi.fi";
-// const char * LOCATIONDBPORT = "5432";
-const char* LOCATIONDBUSER = "fminames_user";
-const char* LOCATIONDBPASSWD = "#6xXwCGTac";
-const char* LOCATIONDB = "fminames";
 const char* CLIENT_ENCODING = "UTF8";
 
 using namespace std;
@@ -74,18 +69,6 @@ namespace Locus
 // ----------------------------------------------------------------------
 
 const float Query::default_radius = 50;
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Default constructor
- */
-// ----------------------------------------------------------------------
-
-Query::Query() : debug(false), recursive_query(false)
-{
-  /* Make a connection to the database */
-  conn.open(LOCATIONDBHOST, LOCATIONDBUSER, LOCATIONDBPASSWD, LOCATIONDB, CLIENT_ENCODING);
-}
 
 // ----------------------------------------------------------------------
 /*!

@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include "SimpleLocation.h"
-#include "QueryOptions.h"
 #include "Connection.h"
+#include "QueryOptions.h"
+#include "SimpleLocation.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
@@ -26,7 +26,7 @@ class Query
   static const float default_radius;
 
  public:
-  Query();
+  Query() = delete;
   Query(const std::string& theHost,
         const std::string& theUser,
         const std::string& thePass,

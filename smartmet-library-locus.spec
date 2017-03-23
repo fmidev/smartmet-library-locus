@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 17.3.14
+Version: 17.3.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -13,8 +13,8 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 BuildRequires: boost-devel
 BuildRequires: libpqxx-devel >= 4.0.1
 BuildRequires: postgresql93-devel
-BuildRequires: smartmet-library-macgyver-devel >= 16.5.6
-Requires: smartmet-library-macgyver >= 16.5.6
+BuildRequires: smartmet-library-macgyver-devel >= 17.3.16
+Requires: smartmet-library-macgyver >= 17.3.16
 Requires: libpqxx >= 4.0.1
 Requires: postgresql93-libs
 Provides: %{SPECNAME}
@@ -59,13 +59,16 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Mar 23 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.3.23-1.fmi
+- Force user to specify the host, username, password and database.
+
 * Tue Mar 14 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.3.14-1.fmi
 - Switched to using macgyver StringConversion tools
 
 * Fri Feb  3 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.3-1.fmi
 - Added possibility to select the PostgreSQL port number
 
-* Tue Dec 20 2016 Mika Heiskanen <mika.heiskanen@fmi.fi> - 16.12.20-1.fmi
+* Tue Dec 20 2016 Mika Heiskanen <mika+.heiskanen@fmi.fi> - 16.12.20-1.fmi
 - Switched to using open source naming conventions
 
 * Tue Jun  7 2016 Mika Heiskanen <mika.heiskanen@fmi.fi> - 16.6.7-1.fmi
