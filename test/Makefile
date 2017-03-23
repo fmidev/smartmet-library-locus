@@ -12,7 +12,7 @@ EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
 DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
 
 CC = g++
-CFLAGS = -DUNIX -D_REENTRANT -O0 -g $(MAINFLAGS)
+CFLAGS = -DUNIX -D_REENTRANT -std=c++11 -O0 -g $(MAINFLAGS)
 INCLUDES = -I ../locus \
 	-I /usr/include/smartmet
 
