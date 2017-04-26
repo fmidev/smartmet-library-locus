@@ -5,9 +5,9 @@
 // ======================================================================
 
 #include "QueryOptions.h"
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
 #include <sstream>
@@ -363,6 +363,8 @@ std::size_t QueryOptions::HashValue() const
     boost::hash_combine(hash, boost::hash_value(c));
   BOOST_FOREACH (const string& f, features)
     boost::hash_combine(hash, boost::hash_value(f));
+  BOOST_FOREACH (const string& k, keywords)
+    boost::hash_combine(hash, boost::hash_value(k));
   BOOST_FOREACH (const string& c, excluded_countries)
     boost::hash_combine(hash, boost::hash_value(c));
 
