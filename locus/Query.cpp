@@ -748,7 +748,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
       if (!variant.empty()) name = variant;
     }
 
-    if (theOptions.GetCharset() != "utf-8")
+    if ((!row["ansiname"].is_null()) && (theOptions.GetCharset() != "utf-8"))
       name = from_utf(name, row["ansiname"].as<string>(), theOptions.GetCharset());
 
     // Elevation
