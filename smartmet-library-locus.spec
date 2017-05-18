@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 17.4.26
+Version: 17.5.18
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -59,6 +59,9 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu May 18 2017 Pertti Kinnia <pertti.kinnia@fmi.fi> - 17.5.18-1.fmi
+- Added 'ansiname' column null check 
+
 * Wed Apr 26 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.4.26-1.fmi
 - Fixed name search hash value to include the list of allowed keywords
 
