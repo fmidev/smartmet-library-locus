@@ -10,6 +10,7 @@ Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-locus
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
+BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libpqxx-devel >= 4.0.1
 BuildRequires: postgresql93-devel
