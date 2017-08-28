@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 17.5.18
+Version: 17.8.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -15,8 +15,8 @@ BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libpqxx-devel >= 4.0.1
 BuildRequires: postgresql93-devel
-BuildRequires: smartmet-library-macgyver-devel >= 17.3.16
-Requires: smartmet-library-macgyver >= 17.3.16
+BuildRequires: smartmet-library-macgyver-devel >= 17.8.28
+Requires: smartmet-library-macgyver >= 17.8.28
 Requires: libpqxx >= 4.0.1
 Requires: postgresql93-libs
 Provides: %{SPECNAME}
@@ -61,6 +61,9 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Aug 28 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.8.28-1.fmi
+- Upgrade to boost 1.65
+
 * Thu May 18 2017 Pertti Kinnia <pertti.kinnia@fmi.fi> - 17.5.18-1.fmi
 - Added 'ansiname' column null check 
 
