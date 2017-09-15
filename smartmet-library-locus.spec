@@ -17,6 +17,11 @@ BuildRequires: libpqxx-devel >= 4.0.1
 BuildRequires: postgresql93-devel
 BuildRequires: smartmet-library-macgyver-devel >= 17.8.28
 Requires: smartmet-library-macgyver >= 17.8.28
+Requires: boost-filesystem
+Requires: boost-locale
+Requires: boost-regex
+Requires: boost-thread
+Requires: boost-system
 Requires: libpqxx >= 4.0.1
 Requires: postgresql93-libs
 Provides: %{SPECNAME}
