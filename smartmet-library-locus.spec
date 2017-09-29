@@ -56,6 +56,8 @@ rm -rf $RPM_BUILD_ROOT
 %package -n %{SPECNAME}-devel
 Summary: FMI Locus library development files
 Provides: %{SPECNAME}-devel
+Requires: %{SPECNAME}
+Requires: libpqxx-devel
 Obsoletes: libsmartmet-locus-devel  < 16.12.20
 
 %description -n %{SPECNAME}-devel
