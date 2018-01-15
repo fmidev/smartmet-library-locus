@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 17.8.28
+Version: 18.1.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -13,17 +13,17 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
-BuildRequires: libpqxx-devel >= 4.0.1
-BuildRequires: postgresql93-devel
-BuildRequires: smartmet-library-macgyver-devel >= 17.8.28
-Requires: smartmet-library-macgyver >= 17.8.28
+BuildRequires: libpqxx-devel >= 5.0.1
+BuildRequires: postgresql95-devel
+BuildRequires: smartmet-library-macgyver-devel >= 17.11.27
+Requires: smartmet-library-macgyver >= 17.11.27
 Requires: boost-filesystem
 Requires: boost-locale
 Requires: boost-regex
 Requires: boost-thread
 Requires: boost-system
-Requires: libpqxx >= 4.0.1
-Requires: postgresql93-libs
+Requires: libpqxx >= 5.0.1
+Requires: postgresql95-libs
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet-locus < 16.12.20
 Obsoletes: libsmartmet-locus-debuginfo < 16.12.20
@@ -68,6 +68,9 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Jan 15 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.1.15-1.fmi
+- Updated libpqxx and postgresql dependencies
+
 * Mon Aug 28 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.8.28-1.fmi
 - Upgrade to boost 1.65
 
