@@ -1,8 +1,7 @@
-#include <regression/tframe.h>
 #include "QueryOptions.h"
 #include <boost/lexical_cast.hpp>
+#include <regression/tframe.h>
 #include <iostream>
-#include <string>
 #include <sstream>
 #include <string>
 

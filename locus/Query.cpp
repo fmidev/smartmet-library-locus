@@ -6,14 +6,14 @@
 
 #include "Query.h"
 
-#include <macgyver/StringConversion.h>
-#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/locale/encoding.hpp>
 #include <boost/make_shared.hpp>
+#include <macgyver/StringConversion.h>
+#include <algorithm>
 #include <cmath>
 #include <stdexcept>
 
@@ -58,7 +58,7 @@ bool contains(const T& theContainer, const S& theObject)
   typename T::const_iterator it = find(theContainer.begin(), theContainer.end(), theObject);
   return (it != theContainer.end());
 }
-}
+}  // namespace
 
 namespace Locus
 {
@@ -382,11 +382,11 @@ void Query::AddFeatureConditions(const QueryOptions& theOptions, string& theQuer
 
 // ----------------------------------------------------------------------
 /*!
-* Helper method that generates keyword conditions for sql-query
-*
-* \param query sql-string
-* \return query sql-string with keyword conditions
-*/
+ * Helper method that generates keyword conditions for sql-query
+ *
+ * \param query sql-string
+ * \return query sql-string with keyword conditions
+ */
 // ----------------------------------------------------------------------
 
 void Query::AddKeywordConditions(const QueryOptions& theOptions, string& theQuery) const

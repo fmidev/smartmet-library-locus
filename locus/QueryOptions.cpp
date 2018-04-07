@@ -94,12 +94,12 @@ void QueryOptions::SetCountries(const string& theCountries)
 void QueryOptions::SetCountries(const list<string>& theCountries) { countries = theCountries; }
 // ----------------------------------------------------------------------
 /*!
-  * Set countries that are not used in search. Takes list of country
-      * codes in importance order separated with comma.
-      * Special value 'all' can be used to define all countries to be searched.
-  *
-  * \param value List of iso country codes (string) separated with comma.
-  * \return void
+ * Set countries that are not used in search. Takes list of country
+ * codes in importance order separated with comma.
+ * Special value 'all' can be used to define all countries to be searched.
+ *
+ * \param value List of iso country codes (string) separated with comma.
+ * \return void
  */
 // ----------------------------------------------------------------------
 
@@ -113,12 +113,12 @@ void QueryOptions::SetExcludedCountries(const string& theCountries)
 
 // ----------------------------------------------------------------------
 /*!
-  * Set countries that are not used in search. Takes list of country
-      * codes in importance order.
-      * Special value 'all' can be used to define all countries to be searched.
-  *
-  * \param value List of iso country codes separated with comma.
-  * \return void
+ * Set countries that are not used in search. Takes list of country
+ * codes in importance order.
+ * Special value 'all' can be used to define all countries to be searched.
+ *
+ * \param value List of iso country codes separated with comma.
+ * \return void
  */
 // ----------------------------------------------------------------------
 
@@ -168,11 +168,11 @@ void QueryOptions::SetFeatures(const string& theFeatures)
 void QueryOptions::SetFeatures(const list<string>& theFeatures) { features = theFeatures; }
 // ----------------------------------------------------------------------
 /*!
-* Set keywords used in search.
-*
-* \param keywords List of iso keywords separated with comma
-* \return void
-*/
+ * Set keywords used in search.
+ *
+ * \param keywords List of iso keywords separated with comma
+ * \return void
+ */
 // ----------------------------------------------------------------------
 
 void QueryOptions::SetKeywords(const string& theKeywords)

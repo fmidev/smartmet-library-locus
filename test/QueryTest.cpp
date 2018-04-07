@@ -1,10 +1,10 @@
-#include <regression/tframe.h>
+#include "Query.h"
+#include "QueryOptions.h"
 #include <boost/lexical_cast.hpp>
+#include <regression/tframe.h>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "Query.h"
-#include "QueryOptions.h"
 
 using namespace std;
 using namespace boost;
