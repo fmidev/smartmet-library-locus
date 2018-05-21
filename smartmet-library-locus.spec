@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 18.4.7
+Version: 18.5.17
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -69,6 +69,9 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu May 17 2018 Anssi Reponen <anssi.reponen@fmi.fi> - 18.5.17-1.fmi
+- New constructor added to allow connect_timeout parameter for PostgreSQL connection
+
 * Sat Apr  7 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.4.7-1.fmi
 - Upgrade to boost 1.66
 

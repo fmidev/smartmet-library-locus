@@ -33,18 +33,28 @@ class Connection
              const std::string& thePort,
              bool theDebug = false);
 
-  bool open(const std::string& theHost,
-            const std::string& theUser,
-            const std::string& thePass,
-            const std::string& theDatabase,
-            const std::string& theClientEncodin);
+  Connection(const std::string& theHost,
+             const std::string& theUser,
+             const std::string& thePass,
+             const std::string& theDatabase,
+             const std::string& theClientEncoding,
+             const std::string& thePort,
+             const std::string& theConnectTimeout = "",
+             bool theDebug = false);
 
   bool open(const std::string& theHost,
             const std::string& theUser,
             const std::string& thePass,
             const std::string& theDatabase,
-            const std::string& theClientEncodin,
-            const std::string& thePort);
+            const std::string& theClientEncoding);
+
+  bool open(const std::string& theHost,
+            const std::string& theUser,
+            const std::string& thePass,
+            const std::string& theDatabase,
+            const std::string& theClientEncoding,
+            const std::string& thePort,
+            const std::string& theConnectTimeout = "");
 
   void close();
   bool isConnected() const { return conn->is_open(); }
