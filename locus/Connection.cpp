@@ -33,6 +33,19 @@ Connection::Connection(const std::string& theHost,
   open(theHost, theUser, thePass, theDatabase, theClientEncoding, thePort);
 }
 
+Connection::Connection(const std::string& theHost,
+                       const std::string& theUser,
+                       const std::string& thePass,
+                       const std::string& theDatabase,
+                       const std::string& theClientEncoding,
+                       const std::string& thePort,
+                       const std::string& theConnectTimeout /* = "" */,
+                       bool theDebug /*= false*/)
+    : debug(theDebug), collate(false)
+{
+  open(theHost, theUser, thePass, theDatabase, theClientEncoding, thePort, theConnectTimeout);
+}
+
 bool Connection::open(const std::string& theHost,
                       const std::string& theUser,
                       const std::string& thePass,
@@ -47,7 +60,8 @@ bool Connection::open(const std::string& theHost,
                       const std::string& thePass,
                       const std::string& theDatabase,
                       const std::string& theClientEncoding,
-                      const std::string& thePort)
+                      const std::string& thePort,
+                      const std::string& theConnectTimeout /*= ""*/)
 {
   close();
 
@@ -63,6 +77,9 @@ bool Connection::open(const std::string& theHost,
 	 << " client_encoding=" << theClientEncoding
 #endif
 	;
+  if(!theConnectTimeout.empty())
+	ss << " connect_timeout=" << theConnectTimeout;
+
 	// clang-format off
 
   try
