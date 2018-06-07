@@ -61,11 +61,16 @@ class Connection
   void setClientEncoding(const std::string& theEncoding) const;
   void setDebug(bool doDebugging) { debug = doDebugging; }
   pqxx::result executeNonTransaction(const std::string& theSQLStatement) const;
+  void startTransaction();
+  pqxx::result executeTransaction(const std::string& theSQLStatement) const;
+  void commitTransaction();
+
   bool collateSupported() { return collate; }
   std::string quote(const std::string& theString) const;
 
  private:
   boost::shared_ptr<pqxx::connection> conn;  // PostgreSQL connecton
+  boost::shared_ptr<pqxx::work> trx;         // PostgreSQL transaction
   bool debug;
   bool collate;
 
