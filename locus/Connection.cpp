@@ -141,6 +141,40 @@ pqxx::result Connection::executeNonTransaction(const std::string& theSQLStatemen
   }
 }
 
+void Connection::startTransaction()
+{
+  trx = boost::make_shared<pqxx::work>(*conn);
+}
+
+pqxx::result Connection::executeTransaction(const std::string& theSQLStatement) const
+{
+  if (debug) std::cout << "SQL: " << theSQLStatement << std::endl;
+
+  try
+  {
+    return trx->exec(theSQLStatement);
+  }
+  catch (const std::exception& e)
+  {
+    throw runtime_error(string("Execution of SQL statement (transaction mode) failed: ") + e.what());
+  }
+}
+
+void Connection::commitTransaction()
+{
+ try
+  {
+	trx->commit();
+	trx.reset();
+  }
+  catch (const std::exception& e)
+  {
+	// If we get here, Xaction has been rolled back
+	trx.reset();
+    throw runtime_error(string("Commiting transaction failed: ") + e.what());
+  }
+}
+
 void Connection::setClientEncoding(const std::string& theEncoding) const
 {
   try
