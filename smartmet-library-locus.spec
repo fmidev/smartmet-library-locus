@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 18.6.7
+Version: 18.6.13
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -16,8 +16,8 @@ BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libpqxx-devel >= 5.0.1
 BuildRequires: postgresql95-devel
-BuildRequires: smartmet-library-macgyver-devel >= 18.4.7
-Requires: smartmet-library-macgyver >= 18.4.7
+BuildRequires: smartmet-library-macgyver-devel >= 18.6.7
+Requires: smartmet-library-macgyver >= 18.6.7
 Requires: boost-filesystem
 Requires: boost-locale
 Requires: boost-regex
@@ -69,7 +69,7 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
-* Thu Jun 7 2018 Anssi Reponen <anssi.reponen@fmi.fi> - 18.6.7-1.fmi
+* Wed Jun 13 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.6.13-1.fmi
 - Transaction-functions added
 
 * Mon May 21 2018 Anssi Reponen <anssi.reponen@fmi.fi> - 18.5.21-1.fmi
