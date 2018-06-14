@@ -69,18 +69,17 @@ bool Connection::open(const std::string& theHost,
 
   // clang-format off
   ss << "host="      << theHost
-	 << " dbname="   << theDatabase
-	 << " port= "    << thePort
-	 << " user="     << theUser
-	 << " password=" << thePass
+     << " dbname="   << theDatabase
+     << " port= "    << thePort
+     << " user="     << theUser
+     << " password=" << thePass
 #if 0
-	 << " client_encoding=" << theClientEncoding
+     << " client_encoding=" << theClientEncoding
 #endif
-	;
-  if(!theConnectTimeout.empty())
-	ss << " connect_timeout=" << theConnectTimeout;
+      ;
+  // clang-format on
 
-	// clang-format off
+  if (!theConnectTimeout.empty()) ss << " connect_timeout=" << theConnectTimeout;
 
   try
   {
@@ -93,7 +92,8 @@ bool Connection::open(const std::string& theHost,
   }
   catch (const std::exception& e)
   {
-    throw runtime_error(string("Failed to connect to FmiNames database: ") + e.what());
+    throw runtime_error("Failed to connect to " + theUser + "@" + theDatabase + ":" + thePort +
+                        " : " + e.what());
   }
 
   return conn->is_open();
@@ -141,10 +141,7 @@ pqxx::result Connection::executeNonTransaction(const std::string& theSQLStatemen
   }
 }
 
-void Connection::startTransaction()
-{
-  trx = boost::make_shared<pqxx::work>(*conn);
-}
+void Connection::startTransaction() { trx = boost::make_shared<pqxx::work>(*conn); }
 
 pqxx::result Connection::executeTransaction(const std::string& theSQLStatement) const
 {
@@ -156,21 +153,22 @@ pqxx::result Connection::executeTransaction(const std::string& theSQLStatement) 
   }
   catch (const std::exception& e)
   {
-    throw runtime_error(string("Execution of SQL statement (transaction mode) failed: ") + e.what());
+    throw runtime_error(string("Execution of SQL statement (transaction mode) failed: ") +
+                        e.what());
   }
 }
 
 void Connection::commitTransaction()
 {
- try
+  try
   {
-	trx->commit();
-	trx.reset();
+    trx->commit();
+    trx.reset();
   }
   catch (const std::exception& e)
   {
-	// If we get here, Xaction has been rolled back
-	trx.reset();
+    // If we get here, Xaction has been rolled back
+    trx.reset();
     throw runtime_error(string("Commiting transaction failed: ") + e.what());
   }
 }
