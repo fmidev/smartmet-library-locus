@@ -4,3 +4,4 @@ libsmartmet_locus.*
 doc/
 obj/
 test/*Test
+compile_commands.json
