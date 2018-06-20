@@ -26,7 +26,7 @@ objdir = obj
 
 # Compiler options
 
-DEFINES = -DUNIX -D_REENTRANT -DFMI_MULTITHREAD
+DEFINES = -DUNIX -D_REENTRANT
 
 ifeq ($(CXX), clang++)
 
