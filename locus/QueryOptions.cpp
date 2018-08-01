@@ -8,7 +8,6 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
 #include <sstream>
 #include <stdexcept>
@@ -330,11 +329,11 @@ string QueryOptions::Hash() const
        << ':' << charset << ':' << population_min << ':' << population_max << ':' << collation
        << ':' << autocollation << ':' << autocompletemode << ':';
 
-  BOOST_FOREACH (const string& c, countries)
+  for (const string& c : countries)
     hash << c << ':';
-  BOOST_FOREACH (const string& f, features)
+  for (const string& f : features)
     hash << f << ':';
-  BOOST_FOREACH (const string& c, excluded_countries)
+  for (const string& c : excluded_countries)
     hash << c << ':';
 
   return hash.str();
@@ -359,13 +358,13 @@ std::size_t QueryOptions::HashValue() const
   boost::hash_combine(hash, boost::hash_value(autocollation));
   boost::hash_combine(hash, boost::hash_value(autocompletemode));
 
-  BOOST_FOREACH (const string& c, countries)
+  for (const string& c : countries)
     boost::hash_combine(hash, boost::hash_value(c));
-  BOOST_FOREACH (const string& f, features)
+  for (const string& f : features)
     boost::hash_combine(hash, boost::hash_value(f));
-  BOOST_FOREACH (const string& k, keywords)
+  for (const string& k : keywords)
     boost::hash_combine(hash, boost::hash_value(k));
-  BOOST_FOREACH (const string& c, excluded_countries)
+  for (const string& c : excluded_countries)
     boost::hash_combine(hash, boost::hash_value(c));
 
   return hash;

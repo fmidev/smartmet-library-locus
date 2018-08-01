@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 18.6.14
+Version: 18.8.1
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -16,8 +16,8 @@ BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libpqxx-devel >= 5.0.1
 BuildRequires: postgresql95-devel
-BuildRequires: smartmet-library-macgyver-devel >= 18.6.7
-Requires: smartmet-library-macgyver >= 18.6.7
+BuildRequires: smartmet-library-macgyver-devel >= 18.7.30
+Requires: smartmet-library-macgyver >= 18.7.30
 Requires: boost-filesystem
 Requires: boost-locale
 Requires: boost-regex
@@ -69,6 +69,9 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Aug  1 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.8.1-1.fmi
+- Use C++11 for-loops instead of BOOST_FOREACH
+
 * Thu Jun 14 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.6.14-1.fmi
 - Improved error message on connection failure
 
