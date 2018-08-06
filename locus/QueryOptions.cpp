@@ -38,19 +38,19 @@ QueryOptions::QueryOptions()
 {
   // Remaining initializations
 
-  countries.push_back("fi");
-  features.push_back("PPLC");
-  features.push_back("ADMD");
-  features.push_back("PPLA");
-  features.push_back("PPLA2");
-  features.push_back("PPLA3");
-  features.push_back("PPLG");
-  features.push_back("PPL");
-  features.push_back("ADM2");
-  features.push_back("ISL");
-  features.push_back("PPLX");
-  features.push_back("POST");
-  features.push_back("SKI");
+  countries.emplace_back("fi");
+  features.emplace_back("PPLC");
+  features.emplace_back("ADMD");
+  features.emplace_back("PPLA");
+  features.emplace_back("PPLA2");
+  features.emplace_back("PPLA3");
+  features.emplace_back("PPLG");
+  features.emplace_back("PPL");
+  features.emplace_back("ADM2");
+  features.emplace_back("ISL");
+  features.emplace_back("PPLX");
+  features.emplace_back("POST");
+  features.emplace_back("SKI");
 }
 
 // ----------------------------------------------------------------------
@@ -221,19 +221,11 @@ void QueryOptions::SetAutoCollation(bool theValue) { autocollation = theValue; }
 
 string QueryOptions::GetCollation() const
 {
-  if (autocollation)
-  {
-    if (language == "fi")
-      return "utf8_swedish_ci";
-    else if (language == "sv")
-      return "utf8_swedish_ci";
-    else if (language == "et")
-      return "utf8_estonian_ci";
-    else
-      return "utf8_general_ci";
-  }
-  else
-    return collation;
+  if (!autocollation) return collation;
+  if (language == "fi") return "utf8_swedish_ci";
+  if (language == "sv") return "utf8_swedish_ci";
+  if (language == "et") return "utf8_estonian_ci";
+  return "utf8_general_ci";
 }
 
 // ----------------------------------------------------------------------
