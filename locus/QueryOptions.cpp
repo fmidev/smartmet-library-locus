@@ -56,13 +56,6 @@ QueryOptions::QueryOptions()
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Destructor
- */
-// ----------------------------------------------------------------------
-
-QueryOptions::~QueryOptions() {}
-// ----------------------------------------------------------------------
-/*!
  * Set countries used in search. Takes list of country codes in importance
  * order separated with comma. Special value 'all' can be used to define
  * all countries to be searched.

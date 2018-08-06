@@ -16,7 +16,7 @@ class QueryOptions
 {
  public:
   QueryOptions();
-  ~QueryOptions();
+  ~QueryOptions() = default;
 
   // Set search conditions
 
