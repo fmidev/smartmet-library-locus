@@ -25,11 +25,9 @@ namespace Locus
 // ----------------------------------------------------------------------
 
 QueryOptions::QueryOptions()
-    : countries(),
-      fullcountrysearch(false),
+    : fullcountrysearch(false),
       language("fi"),
       result_limit(100),
-      features(),
       search_variants(true),
       charset("utf8"),
       population_min(0),
