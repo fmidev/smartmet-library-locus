@@ -12,7 +12,9 @@
 #include <sstream>
 #include <stdexcept>
 
-using namespace std;
+using std::list;
+using std::ostringstream;
+using std::string;
 
 namespace Locus
 {
