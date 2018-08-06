@@ -32,7 +32,6 @@ QueryOptions::QueryOptions()
       charset("utf8"),
       population_min(0),
       population_max(0),
-      excluded_countries(),
       collation("utf8_general_ci"),
       autocollation(false),
       autocompletemode(false)
