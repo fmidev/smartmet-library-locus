@@ -5,3 +5,4 @@ doc/
 obj/
 test/*Test
 compile_commands.json
+libsmartmet-locus.so

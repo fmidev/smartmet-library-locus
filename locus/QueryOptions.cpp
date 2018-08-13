@@ -8,12 +8,13 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
 #include <sstream>
 #include <stdexcept>
 
-using namespace std;
+using std::list;
+using std::ostringstream;
+using std::string;
 
 namespace Locus
 {
@@ -24,44 +25,34 @@ namespace Locus
 // ----------------------------------------------------------------------
 
 QueryOptions::QueryOptions()
-    : countries(),
-      fullcountrysearch(false),
+    : fullcountrysearch(false),
       language("fi"),
       result_limit(100),
-      features(),
       search_variants(true),
       charset("utf8"),
       population_min(0),
       population_max(0),
-      excluded_countries(),
       collation("utf8_general_ci"),
       autocollation(false),
       autocompletemode(false)
 {
   // Remaining initializations
 
-  countries.push_back("fi");
-  features.push_back("PPLC");
-  features.push_back("ADMD");
-  features.push_back("PPLA");
-  features.push_back("PPLA2");
-  features.push_back("PPLA3");
-  features.push_back("PPLG");
-  features.push_back("PPL");
-  features.push_back("ADM2");
-  features.push_back("ISL");
-  features.push_back("PPLX");
-  features.push_back("POST");
-  features.push_back("SKI");
+  countries.emplace_back("fi");
+  features.emplace_back("PPLC");
+  features.emplace_back("ADMD");
+  features.emplace_back("PPLA");
+  features.emplace_back("PPLA2");
+  features.emplace_back("PPLA3");
+  features.emplace_back("PPLG");
+  features.emplace_back("PPL");
+  features.emplace_back("ADM2");
+  features.emplace_back("ISL");
+  features.emplace_back("PPLX");
+  features.emplace_back("POST");
+  features.emplace_back("SKI");
 }
 
-// ----------------------------------------------------------------------
-/*!
- * \brief Destructor
- */
-// ----------------------------------------------------------------------
-
-QueryOptions::~QueryOptions() {}
 // ----------------------------------------------------------------------
 /*!
  * Set countries used in search. Takes list of country codes in importance
@@ -230,19 +221,11 @@ void QueryOptions::SetAutoCollation(bool theValue) { autocollation = theValue; }
 
 string QueryOptions::GetCollation() const
 {
-  if (autocollation)
-  {
-    if (language == "fi")
-      return "utf8_swedish_ci";
-    else if (language == "sv")
-      return "utf8_swedish_ci";
-    else if (language == "et")
-      return "utf8_estonian_ci";
-    else
-      return "utf8_general_ci";
-  }
-  else
-    return collation;
+  if (!autocollation) return collation;
+  if (language == "fi") return "utf8_swedish_ci";
+  if (language == "sv") return "utf8_swedish_ci";
+  if (language == "et") return "utf8_estonian_ci";
+  return "utf8_general_ci";
 }
 
 // ----------------------------------------------------------------------
@@ -330,11 +313,11 @@ string QueryOptions::Hash() const
        << ':' << charset << ':' << population_min << ':' << population_max << ':' << collation
        << ':' << autocollation << ':' << autocompletemode << ':';
 
-  BOOST_FOREACH (const string& c, countries)
+  for (const string& c : countries)
     hash << c << ':';
-  BOOST_FOREACH (const string& f, features)
+  for (const string& f : features)
     hash << f << ':';
-  BOOST_FOREACH (const string& c, excluded_countries)
+  for (const string& c : excluded_countries)
     hash << c << ':';
 
   return hash.str();
@@ -359,13 +342,13 @@ std::size_t QueryOptions::HashValue() const
   boost::hash_combine(hash, boost::hash_value(autocollation));
   boost::hash_combine(hash, boost::hash_value(autocompletemode));
 
-  BOOST_FOREACH (const string& c, countries)
+  for (const string& c : countries)
     boost::hash_combine(hash, boost::hash_value(c));
-  BOOST_FOREACH (const string& f, features)
+  for (const string& f : features)
     boost::hash_combine(hash, boost::hash_value(f));
-  BOOST_FOREACH (const string& k, keywords)
+  for (const string& k : keywords)
     boost::hash_combine(hash, boost::hash_value(k));
-  BOOST_FOREACH (const string& c, excluded_countries)
+  for (const string& c : excluded_countries)
     boost::hash_combine(hash, boost::hash_value(c));
 
   return hash;
