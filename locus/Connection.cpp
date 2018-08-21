@@ -4,8 +4,6 @@
 
 const std::string default_port = "5432";
 
-using namespace std;
-
 namespace Locus
 {
 Connection::Connection(const std::string& theHost,
@@ -57,7 +55,7 @@ bool Connection::open(const std::string& theHost,
                       const std::string& theUser,
                       const std::string& thePass,
                       const std::string& theDatabase,
-                      const std::string& theClientEncoding,
+                      const std::string& /* theClientEncoding */,
                       const std::string& thePort,
                       const std::string& theConnectTimeout /*= ""*/)
 {
@@ -90,8 +88,8 @@ bool Connection::open(const std::string& theHost,
   }
   catch (const std::exception& e)
   {
-    throw runtime_error("Failed to connect to " + theUser + "@" + theDatabase + ":" + thePort +
-                        " : " + e.what());
+    throw std::runtime_error("Failed to connect to " + theUser + "@" + theDatabase + ":" + thePort +
+                             " : " + e.what());
   }
 
   return conn->is_open();
@@ -111,17 +109,15 @@ void Connection::close()
 	  }
 	catch(const std::exception& e)
 	  {
-		throw runtime_error(string("Failed to close connection to PostgreSQL: ") + e.what());
+		throw std::runtime_error(string("Failed to close connection to PostgreSQL: ") + e.what());
 	  }
 #endif
 }
 
 std::string Connection::quote(const std::string& theString) const
 {
-  if (conn)
-    return conn->quote(theString);
-  else
-    throw std::runtime_error("Locus: Attempting to quote string without database connection");
+  if (conn) return conn->quote(theString);
+  throw std::runtime_error("Locus: Attempting to quote string without database connection");
 }
 
 pqxx::result Connection::executeNonTransaction(const std::string& theSQLStatement) const
@@ -135,7 +131,7 @@ pqxx::result Connection::executeNonTransaction(const std::string& theSQLStatemen
   }
   catch (const std::exception& e)
   {
-    throw runtime_error(string("Execution of SQL statement failed: ") + e.what());
+    throw std::runtime_error(std::string("Execution of SQL statement failed: ").append(e.what()));
   }
 }
 
@@ -151,8 +147,8 @@ pqxx::result Connection::executeTransaction(const std::string& theSQLStatement) 
   }
   catch (const std::exception& e)
   {
-    throw runtime_error(string("Execution of SQL statement (transaction mode) failed: ") +
-                        e.what());
+    throw std::runtime_error(
+        std::string("Execution of SQL statement (transaction mode) failed: ").append(e.what()));
   }
 }
 
@@ -167,7 +163,7 @@ void Connection::commitTransaction()
   {
     // If we get here, Xaction has been rolled back
     trx.reset();
-    throw runtime_error(string("Commiting transaction failed: ") + e.what());
+    throw std::runtime_error(std::string("Commiting transaction failed: ").append(e.what()));
   }
 }
 
@@ -179,7 +175,7 @@ void Connection::setClientEncoding(const std::string& theEncoding) const
   }
   catch (const std::exception& e)
   {
-    throw runtime_error(string("set_client_encoding failed: ") + e.what());
+    throw std::runtime_error(std::string("set_client_encoding failed: ").append(e.what()));
   }
 }
 
