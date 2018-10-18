@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 18.8.6
+Version: 18.8.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -16,8 +16,8 @@ BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libpqxx-devel >= 5.0.1
 BuildRequires: postgresql95-devel
-BuildRequires: smartmet-library-macgyver-devel >= 18.7.30
-Requires: smartmet-library-macgyver >= 18.7.30
+BuildRequires: smartmet-library-macgyver-devel >= 18.8.20
+Requires: smartmet-library-macgyver >= 18.8.20
 Requires: boost-filesystem
 Requires: boost-locale
 Requires: boost-regex
@@ -69,6 +69,9 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Aug 21 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.8.21-1.fmi
+- Silenced CodeChecker warnings
+
 * Mon Aug  6 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.8.6-1.fmi
 - Silenced CodeChecker warnings
 
