@@ -1,6 +1,9 @@
 PROG = $(patsubst %.cpp,%,$(wildcard *.cpp))
 # OBS = $(wildcard ../obj/*.o)
 
+DATABASE_HOST = $(shell test "$$CI" = "true" && echo "localhost" || echo "smartmet-test")
+DATABASE_PORT = $(shell test "$$CI" = "true" && echo "5432" || echo "5444")
+
 MAINFLAGS = -Wall -W -Wno-unused-parameter
 
 EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
@@ -12,7 +15,7 @@ EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
 DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
 
 CC = g++
-CFLAGS = -DUNIX -D_REENTRANT -std=c++11 -O0 -g $(MAINFLAGS)
+CFLAGS = -DUNIX -D_REENTRANT -std=c++11 -O0 -g $(MAINFLAGS) -DDATABASE_PORT=\"$(DATABASE_PORT)\" -DDATABASE_HOST=\"$(DATABASE_HOST)\"
 INCLUDES = -I ../locus \
 	-I /usr/include/smartmet
 
@@ -23,7 +26,11 @@ all: $(PROG)
 clean:
 	rm -f $(PROG) *~
 
-test: $(PROG)
+.ciprep:
+	test "$$CI" != "true" || ( /usr/share/smartmet/test/db/init-and-start.sh && \
+		/usr/share/smartmet/test/db/install-test-db.sh drop && rm -f $(PROG) && touch .ciprep )
+
+test: .ciprep $(PROG)
 	@echo Running tests:
 	@rm -f *.err
 	@for prog in $(PROG); do \

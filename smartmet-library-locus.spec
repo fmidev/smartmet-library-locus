@@ -26,7 +26,11 @@ Requires: boost-system
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet-locus < 16.12.20
 Obsoletes: libsmartmet-locus-debuginfo < 16.12.20
-
+#TestRequires: make
+#TestRequires: gcc-c++
+#TestRequires: boost-devel
+#TestRequires: smartmet-library-regression
+#TestRequires: smartmet-test-db
 
 %description
 FMI locus library
