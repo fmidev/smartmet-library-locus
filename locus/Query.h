@@ -93,7 +93,7 @@ class Query
     eFetchByKeyword1,
     eFetchByKeyword2,
     eFetchByKeyword3,
-    eCountKeywordLocations,
+    eCountKeywordLocations
   };
 
   // ids for query parameters

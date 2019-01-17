@@ -2,7 +2,15 @@
 #include <boost/make_shared.hpp>
 #include <iostream>
 
+#ifdef __llvm__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wglobal-constructors"
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
+#endif
 const std::string default_port = "5432";
+#ifdef __llvm__
+#pragma clang diagnostic pop
+#endif
 
 namespace Locus
 {

@@ -38,7 +38,7 @@ class SimpleLocation
                  const std::string& theDescription = "",
                  const std::string& theTimeZone = "",
                  const std::string& theAdmin = "",
-                 int thePopulation = 0,
+                 unsigned int thePopulation = 0,
                  const std::string& theIso2 = "",
                  int theId = 0,
                  int theElevation = 0)

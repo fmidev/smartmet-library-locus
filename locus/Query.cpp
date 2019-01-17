@@ -17,7 +17,7 @@
 #include <cmath>
 #include <stdexcept>
 
-const char* CLIENT_ENCODING = "UTF8";
+static const char* CLIENT_ENCODING = "UTF8";
 
 using namespace std;
 
@@ -126,8 +126,7 @@ void Query::SetOptions(const QueryOptions& theOptions)
  * SetDebug-mode on or off. Debug-mode prints sql-queries and
  * error-messages
  *
- * \param value Boolean for mode: true=on, false=off
- * \return void
+ * \param theFlag Boolean for mode: true=on, false=off
  */
 // ----------------------------------------------------------------------
 
@@ -141,7 +140,7 @@ void Query::SetDebug(bool theFlag)
 /*!
  * Resolves name for the feature code
  *
- * \param code Feature code
+ * \param theCode Feature code
  * \return feature Name of the feature or false if not found
  */
 // ----------------------------------------------------------------------
@@ -167,7 +166,7 @@ string Query::ResolveFeature(const QueryOptions& theOptions, const string& theCo
  * Helper method to return variant name for search result using
  * correct language
  *
- * \param id Database id for geoname
+ * \param theId Database id for geoname
  * \return feature Name of the feature or false if not found
  */
 // ----------------------------------------------------------------------
@@ -199,7 +198,7 @@ string Query::ResolveNameVariant(const QueryOptions& theOptions,
 /*!
  * Resolves name for country
  *
- * \param iso2 Iso country code
+ * \param theIsoCode Iso country code
  * \return country Name of the country or false if not found
  */
 // ----------------------------------------------------------------------
@@ -222,10 +221,10 @@ string Query::ResolveCountry(const QueryOptions& theOptions, const string& theIs
   else
   {
     // If variant is not found use name in countries-table
-    string sqlStmt = constructSQLStatement(eResolveCountry2, params);
-    pqxx::result res = conn.executeNonTransaction(sqlStmt);
+    string localsqlStmt = constructSQLStatement(eResolveCountry2, params);
+    pqxx::result localres = conn.executeNonTransaction(localsqlStmt);
 
-    if (!res.empty()) retval = res[0][0].as<string>();
+    if (!localres.empty()) retval = localres[0][0].as<string>();
   }
 
   return retval;
@@ -234,7 +233,7 @@ string Query::ResolveCountry(const QueryOptions& theOptions, const string& theIs
 // ----------------------------------------------------------------------
 /*!
  * Helper method that resolves name for municipality id
- * \param id Municipality id
+ * \param theId Municipality id
  * \return municipality Name of the municipality or "" if not found
  */
 // ----------------------------------------------------------------------
@@ -270,8 +269,8 @@ string Query::ResolveMunicipality(const QueryOptions& theOptions, const string& 
 /*!
  * Resolves name for administrative area (state)
  *
- * \param code Administrative area code
- * \param country Country iso code
+ * \param theCode Administrative area code
+ * \param theCountry Country iso code
  * \return administrative Name of the state or false if not found
  */
 // ----------------------------------------------------------------------
@@ -300,7 +299,7 @@ string Query::ResolveAdministrative(const string& theCode, const string& theCoun
 /*!
  * Helper method that generates country conditions for sql-query
  *
- * \param query
+ * \param theQuery the SQL query yo modify
  */
 // ----------------------------------------------------------------------
 
@@ -356,7 +355,6 @@ void Query::AddCountryConditions(const QueryOptions& theOptions, string& theQuer
 /*!
  * Helper method that generates feature conditions for sql-query
  *
- * \param query
  */
 // ----------------------------------------------------------------------
 void Query::AddFeatureConditions(const QueryOptions& theOptions, string& theQuery) const
@@ -384,8 +382,7 @@ void Query::AddFeatureConditions(const QueryOptions& theOptions, string& theQuer
 /*!
  * Helper method that generates keyword conditions for sql-query
  *
- * \param query sql-string
- * \return query sql-string with keyword conditions
+ * \param theQuery sql-string
  */
 // ----------------------------------------------------------------------
 
@@ -421,7 +418,7 @@ void Query::AddKeywordConditions(const QueryOptions& theOptions, string& theQuer
 /*!
  * Public method for fetching locations by name
  *
- * \param name Place name
+ * \param theName Place name
  * \return locations Array of SimpleLocation objects
  */
 // ----------------------------------------------------------------------
@@ -536,9 +533,9 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
 /*!
  * Alias for FetchByLonLat-method because some people don't like lon,lat order
  *
- * \param lat Latitude
- * \param lon Longitude
- * \param radius Maximum distance from point in kilometers.
+ * \param theLatitude Latitude
+ * \param theLongitude Longitude
+ * \param theRadius Maximum distance from point in kilometers.
  * \return locations Array of SimpleLocation objects
  */
 // ----------------------------------------------------------------------
@@ -555,9 +552,9 @@ Query::return_type Query::FetchByLatLon(const QueryOptions& theOptions,
 /*!
  * Method for fetching locations close to some lon,lat point
  *
- * \param lat Latitude
- * \param lon Longitude
- * \param radius Maximum distance from point in kilometers.
+ * \param theLatitude Latitude
+ * \param theLongitude Longitude
+ * \param theRadius Maximum distance from point in kilometers.
  * \return locations Array of SimpleLocation objects
  */
 // ----------------------------------------------------------------------
@@ -589,7 +586,7 @@ Query::return_type Query::FetchByLonLat(const QueryOptions& theOptions,
 /*!
  * Method for fetching location by unique id
  *
- * \param id unique fminames id for location
+ * \param theId unique fminames id for location
  * \return locations Array of SimpleLocation objects (0/1)
  */
 // ----------------------------------------------------------------------
@@ -614,7 +611,7 @@ Query::return_type Query::FetchById(const QueryOptions& theOptions, int theId)
 /*!
  * Method for fetching locations by keyword
  *
- * \param keyword keyword
+ * \param theKeyword keyword
  * \return locations Array of SimpleLocation objects
  */
 // ----------------------------------------------------------------------
@@ -651,7 +648,7 @@ Query::return_type Query::FetchByKeyword(const QueryOptions& theOptions, const s
 /*!
  * Method for fetching number of locations by keyword
  *
- * \param keyword keyword
+ * \param theKeyword keyword
  * \return locations Array of SimpleLocation objects
  */
 // ----------------------------------------------------------------------
@@ -819,14 +816,14 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
         string admin1 = row["admin1"].as<string>();
         if (!admin1.empty())
         {
-          string iso2 = row["iso2"].as<string>();
-          string key = admin1 + '|' + iso2;
+          string localiso2 = row["iso2"].as<string>();
+          string key = admin1 + '|' + localiso2;
           const auto pos = admin_cache.find(key);
           if (pos != admin_cache.end())
             administrative = pos->second;
           else
           {
-            administrative = ResolveAdministrative(admin1, iso2);
+            administrative = ResolveAdministrative(admin1, localiso2);
             if (theOptions.GetCharset() != "utf-8")
               administrative = from_utf(administrative, theOptions.GetCharset());
             admin_cache[key] = administrative;
@@ -859,7 +856,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
                                          description,
                                          row["timezone"].as<string>(),
                                          administrative,
-                                         row["population"].as<int>(),
+                                         row["population"].as<unsigned int>(),
                                          iso2,
                                          row["id"].as<int>(),
                                          elevation));
@@ -1356,8 +1353,9 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
       sql += conn.quote(theKeyword);
       break;
     }
-    default:
-      break;
+      // With -Weverything complains as all cases are covered
+      //    default:
+      //      break;
   }
 
   return sql;

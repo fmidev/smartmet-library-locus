@@ -59,8 +59,7 @@ QueryOptions::QueryOptions()
  * order separated with comma. Special value 'all' can be used to define
  * all countries to be searched.
  *
- * \param value List of iso country codes (string) separated with comma.
- * \return void
+ * \param theCountries List of iso country codes (string) separated with comma.
  */
 // ----------------------------------------------------------------------
 
@@ -77,8 +76,7 @@ void QueryOptions::SetCountries(const string& theCountries)
  * Set countries used in search. Takes list of country codes in importance,
  * Special value 'all' can be used to define all countries to be searched.
  *
- * \param value List of iso country codes
- * \return void
+ * \param theCountries List of iso country codes
  */
 // ----------------------------------------------------------------------
 
@@ -89,8 +87,7 @@ void QueryOptions::SetCountries(const list<string>& theCountries) { countries = 
  * codes in importance order separated with comma.
  * Special value 'all' can be used to define all countries to be searched.
  *
- * \param value List of iso country codes (string) separated with comma.
- * \return void
+ * \param theCountries List of iso country codes (string) separated with comma.
  */
 // ----------------------------------------------------------------------
 
@@ -108,8 +105,7 @@ void QueryOptions::SetExcludedCountries(const string& theCountries)
  * codes in importance order.
  * Special value 'all' can be used to define all countries to be searched.
  *
- * \param value List of iso country codes separated with comma.
- * \return void
+ * \param theCountries List of iso country codes separated with comma.
  */
 // ----------------------------------------------------------------------
 
@@ -123,8 +119,7 @@ void QueryOptions::SetExcludedCountries(const list<string>& theCountries)
  * Set limit for result rows to not overheat servers when using wildcards
  * or common names like Springfield in searches
  *
- * \param value Maximum number of results
- * \return void
+ * \param theLimit Maximum number of results
  */
 // ----------------------------------------------------------------------
 
@@ -135,8 +130,7 @@ void QueryOptions::SetResultLimit(unsigned int theLimit) { result_limit = theLim
  * order separated with comma. Special value 'all' can be used to define
  * all features.
  *
- * \param features List of iso features codes (string) separated with comma.
- * \return void
+ * \param theFeatures List of iso features codes (string) separated with comma.
  */
 // ----------------------------------------------------------------------
 
@@ -151,8 +145,7 @@ void QueryOptions::SetFeatures(const string& theFeatures)
  * Set features used in search. Takes list of feature codes in importance
  * order. Special value 'all' can be used to define all features.
  *
- * \param features List of iso features codes
- * \return void
+ * \param theFeatures List of iso features codes
  */
 // ----------------------------------------------------------------------
 
@@ -161,8 +154,7 @@ void QueryOptions::SetFeatures(const list<string>& theFeatures) { features = the
 /*!
  * Set keywords used in search.
  *
- * \param keywords List of iso keywords separated with comma
- * \return void
+ * \param theKeywords List of iso keywords separated with comma
  */
 // ----------------------------------------------------------------------
 
@@ -177,7 +169,6 @@ void QueryOptions::SetKeywords(const string& theKeywords)
  * Set keywords used in search. Takes list of keywords.
  *
  * \param theKeywords List of keywords
- * \return void
  */
 // ----------------------------------------------------------------------
 
@@ -195,8 +186,7 @@ void QueryOptions::SetCharset(const string& theCharset) { charset = theCharset; 
  * Collation defines how string comparisons are made and how results
  * are sorted
  *
- * \param collation Mysql collate string
- * \return void
+ * \param theCollation Mysql collate string
  */
 // ----------------------------------------------------------------------
 
@@ -207,15 +197,14 @@ void QueryOptions::SetCollation(const string& theCollation) { collation = theCol
  * automatically based on language. Autocollation doesn't support all
  * languages.
  *
- * \param value true/false
- * \return void
+ * \param theValue true/false
  */
 // ----------------------------------------------------------------------
 
 void QueryOptions::SetAutoCollation(bool theValue) { autocollation = theValue; }
 // ----------------------------------------------------------------------
 /*!
- * \brief Get collation string
+ *ï¿½\brief Get collation string
  */
 // ----------------------------------------------------------------------
 
@@ -234,8 +223,7 @@ string QueryOptions::GetCollation() const
  * exactly to searchword. This is not normally required. For example
  * search Villmanstrand may return Lappeenranta
  *
- * \param value true/false
- * \return void
+ * \param theValue true/false
  */
 // ----------------------------------------------------------------------
 
@@ -246,8 +234,7 @@ void QueryOptions::SetAutocompleteMode(bool theValue) { autocompletemode = theVa
  * with specified countries fails. Usually search with 'all'
  * is fast enough and method is usually useless
  *
- * \param value Boolean true or false
- * \return void
+ * \param theFlag Boolean true or false
  */
 // ----------------------------------------------------------------------
 
@@ -256,8 +243,7 @@ void QueryOptions::SetFullCountrySearch(bool theFlag) { fullcountrysearch = theF
 /*!
  * Defines should variants be searched. This is on by default
  *
- * \param value Boolean true or false
- * \return void
+ * \param theFlag Boolean true or false
  */
 // ----------------------------------------------------------------------
 
@@ -267,8 +253,7 @@ void QueryOptions::SetSearchVariants(bool theFlag) { search_variants = theFlag; 
  * Language for results. For example if language 'fi' is set then
  * result 'Praha' is returned when searching 'Prague'.
  *
- * \param value ISO language code
- * \return void
+ * \param theLanguage ISO language code
  */
 // ----------------------------------------------------------------------
 
@@ -281,8 +266,7 @@ void QueryOptions::SetLanguage(const string& theLanguage)
 /*!
  * \brief Search populated places bigger than this
  *
- * \param value Population limit
- * \return void
+ * \param theValue Population limit
  */
 // ----------------------------------------------------------------------
 
@@ -291,8 +275,7 @@ void QueryOptions::SetPopulationMin(unsigned int theValue) { population_min = th
 /*!
  * \brief Search populated places smaller than this
  *
- * \param value Population limit
- * \return void
+ * \param theValue Population limit
  */
 // ----------------------------------------------------------------------
 
