@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 18.8.21
+Version: 18.11.16
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -15,7 +15,7 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libpqxx-devel >= 5.0.1
-BuildRequires: postgresql95-devel
+BuildRequires: postgresql-devel
 BuildRequires: smartmet-library-macgyver-devel >= 18.8.20
 Requires: smartmet-library-macgyver >= 18.8.20
 Requires: boost-filesystem
@@ -23,12 +23,14 @@ Requires: boost-locale
 Requires: boost-regex
 Requires: boost-thread
 Requires: boost-system
-Requires: libpqxx >= 5.0.1
-Requires: postgresql95-libs
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet-locus < 16.12.20
 Obsoletes: libsmartmet-locus-debuginfo < 16.12.20
-
+#TestRequires: make
+#TestRequires: gcc-c++
+#TestRequires: boost-devel
+#TestRequires: smartmet-library-regression
+#TestRequires: smartmet-test-db
 
 %description
 FMI locus library
@@ -69,6 +71,9 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Nov 16 2018 Heikki Pernu <heikki.pernu@fmi.fi> - 18.11.16-1.fmi
+- Remove Postgresql 9.5 library dependencies
+
 * Tue Aug 21 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.8.21-1.fmi
 - Silenced CodeChecker warnings
 

@@ -6,3 +6,8 @@ obj/
 test/*Test
 compile_commands.json
 libsmartmet-locus.so
+dist/
+.project
+.cproject
+.settings/
+.ciprep

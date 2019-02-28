@@ -10,11 +10,21 @@ using namespace std;
 using namespace boost;
 using namespace Locus;
 
+#ifndef DATABASE_HOST
 #define DATABASE_HOST "smartmet-test"
+#endif
+#ifndef DATABASE_USER
 #define DATABASE_USER "fminames_user"
+#endif
+#ifndef DATABASE_PASS
 #define DATABASE_PASS "fminames_pw"
+#endif
+#ifndef DATABASE_PORT
 #define DATABASE_PORT "5444"
+#endif
+#ifndef DATABASE
 #define DATABASE "fminames"
+#endif
 
 // Some helpful debugging functions
 
