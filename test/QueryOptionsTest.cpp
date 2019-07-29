@@ -18,7 +18,7 @@ void hash()
 
   string result =
       "0:fi:100:1:utf8:0:0:utf8_general_ci:0:0:fi:PPLC:ADMD:PPLA:PPLA2:PPLA3:PPLG:PPL:ADM2:ISL:"
-      "PPLX:POST:SKI:";
+      "PPLX:POST:AIRB:HBR:SKI:MT:MTS:PRK:";
 
   if (options.Hash() != result)
     TEST_FAILED("Default hash should be " + result + ", not " + options.Hash());
