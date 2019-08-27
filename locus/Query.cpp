@@ -13,6 +13,7 @@
 #include <boost/locale/encoding.hpp>
 #include <boost/make_shared.hpp>
 #include <macgyver/StringConversion.h>
+
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -192,6 +193,29 @@ string Query::ResolveNameVariant(const QueryOptions& theOptions,
   if (!res.empty()) retval = res[0][0].as<string>();
 
   return retval;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * Helper method to return fmisid for a search result
+ *
+ * \param theId Database id for geoname
+ * \return fmisid optional fmisid
+ */
+// ----------------------------------------------------------------------
+
+boost::optional<int> Query::ResolveFmisid(const QueryOptions& theOptions, const string& theId)
+{
+  map<SQLQueryParameterId, boost::any> params;
+  params[eQueryOptions] = theOptions;
+  params[eGeonamesId] = theId;
+  string sqlStmt = constructSQLStatement(eResolveFmisid, params);
+
+  pqxx::result res = conn.executeNonTransaction(sqlStmt);
+
+  if (res.empty()) return {};
+
+  return res[0][0].as<int>();
 }
 
 // ----------------------------------------------------------------------
@@ -848,18 +872,22 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
 
     if (ok)
     {
-      locations.push_back(SimpleLocation(name,
-                                         row["lon"].as<float>(),
-                                         row["lat"].as<float>(),
-                                         country,
-                                         features_code,
-                                         description,
-                                         row["timezone"].as<string>(),
-                                         administrative,
-                                         row["population"].as<unsigned int>(),
-                                         iso2,
-                                         row["id"].as<int>(),
-                                         elevation));
+      SimpleLocation loc(name,
+                         row["lon"].as<float>(),
+                         row["lat"].as<float>(),
+                         country,
+                         features_code,
+                         description,
+                         row["timezone"].as<string>(),
+                         administrative,
+                         row["population"].as<unsigned int>(),
+                         iso2,
+                         row["id"].as<int>(),
+                         elevation);
+
+      loc.fmisid = ResolveFmisid(theOptions, row["id"].as<string>());
+
+      locations.emplace_back(loc);
     }
 
     // See if locations-sequence is already long enough
@@ -920,8 +948,8 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
       string theCode = boost::any_cast<string>(theParams.at(eFeatureCode));
       sql += "SELECT shortdesc FROM features WHERE code=";
       sql += conn.quote(theCode);
+      break;
     }
-    break;
     case eResolveNameVariant:
     {
       string theGeonamesId = boost::any_cast<string>(theParams.at(eGeonamesId));
@@ -947,6 +975,13 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         sql += conn.quote(theSearchWord);
         sql += " AND historic=false ORDER BY priority ASC, preferred DESC, l ASC, name ASC LIMIT 1";
       }
+      break;
+    }
+    case eResolveFmisid:
+    {
+      string theGeonamesId = boost::any_cast<string>(theParams.at(eGeonamesId));
+      sql += "SELECT name FROM alternate_geonames WHERE language='fmisid' AND geonames_id=";
+      sql += conn.quote(theGeonamesId);
       break;
     }
     case eResolveCountry1:

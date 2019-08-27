@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <boost/optional.hpp>
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -28,6 +30,7 @@ class SimpleLocation
   std::string iso2;
   int id;
   int elevation;
+  boost::optional<int> fmisid;
 
  public:
   SimpleLocation(const std::string& theName,
