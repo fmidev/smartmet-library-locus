@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 19.3.21
+Version: 19.8.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -16,8 +16,8 @@ BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libpqxx-devel >= 5.0.1
 BuildRequires: postgresql-devel
-BuildRequires: smartmet-library-macgyver-devel >= 18.11.24
-Requires: smartmet-library-macgyver >= 18.11.24
+BuildRequires: smartmet-library-macgyver-devel >= 19.8.2
+Requires: smartmet-library-macgyver >= 19.8.2
 Requires: boost-filesystem
 Requires: boost-locale
 Requires: boost-regex
@@ -71,6 +71,9 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Aug 28 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.8.28-1.fmi
+- Added optional fmisid information for locations
+
 * Thu Mar 21 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.3.21-1.fmi
 - Added mountains, parks, airports and harbours to default coordinate search feature list
 
