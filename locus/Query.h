@@ -10,12 +10,13 @@
 #include "QueryOptions.h"
 #include "SimpleLocation.h"
 
+#include <boost/any.hpp>
+#include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
+
+#include <pqxx/pqxx>
 #include <string>
 #include <vector>
-
-#include <boost/any.hpp>
-#include <boost/shared_ptr.hpp>
-#include <pqxx/pqxx>
 
 namespace Locus
 {
@@ -58,6 +59,7 @@ class Query
 
  private:
   // Helper methods
+  boost::optional<int> ResolveFmisid(const QueryOptions& theOptions, const std::string& theId);
   std::string ResolveFeature(const QueryOptions& theOptions, const std::string& theCode);
   std::string ResolveNameVariant(const QueryOptions& theOptions,
                                  const std::string& theId,
@@ -87,6 +89,7 @@ class Query
     eResolveMunicipality1,
     eResolveMunicipality2,
     eResolveAdministrative,
+    eResolveFmisid,
     eFetchByName,
     eFetchByLonLat,
     eFetchById,
