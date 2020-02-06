@@ -4,6 +4,10 @@ PROG = $(patsubst %.cpp,%,$(wildcard *.cpp))
 DATABASE_HOST = $(shell test "$$CI" = "true" && echo "localhost" || echo "smartmet-test")
 DATABASE_PORT = $(shell test "$$CI" = "true" && echo "5432" || echo "5444")
 
+-include $(HOME)/.smartmet.mk
+GCC_DIAG_COLOR ?= always
+CXX_STD ?= c++11
+
 MAINFLAGS = -Wall -W -Wno-unused-parameter
 
 EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
@@ -15,7 +19,7 @@ EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
 DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
 
 CC = g++
-CFLAGS = -DUNIX -D_REENTRANT -std=c++11 -O0 -g $(MAINFLAGS) -DDATABASE_PORT=\"$(DATABASE_PORT)\" -DDATABASE_HOST=\"$(DATABASE_HOST)\"
+CFLAGS = -DUNIX -D_REENTRANT -std=$(CXX_STD) -O0 -g $(MAINFLAGS) -DDATABASE_PORT=\"$(DATABASE_PORT)\" -DDATABASE_HOST=\"$(DATABASE_HOST)\"
 INCLUDES = -I ../locus \
 	-I /usr/include/smartmet
 
