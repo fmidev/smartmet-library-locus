@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 19.8.28
+Version: 19.12.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -16,8 +16,8 @@ BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libpqxx-devel >= 5.0.1
 BuildRequires: postgresql-devel
-BuildRequires: smartmet-library-macgyver-devel >= 19.8.2
-Requires: smartmet-library-macgyver >= 19.8.2
+BuildRequires: smartmet-library-macgyver-devel >= 19.12.4
+Requires: smartmet-library-macgyver >= 19.12.4
 Requires: boost-filesystem
 Requires: boost-locale
 Requires: boost-regex
@@ -71,6 +71,8 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Dec  4 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.12.4-1.fmi
+- Use -fno-omit-frame-pointer for a better profiling and debugging experience                                                                                              
 * Wed Aug 28 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.8.28-1.fmi
 - Added optional fmisid information for locations
 
