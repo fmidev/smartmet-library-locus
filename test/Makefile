@@ -20,11 +20,19 @@ DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
 
 CC = g++
 CFLAGS = -DUNIX -D_REENTRANT -std=$(CXX_STD) -O0 -g $(MAINFLAGS) -DDATABASE_PORT=\"$(DATABASE_PORT)\" -DDATABASE_HOST=\"$(DATABASE_HOST)\"
-INCLUDES = -I ../locus \
-	-I /usr/include/smartmet
+
+# Boost 1.69
+
+ifneq "$(wildcard /usr/include/boost169)" ""
+  INCLUDES += -I/usr/include/boost169
+  LIBS += -L/usr/lib64/boost169
+endif
+
+INCLUDES += -I../locus \
+	-I/usr/include/smartmet
 
 
-LIBS = ../libsmartmet-locus.so
+LIBS += ../libsmartmet-locus.so
 
 all: $(PROG)
 clean:
