@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 19.12.4
+Version: 20.4.18
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -13,16 +13,17 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 BuildRequires: rpm-build
 BuildRequires: gcc-c++
 BuildRequires: make
-BuildRequires: boost-devel
-BuildRequires: libpqxx-devel >= 5.0.1
+BuildRequires: boost169-devel
+BuildRequires: libpqxx-devel
 BuildRequires: postgresql-devel
-BuildRequires: smartmet-library-macgyver-devel >= 19.12.4
-Requires: smartmet-library-macgyver >= 19.12.4
-Requires: boost-filesystem
-Requires: boost-locale
-Requires: boost-regex
-Requires: boost-thread
-Requires: boost-system
+BuildRequires: smartmet-library-macgyver-devel >= 20.4.18
+Requires: smartmet-library-macgyver >= 20.4.18
+Requires: libpqxx
+Requires: boost169-filesystem
+Requires: boost169-locale
+Requires: boost169-regex
+Requires: boost169-thread
+Requires: boost169-system
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet-locus < 16.12.20
 Obsoletes: libsmartmet-locus-debuginfo < 16.12.20
@@ -71,6 +72,9 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Sat Apr 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.18-1.fmi
+- Upgrade to Boost 1.69
+
 * Wed Dec  4 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.12.4-1.fmi
 - Use -fno-omit-frame-pointer for a better profiling and debugging experience                                                                                              
 * Wed Aug 28 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.8.28-1.fmi
