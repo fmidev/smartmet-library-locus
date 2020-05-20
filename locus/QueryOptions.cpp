@@ -50,7 +50,7 @@ QueryOptions::QueryOptions()
   features.emplace_back("ISL");
   features.emplace_back("PPLX");
   features.emplace_back("POST");
-  features.emplace_back("AIRB");
+  features.emplace_back("AIRP");
   features.emplace_back("HBR");
   features.emplace_back("SKI");
   features.emplace_back("MT");
