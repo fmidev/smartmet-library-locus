@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 20.6.8
+Version: 20.6.10
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -15,7 +15,7 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost169-devel
 BuildRequires: libpqxx-devel
-BuildRequires: postgresql-devel
+BuildRequires: postgresql95-devel
 BuildRequires: smartmet-library-macgyver-devel >= 20.4.18
 Requires: smartmet-library-macgyver >= 20.4.18
 Requires: libpqxx
@@ -72,6 +72,9 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jun 10 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.6.10-1.fmi
+- Require postgresql from PGDG instead of EPEL
+
 * Mon Jun  8 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.6.8-1.fmi
 - Upgraded libpqxx
 
