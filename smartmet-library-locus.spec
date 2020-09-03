@@ -15,7 +15,11 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost169-devel
 BuildRequires: libpqxx-devel
+%if 0%{rhel} >= 8
+BuildRequires: postgresql12-devel
+%else
 BuildRequires: postgresql95-devel
+%endif
 BuildRequires: smartmet-library-macgyver-devel >= 20.8.21
 Requires: smartmet-library-macgyver >= 20.8.21
 Requires: libpqxx
