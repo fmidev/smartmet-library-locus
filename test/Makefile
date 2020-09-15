@@ -32,7 +32,7 @@ INCLUDES += -I../locus \
 	-I/usr/include/smartmet
 
 
-LIBS += ../libsmartmet-locus.so
+LIBS += ../libsmartmet-locus.so -lpqxx
 
 all: $(PROG)
 clean:
