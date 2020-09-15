@@ -4,9 +4,7 @@ PROG = $(patsubst %.cpp,%,$(wildcard *.cpp))
 DATABASE_HOST = $(shell test "$$CI" = "true" && echo "localhost" || echo "smartmet-test")
 DATABASE_PORT = $(shell test "$$CI" = "true" && echo "5432" || echo "5444")
 
--include $(HOME)/.smartmet.mk
-GCC_DIAG_COLOR ?= always
-CXX_STD ?= c++11
+include ../common.mk
 
 MAINFLAGS = -Wall -W -Wno-unused-parameter
 
@@ -18,15 +16,7 @@ EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
 
 DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
 
-CC = g++
 CFLAGS = -DUNIX -D_REENTRANT -std=$(CXX_STD) -O0 -g $(MAINFLAGS) -DDATABASE_PORT=\"$(DATABASE_PORT)\" -DDATABASE_HOST=\"$(DATABASE_HOST)\"
-
-# Boost 1.69
-
-ifneq "$(wildcard /usr/include/boost169)" ""
-  INCLUDES += -I/usr/include/boost169
-  LIBS += -L/usr/lib64/boost169
-endif
 
 INCLUDES += -I../locus \
 	-I/usr/include/smartmet
@@ -53,5 +43,5 @@ test: .ciprep $(PROG)
 
 
 $(PROG) : % : %.cpp ../libsmartmet-locus.so
-	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)
+	$(CXX) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)
 
