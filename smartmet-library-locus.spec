@@ -1,9 +1,10 @@
+
 %define DIRNAME locus
 %define LIBNAME smartmet-%{DIRNAME}
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 20.8.21
+Version: 20.10.7
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -20,8 +21,8 @@ BuildRequires: postgresql12-devel
 %else
 BuildRequires: postgresql95-devel
 %endif
-BuildRequires: smartmet-library-macgyver-devel >= 20.8.21
-Requires: smartmet-library-macgyver >= 20.8.21
+BuildRequires: smartmet-library-macgyver-devel >= 20.10.7
+Requires: smartmet-library-macgyver >= 20.10.7
 Requires: libpqxx
 Requires: boost169-filesystem
 Requires: boost169-locale
@@ -76,6 +77,10 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Oct  7 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.10.7-1.fmi
+- Build update: use makefile.inc from smartmet-library-macgyver
+- Fail build in case of unresolvedreferences in built shared library
+
 * Fri Aug 21 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.21-1.fmi
 - Upgrade to fmt 6.2
 
@@ -92,7 +97,8 @@ FMI Locus library development files
 - Upgrade to Boost 1.69
 
 * Wed Dec  4 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.12.4-1.fmi
-- Use -fno-omit-frame-pointer for a better profiling and debugging experience                                                                                              
+- Use -fno-omit-frame-pointer for a better profiling and debugging experience
+
 * Wed Aug 28 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.8.28-1.fmi
 - Added optional fmisid information for locations
 
