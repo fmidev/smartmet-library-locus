@@ -3,60 +3,11 @@ LIB = smartmet-$(SUBNAME)
 SPEC = smartmet-library-$(SUBNAME)
 INCDIR = smartmet/$(SUBNAME)
 
-# Installation directories
+REQUIRES = icu-i18n
 
-include common.mk
-
-# Compiler options
+include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
 
 DEFINES = -DUNIX -D_REENTRANT
-
-ifeq ($(USE_CLANG), yes)
-
- FLAGS = \
-	-std=$(CXX_STD) -fPIC -MD -fno-omit-frame-pointer \
-	-Weverything \
-	-Wno-c++98-compat \
-	-Wno-float-equal \
-	-Wno-padded \
-	-Wno-missing-prototypes
-
- INCLUDES += \
-	-isystem $(includedir) \
-	-isystem $(includedir)/smartmet \
-	$$(pkg-config --cflags icu-i18n)
-
-else
-
- FLAGS = -std=$(CXX_STD) -fPIC -MD -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter -Wnon-virtual-dtor
-
- FLAGS_DEBUG = \
-	-Wcast-align \
-	-Winline \
-	-Wno-multichar \
-	-Wno-pmf-conversions \
-	-Woverloaded-virtual  \
-	-Wpointer-arith \
-	-Wcast-qual \
-	-Wredundant-decls \
-	-Wwrite-strings \
-	-Wsign-promo \
-	-Wno-inline
-
- FLAGS_RELEASE = -Wuninitialized
-
- INCLUDES += \
-	-I$(includedir) \
-	-I$(includedir)/smartmet \
-	$$(pkg-config --cflags icu-i18n)
-
-endif
-
-# Compile options in detault, debug and profile modes
-
-CFLAGS         = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE) -DNDEBUG -O2 -g
-CFLAGS_DEBUG   = $(DEFINES) $(FLAGS) $(FLAGS_DEBUG)   -Werror  -Og -g
-CFLAGS_PROFILE = $(DEFINES) $(FLAGS) $(FLAGS_PROFILE) -DNDEBUG -O2 -g -pg
 
 LIBS += -L$(libdir) \
 	-lsmartmet-macgyver \
@@ -66,26 +17,11 @@ LIBS += -L$(libdir) \
 	-lboost_thread \
 	-lboost_system \
 	-lpqxx \
-	$$(pkg-config --libs icu-i18n)
+	$(ICU_I18N_LIBS)
 
 # What to install
 
 LIBFILE = libsmartmet-$(SUBNAME).so
-
-# How to install
-
-INSTALL_PROG = install -m 775
-INSTALL_DATA = install -m 664
-
-# Compile option overrides
-
-ifneq (,$(findstring debug,$(MAKECMDGOALS)))
-  CFLAGS = $(CFLAGS_DEBUG)
-endif
-
-ifneq (,$(findstring profile,$(MAKECMDGOALS)))
-  CFLAGS = $(CFLAGS_PROFILE)
-endif
 
 # Compilation directories
 
@@ -110,7 +46,12 @@ release: all
 profile: all
 
 $(LIBFILE): $(OBJS)
-	$(CC) $(LDFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJS) $(LIBS)
+	$(CXX) $(CFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJS) $(LIBS)
+	@echo Checking $(LIBFILE) for unresolved references
+	@if ldd -r $(LIBFILE) 2>&1 | c++filt | grep ^undefined\ symbol; \
+		then rm -v $(LIBFILE); \
+		exit 1; \
+	fi
 
 clean:
 	rm -f $(LIBFILE) *~ $(SUBNAME)/*~
