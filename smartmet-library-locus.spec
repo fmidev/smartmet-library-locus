@@ -36,6 +36,7 @@ Obsoletes: libsmartmet-locus-debuginfo < 16.12.20
 #TestRequires: boost-devel
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-test-db
+#TestRequires: smartmet-library-macgyver-devel
 
 %description
 FMI locus library
