@@ -36,7 +36,7 @@ Obsoletes: libsmartmet-locus-debuginfo < 16.12.20
 #TestRequires: gcc-c++
 #TestRequires: boost-devel
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-test-db
+#TestRequires: smartmet-test-db >= 20.6.9
 #TestRequires: smartmet-library-macgyver-devel
 
 %description
