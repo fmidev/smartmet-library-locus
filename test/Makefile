@@ -27,7 +27,7 @@ clean:
 
 fminames:
 ifdef CI
-        @/usr/share/smartmet/test/db/init-and-start.sh && /usr/share/smartmet/test/db/install-test-db.sh
+	@/usr/share/smartmet/test/db/init-and-start.sh && /usr/share/smartmet/test/db/install-test-db.sh
 endif
 
 test: fminames $(PROG)
