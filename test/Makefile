@@ -1,8 +1,13 @@
 PROG = $(patsubst %.cpp,%,$(wildcard *.cpp))
 # OBS = $(wildcard ../obj/*.o)
 
-DATABASE_HOST = $(shell test "$$CI" = "true" && echo "localhost" || echo "smartmet-test")
-DATABASE_PORT = $(shell test "$$CI" = "true" && echo "5432" || echo "5444")
+ifdef CI
+DATABASE_HOST = "localhost"
+DATABASE_PORT = 5444
+else
+DATABASE_HOST = "smartmet-test"
+DATABASE_PORT = 5444
+endif
 
 REQUIRES = icu-i18n
 
@@ -20,11 +25,12 @@ all: $(PROG)
 clean:
 	rm -f $(PROG) *~
 
-.ciprep:
-	test "$$CI" != "true" || ( /usr/share/smartmet/test/db/init-and-start.sh && \
-		/usr/share/smartmet/test/db/install-test-db.sh drop && rm -f $(PROG) && touch .ciprep )
+fminames:
+ifdef CI
+	@/usr/share/smartmet/test/db/init-and-start.sh && /usr/share/smartmet/test/db/install-test-db.sh
+endif
 
-test: .ciprep $(PROG)
+test: fminames $(PROG)
 	@echo Running tests:
 	@rm -f *.err
 	@for prog in $(PROG); do \
