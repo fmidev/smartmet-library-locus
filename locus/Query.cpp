@@ -56,7 +56,7 @@ string from_utf(const string& name, const string& encoding)
 template <typename T, typename S>
 bool contains(const T& theContainer, const S& theObject)
 {
-  typename T::const_iterator it = find(theContainer.begin(), theContainer.end(), theObject);
+  const auto it = find(theContainer.begin(), theContainer.end(), theObject);
   return (it != theContainer.end());
 }
 }  // namespace
@@ -336,7 +336,7 @@ void Query::AddCountryConditions(const QueryOptions& theOptions, string& theQuer
     // Append to the query
 
     int n = 1;
-    for (list<string>::const_iterator it = countries.begin(); it != countries.end(); ++it, ++n)
+    for (auto it = countries.begin(); it != countries.end(); ++it, ++n)
     {
       string country_iso2 = *it;
       Fmi::ascii_toupper(country_iso2);
@@ -357,9 +357,7 @@ void Query::AddCountryConditions(const QueryOptions& theOptions, string& theQuer
     // Append to the query
 
     int n = 1;
-    for (list<string>::const_iterator it = excluded_countries.begin();
-         it != excluded_countries.end();
-         ++it, ++n)
+    for (auto it = excluded_countries.begin(); it != excluded_countries.end(); ++it, ++n)
     {
       string country_iso2 = *it;
       Fmi::ascii_tolower(country_iso2);
@@ -392,7 +390,7 @@ void Query::AddFeatureConditions(const QueryOptions& theOptions, string& theQuer
   // Append to the query
 
   int n = 1;
-  for (list<string>::const_iterator it = features.begin(); it != features.end(); ++it, ++n)
+  for (auto it = features.begin(); it != features.end(); ++it, ++n)
   {
     theQuery += (n == 1 ? " AND (" : " OR ");
     theQuery += "features_code=";
@@ -419,7 +417,7 @@ void Query::AddKeywordConditions(const QueryOptions& theOptions, string& theQuer
   // Append to the query
 
   int n = 1;
-  for (list<string>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+  for (auto it = keywords.begin(); it != keywords.end(); ++it)
   {
     if (n == 1)
     {
@@ -474,7 +472,7 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
   {
     country_priorities += ", CASE countries_iso2 WHEN ";
     int n = 1;
-    for (list<string>::const_iterator it = countries.begin(); it != countries.end(); ++it, ++n)
+    for (auto it = countries.begin(); it != countries.end(); ++it, ++n)
     {
       if (n == 1)
       {
@@ -502,7 +500,7 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
   {
     feature_priorities += ", CASE features_code WHEN ";
     int n = 1;
-    for (list<string>::const_iterator it = features.begin(); it != features.end(); ++it, ++n)
+    for (auto it = features.begin(); it != features.end(); ++it, ++n)
     {
       if (n == 1)
       {
@@ -690,9 +688,7 @@ unsigned int Query::CountKeywordLocations(const QueryOptions& theOptions, const 
   string sqlStmt = constructSQLStatement(eCountKeywordLocations, params);
   pqxx::result res = conn.executeNonTransaction(sqlStmt);
 
-  unsigned int ret = res[0]["count"].as<unsigned int>();
-
-  return ret;
+  return res[0]["count"].as<unsigned int>();
 }
 
 // ----------------------------------------------------------------------
@@ -940,7 +936,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
   {
     case eResolveFeature:
     {
-      string theCode = boost::any_cast<string>(theParams.at(eFeatureCode));
+      auto theCode = boost::any_cast<string>(theParams.at(eFeatureCode));
       sql += "SELECT shortdesc FROM features WHERE code=";
       sql += conn.quote(theCode);
       break;
@@ -1152,9 +1148,9 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
     }
     case eFetchByLonLat:
     {
-      float theLongitude = boost::any_cast<float>(theParams.at(eLongitude));
-      float theLatitude = boost::any_cast<float>(theParams.at(eLatitude));
-      float theRadius = boost::any_cast<float>(theParams.at(eRadius));
+      auto theLongitude = boost::any_cast<float>(theParams.at(eLongitude));
+      auto theLatitude = boost::any_cast<float>(theParams.at(eLatitude));
+      auto theRadius = boost::any_cast<float>(theParams.at(eRadius));
 
       sql +=
           "WITH candidates AS ("
