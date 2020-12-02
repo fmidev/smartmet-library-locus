@@ -900,12 +900,11 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
   {
     vector<SimpleLocation> bestmatches;
     vector<SimpleLocation> secondarymatches;
-    unsigned int n;
 
     // Remove "%" from searchword
     string tmp = theSearchWord.substr(0, theSearchWord.size() - 1);
 
-    for (n = 0; n < locations.size(); n++)
+    for (std::size_t n = 0; n < locations.size(); n++)
     {
       if (boost::iequals(tmp, locations[n].name))
         bestmatches.push_back(locations[n]);
@@ -915,12 +914,12 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
 
     locations.clear();
 
-    for (n = 0; n < bestmatches.size(); n++)
+    for (std::size_t n = 0; n < bestmatches.size(); n++)
     {
       locations.push_back(bestmatches[n]);
     }
 
-    for (n = 0; n < secondarymatches.size(); n++)
+    for (std::size_t n = 0; n < secondarymatches.size(); n++)
     {
       locations.push_back(secondarymatches[n]);
     }
