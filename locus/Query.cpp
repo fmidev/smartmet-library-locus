@@ -18,12 +18,12 @@
 #include <cmath>
 #include <stdexcept>
 
-static const char* CLIENT_ENCODING = "UTF8";
-
 using namespace std;
 
 namespace
 {
+const char* CLIENT_ENCODING = "UTF8";
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Convert from UTF-8 to given locale
