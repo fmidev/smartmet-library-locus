@@ -110,7 +110,8 @@ Query::Query(const string& theHost,
  */
 // ----------------------------------------------------------------------
 
-Query::~Query() {}
+Query::~Query() = default;
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Activate the correct language
