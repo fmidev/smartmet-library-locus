@@ -862,12 +862,8 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
     if (!theArea.empty())
     {
       string lc_area = boost::algorithm::to_lower_copy(theArea);
-      if (lc_area == boost::algorithm::to_lower_copy(country))
-        ok = true;
-      else if (lc_area == boost::algorithm::to_lower_copy(administrative))
-        ok = true;
-      else
-        ok = false;
+      ok = (lc_area == boost::algorithm::to_lower_copy(country) ||
+            lc_area == boost::algorithm::to_lower_copy(administrative));
     }
 
     if (ok)
