@@ -781,7 +781,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
     // Country and description
 
     string country;
-    string iso2 = "";
+    string iso2;
     if (!row["iso2"].is_null())
     {
       iso2 = row["iso2"].as<string>();
@@ -798,7 +798,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
     }
 
     string description;
-    string features_code = "";
+    string features_code;
     if (!row["features_code"].is_null())
     {
       features_code = row["features_code"].as<string>();
@@ -814,7 +814,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
 
     // Administrative areas
 
-    string administrative = "";
+    string administrative;
     if (!row["municipalities_id"].is_null())
     {
       string municipalities_id = row["municipalities_id"].as<string>();
