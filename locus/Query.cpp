@@ -530,7 +530,7 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
   else
     locations = build_locations(theOptions, res, searchword);
 
-  if (locations.size() > 0) return locations;
+  if (!locations.empty()) return locations;
 
   // Prevent endless recursion
 
@@ -625,7 +625,7 @@ Query::return_type Query::FetchById(const QueryOptions& theOptions, int theId)
   string sqlStmt = constructSQLStatement(eFetchById, params);
   pqxx::result res = conn.executeNonTransaction(sqlStmt);
 
-  if (res.size() == 0 && theId >= 10000000) return FetchById(theOptions, -theId);
+  if (res.empty() && theId >= 10000000) return FetchById(theOptions, -theId);
 
   return build_locations(theOptions, res, "", "");
 }
