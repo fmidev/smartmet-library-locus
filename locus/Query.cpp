@@ -418,18 +418,18 @@ void Query::AddKeywordConditions(const QueryOptions& theOptions, string& theQuer
   // Append to the query
 
   int n = 1;
-  for (auto it = keywords.begin(); it != keywords.end(); ++it)
+  for (const auto & keyword : keywords)
   {
     if (n == 1)
     {
       theQuery +=
           " AND geonames.id IN (SELECT geonames_id FROM keywords_has_geonames WHERE keyword IN (";
-      theQuery += conn.quote(*it);
+      theQuery += conn.quote(keyword);
     }
     else
     {
       theQuery += ",";
-      theQuery += conn.quote(*it);
+      theQuery += conn.quote(keyword);
     }
     n++;
   }
