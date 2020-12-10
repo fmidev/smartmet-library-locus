@@ -4,7 +4,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 20.10.7
+Version: 20.12.3
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -21,8 +21,8 @@ BuildRequires: postgresql12-devel
 %else
 BuildRequires: postgresql95-devel
 %endif
-BuildRequires: smartmet-library-macgyver-devel >= 20.10.7
-Requires: smartmet-library-macgyver >= 20.10.7
+BuildRequires: smartmet-library-macgyver-devel >= 20.11.24
+Requires: smartmet-library-macgyver >= 20.11.24
 Requires: libpqxx
 Requires: boost169-filesystem
 Requires: boost169-locale
@@ -78,6 +78,9 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Dec  3 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.3-1.fmi
+- Silenced CodeChecker warnings
+
 * Wed Oct  7 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.10.7-1.fmi
 - Build update: use makefile.inc from smartmet-library-macgyver
 - Fail build in case of unresolvedreferences in built shared library

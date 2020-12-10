@@ -18,12 +18,12 @@
 #include <cmath>
 #include <stdexcept>
 
-static const char* CLIENT_ENCODING = "UTF8";
-
 using namespace std;
 
 namespace
 {
+const char* CLIENT_ENCODING = "UTF8";
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Convert from UTF-8 to given locale
@@ -56,7 +56,7 @@ string from_utf(const string& name, const string& encoding)
 template <typename T, typename S>
 bool contains(const T& theContainer, const S& theObject)
 {
-  typename T::const_iterator it = find(theContainer.begin(), theContainer.end(), theObject);
+  const auto it = find(theContainer.begin(), theContainer.end(), theObject);
   return (it != theContainer.end());
 }
 }  // namespace
@@ -110,7 +110,8 @@ Query::Query(const string& theHost,
  */
 // ----------------------------------------------------------------------
 
-Query::~Query() {}
+Query::~Query() = default;
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Activate the correct language
@@ -336,7 +337,7 @@ void Query::AddCountryConditions(const QueryOptions& theOptions, string& theQuer
     // Append to the query
 
     int n = 1;
-    for (list<string>::const_iterator it = countries.begin(); it != countries.end(); ++it, ++n)
+    for (auto it = countries.begin(); it != countries.end(); ++it, ++n)
     {
       string country_iso2 = *it;
       Fmi::ascii_toupper(country_iso2);
@@ -357,9 +358,7 @@ void Query::AddCountryConditions(const QueryOptions& theOptions, string& theQuer
     // Append to the query
 
     int n = 1;
-    for (list<string>::const_iterator it = excluded_countries.begin();
-         it != excluded_countries.end();
-         ++it, ++n)
+    for (auto it = excluded_countries.begin(); it != excluded_countries.end(); ++it, ++n)
     {
       string country_iso2 = *it;
       Fmi::ascii_tolower(country_iso2);
@@ -392,7 +391,7 @@ void Query::AddFeatureConditions(const QueryOptions& theOptions, string& theQuer
   // Append to the query
 
   int n = 1;
-  for (list<string>::const_iterator it = features.begin(); it != features.end(); ++it, ++n)
+  for (auto it = features.begin(); it != features.end(); ++it, ++n)
   {
     theQuery += (n == 1 ? " AND (" : " OR ");
     theQuery += "features_code=";
@@ -419,18 +418,18 @@ void Query::AddKeywordConditions(const QueryOptions& theOptions, string& theQuer
   // Append to the query
 
   int n = 1;
-  for (list<string>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+  for (const auto & keyword : keywords)
   {
     if (n == 1)
     {
       theQuery +=
           " AND geonames.id IN (SELECT geonames_id FROM keywords_has_geonames WHERE keyword IN (";
-      theQuery += conn.quote(*it);
+      theQuery += conn.quote(keyword);
     }
     else
     {
       theQuery += ",";
-      theQuery += conn.quote(*it);
+      theQuery += conn.quote(keyword);
     }
     n++;
   }
@@ -474,7 +473,7 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
   {
     country_priorities += ", CASE countries_iso2 WHEN ";
     int n = 1;
-    for (list<string>::const_iterator it = countries.begin(); it != countries.end(); ++it, ++n)
+    for (auto it = countries.begin(); it != countries.end(); ++it, ++n)
     {
       if (n == 1)
       {
@@ -502,7 +501,7 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
   {
     feature_priorities += ", CASE features_code WHEN ";
     int n = 1;
-    for (list<string>::const_iterator it = features.begin(); it != features.end(); ++it, ++n)
+    for (auto it = features.begin(); it != features.end(); ++it, ++n)
     {
       if (n == 1)
       {
@@ -531,7 +530,7 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
   else
     locations = build_locations(theOptions, res, searchword);
 
-  if (locations.size() > 0) return locations;
+  if (!locations.empty()) return locations;
 
   // Prevent endless recursion
 
@@ -626,7 +625,7 @@ Query::return_type Query::FetchById(const QueryOptions& theOptions, int theId)
   string sqlStmt = constructSQLStatement(eFetchById, params);
   pqxx::result res = conn.executeNonTransaction(sqlStmt);
 
-  if (res.size() == 0 && theId >= 10000000) return FetchById(theOptions, -theId);
+  if (res.empty() && theId >= 10000000) return FetchById(theOptions, -theId);
 
   return build_locations(theOptions, res, "", "");
 }
@@ -690,9 +689,7 @@ unsigned int Query::CountKeywordLocations(const QueryOptions& theOptions, const 
   string sqlStmt = constructSQLStatement(eCountKeywordLocations, params);
   pqxx::result res = conn.executeNonTransaction(sqlStmt);
 
-  unsigned int ret = res[0]["count"].as<unsigned int>();
-
-  return ret;
+  return res[0]["count"].as<unsigned int>();
 }
 
 // ----------------------------------------------------------------------
@@ -784,7 +781,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
     // Country and description
 
     string country;
-    string iso2 = "";
+    string iso2;
     if (!row["iso2"].is_null())
     {
       iso2 = row["iso2"].as<string>();
@@ -801,7 +798,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
     }
 
     string description;
-    string features_code = "";
+    string features_code;
     if (!row["features_code"].is_null())
     {
       features_code = row["features_code"].as<string>();
@@ -817,7 +814,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
 
     // Administrative areas
 
-    string administrative = "";
+    string administrative;
     if (!row["municipalities_id"].is_null())
     {
       string municipalities_id = row["municipalities_id"].as<string>();
@@ -862,12 +859,8 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
     if (!theArea.empty())
     {
       string lc_area = boost::algorithm::to_lower_copy(theArea);
-      if (lc_area == boost::algorithm::to_lower_copy(country))
-        ok = true;
-      else if (lc_area == boost::algorithm::to_lower_copy(administrative))
-        ok = true;
-      else
-        ok = false;
+      ok = (lc_area == boost::algorithm::to_lower_copy(country) ||
+            lc_area == boost::algorithm::to_lower_copy(administrative));
     }
 
     if (ok)
@@ -904,12 +897,11 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
   {
     vector<SimpleLocation> bestmatches;
     vector<SimpleLocation> secondarymatches;
-    unsigned int n;
 
     // Remove "%" from searchword
     string tmp = theSearchWord.substr(0, theSearchWord.size() - 1);
 
-    for (n = 0; n < locations.size(); n++)
+    for (std::size_t n = 0; n < locations.size(); n++)
     {
       if (boost::iequals(tmp, locations[n].name))
         bestmatches.push_back(locations[n]);
@@ -919,12 +911,12 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
 
     locations.clear();
 
-    for (n = 0; n < bestmatches.size(); n++)
+    for (std::size_t n = 0; n < bestmatches.size(); n++)
     {
       locations.push_back(bestmatches[n]);
     }
 
-    for (n = 0; n < secondarymatches.size(); n++)
+    for (std::size_t n = 0; n < secondarymatches.size(); n++)
     {
       locations.push_back(secondarymatches[n]);
     }
@@ -945,7 +937,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
   {
     case eResolveFeature:
     {
-      string theCode = boost::any_cast<string>(theParams.at(eFeatureCode));
+      auto theCode = boost::any_cast<string>(theParams.at(eFeatureCode));
       sql += "SELECT shortdesc FROM features WHERE code=";
       sql += conn.quote(theCode);
       break;
@@ -1157,9 +1149,9 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
     }
     case eFetchByLonLat:
     {
-      float theLongitude = boost::any_cast<float>(theParams.at(eLongitude));
-      float theLatitude = boost::any_cast<float>(theParams.at(eLatitude));
-      float theRadius = boost::any_cast<float>(theParams.at(eRadius));
+      auto theLongitude = boost::any_cast<float>(theParams.at(eLongitude));
+      auto theLatitude = boost::any_cast<float>(theParams.at(eLatitude));
+      auto theRadius = boost::any_cast<float>(theParams.at(eRadius));
 
       sql +=
           "WITH candidates AS ("
