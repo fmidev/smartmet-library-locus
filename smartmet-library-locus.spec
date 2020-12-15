@@ -11,19 +11,25 @@ Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-locus
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
+
+%if 0%{rhel} >= 8
+BuildRequires: libpqxx-devel < 1:7.0
+BuildRequires: postgresql12-devel
+#TestRequires: postgresql12-libs
+Requires: libpqxx < 1:7.0
+%else
+BuildRequires: libpqxx-devel < 1:6.0
+BuildRequires: postgresql95-devel
+#TestRequires: postgresql95-libs
+Requires: libpqxx < 1:6.0
+%endif
+
 BuildRequires: rpm-build
 BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost169-devel
-BuildRequires: libpqxx-devel
-%if 0%{rhel} >= 8
-BuildRequires: postgresql12-devel
-%else
-BuildRequires: postgresql95-devel
-%endif
 BuildRequires: smartmet-library-macgyver-devel >= 20.11.24
 Requires: smartmet-library-macgyver >= 20.11.24
-Requires: libpqxx
 Requires: boost169-filesystem
 Requires: boost169-locale
 Requires: boost169-regex
