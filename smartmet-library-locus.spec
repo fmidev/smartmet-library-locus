@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 21.1.5
+Version: 21.1.14
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -17,14 +17,14 @@ BuildRequires: libpqxx-devel < 1:7.0
 BuildRequires: make
 BuildRequires: postgresql12-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.1.5
+BuildRequires: smartmet-library-macgyver-devel >= 21.1.14
 Requires: boost169-filesystem
 Requires: boost169-locale
 Requires: boost169-regex
 Requires: boost169-system
 Requires: boost169-thread
 Requires: libpqxx < 1:7.0
-Requires: smartmet-library-macgyver >= 21.1.5
+Requires: smartmet-library-macgyver >= 21.1.14
 #TestRequires: boost169-devel
 #TestRequires: gcc-c++
 #TestRequires: make
@@ -75,6 +75,9 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Jan 14 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.14-1.fmi
+- Repackaged smartmet to resolve debuginfo issues
+
 * Tue Jan  5 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.5-1.fmi
 - Repackaged with latest postgresql packages
 
