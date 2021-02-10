@@ -25,21 +25,42 @@ all: $(PROG)
 clean:
 	rm -f $(PROG) *~
 
-fminames:
 ifdef CI
-	@/usr/share/smartmet/test/db/init-and-start.sh && /usr/share/smartmet/test/db/install-test-db.sh
+TEST_PREPARE_TARGETS := start-geonames-db
+TEST_FINISH_TARGETS :=  stop-geonames-db
+else
+TEST_PREPARE_TARGETS := dummy
+TEST_FINISH_TARGETS := dummy
 endif
+TEST_DB_DIR := tmp-geonames-db
 
-test: fminames $(PROG)
+test: $(PROG) $(TEST_PREPARE_TARGETS)
 	@echo Running tests:
 	@rm -f *.err
-	@for prog in $(PROG); do \
-		( ./$$prog || touch $$prog.err ) ; \
-	done
-	@test `find . -name \*.err | wc -l` = "0" || ( echo ; echo "The following tests have errors:" ; \
-			for i in *.err ; do echo `basename $$i .err`; done ; rm -f *.err ; false )
-
+	@err=; \
+	for prog in $(PROG); do \
+		( ./$$prog || err="$$err $$prog" ) ; \
+	done; \
+	$(MAKE) $(TEST_FINISH_TARGETS); \
+	test -z "$$err"
 
 $(PROG) : % : %.cpp ../libsmartmet-locus.so
 	$(CXX) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)
+
+geonames-database:
+	@-$(MAKE) stop-geonames-db
+	rm -rf tmp-geonames-db
+	if ! /usr/share/smartmet/test/db/create-local-db.sh $(TEST_DB_DIR) >tmp-geonames-db.log 2>&1 ; then \
+	    cat tmp-geonames-db.log; \
+	    false; \
+	fi
+
+start-geonames-db: geonames-database
+	/usr/share/smartmet/test/db/test-db-ctl.sh $(TEST_DB_DIR) start -w
+
+stop-geonames-db:
+	-/usr/share/smartmet/test/db/test-db-ctl.sh $(TEST_DB_DIR) stop -w
+
+.dummy:
+	true
 

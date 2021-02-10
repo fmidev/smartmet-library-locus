@@ -1,43 +1,40 @@
-
 %define DIRNAME locus
 %define LIBNAME smartmet-%{DIRNAME}
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 20.12.3
+Version: 21.1.14
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-locus
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
-BuildRequires: rpm-build
-BuildRequires: gcc-c++
-BuildRequires: make
+
 BuildRequires: boost169-devel
-BuildRequires: libpqxx-devel
-%if 0%{rhel} >= 8
+BuildRequires: gcc-c++
+BuildRequires: libpqxx-devel < 1:7.0
+BuildRequires: make
 BuildRequires: postgresql12-devel
-%else
-BuildRequires: postgresql95-devel
-%endif
-BuildRequires: smartmet-library-macgyver-devel >= 20.11.24
-Requires: smartmet-library-macgyver >= 20.11.24
-Requires: libpqxx
+BuildRequires: rpm-build
+BuildRequires: smartmet-library-macgyver-devel >= 21.1.14
 Requires: boost169-filesystem
 Requires: boost169-locale
 Requires: boost169-regex
-Requires: boost169-thread
 Requires: boost169-system
+Requires: boost169-thread
+Requires: libpqxx < 1:7.0
+Requires: smartmet-library-macgyver >= 21.1.14
+#TestRequires: boost169-devel
+#TestRequires: gcc-c++
+#TestRequires: make
+#TestRequires: postgresql12-libs
+#TestRequires: smartmet-library-macgyver-devel
+#TestRequires: smartmet-library-regression
+#TestRequires: smartmet-test-db >= 20.6.9
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet-locus < 16.12.20
 Obsoletes: libsmartmet-locus-debuginfo < 16.12.20
-#TestRequires: make
-#TestRequires: gcc-c++
-#TestRequires: boost-devel
-#TestRequires: smartmet-library-regression
-#TestRequires: smartmet-test-db >= 20.6.9
-#TestRequires: smartmet-library-macgyver-devel
 
 %description
 FMI locus library
@@ -78,6 +75,15 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Jan 14 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.14-1.fmi
+- Repackaged smartmet to resolve debuginfo issues
+
+* Tue Jan  5 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.5-1.fmi
+- Repackaged with latest postgresql packages
+
+* Tue Dec 15 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.15-1.fmi
+- Upgrade to pgdg12
+
 * Thu Dec  3 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.3-1.fmi
 - Silenced CodeChecker warnings
 
