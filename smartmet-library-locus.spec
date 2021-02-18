@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 21.1.14
+Version: 21.2.18
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -75,6 +75,10 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Feb 18 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.2.18-1.fmi
+- Added name_type in QueryOptions, so that there is no more need to store fmisid-,wmo-,lpnn-id in 
+language-field in FetchByName-query(BRAINSTORM-1848)
+
 * Thu Jan 14 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.14-1.fmi
 - Repackaged smartmet to resolve debuginfo issues
 
