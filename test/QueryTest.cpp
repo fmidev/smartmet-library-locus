@@ -72,54 +72,53 @@ void name_id_search()
 
   // FMISID
   opts.SetNameType("fmisid");
-  opts.SetLanguage("fi");  
+  opts.SetLanguage("fi");
   ret = lq.FetchByName(opts, "101004");
-  
-  if(ret.size() > 0)
-	if(ret[0].name != "Kumpula")
-	  TEST_FAILED("Name of FMISID 101004 should be Kumpula, not " + ret[0].name);
+
+  if (ret.size() > 0)
+    if (ret[0].name != "Kumpula")
+      TEST_FAILED("Name of FMISID 101004 should be Kumpula, not " + ret[0].name);
 
   opts.SetLanguage("sv");
   ret = lq.FetchByName(opts, "101004");
-  
-  if(ret.size() > 0)
-	if(ret[0].name != "Gumtäkt")
-	  TEST_FAILED("Name of FMISID 101004 should be Gumtäkt, not " + ret[0].name);
+
+  if (ret.size() > 0)
+    if (ret[0].name != "Gumtäkt")
+      TEST_FAILED("Name of FMISID 101004 should be Gumtäkt, not " + ret[0].name);
 
   // WMO
   opts.SetNameType("wmo");
-  opts.SetLanguage("fi");  
+  opts.SetLanguage("fi");
   ret = lq.FetchByName(opts, "2998");
-  
-  if(ret.size() > 0)
-	if(ret[0].name != "Kumpula")
-	  TEST_FAILED("Name of WMO 2998 should be Kumpula, not " + ret[0].name);
+
+  if (ret.size() > 0)
+    if (ret[0].name != "Kumpula")
+      TEST_FAILED("Name of WMO 2998 should be Kumpula, not " + ret[0].name);
 
   opts.SetLanguage("sv");
   ret = lq.FetchByName(opts, "2998");
-  
-  if(ret.size() > 0)
-	if(ret[0].name != "Gumtäkt")
-	  TEST_FAILED("Name of WMO 2998 should be Gumtäkt, not " + ret[0].name);
+
+  if (ret.size() > 0)
+    if (ret[0].name != "Gumtäkt")
+      TEST_FAILED("Name of WMO 2998 should be Gumtäkt, not " + ret[0].name);
 
   // LPNN
   opts.SetNameType("lpnn");
-  opts.SetLanguage("fi");  
+  opts.SetLanguage("fi");
   ret = lq.FetchByName(opts, "339");
-  
-  if(ret.size() > 0)
-	if(ret[0].name != "Kumpula")
-	  TEST_FAILED("Name of LPNN 339 should be Kumpula, not " + ret[0].name);
+
+  if (ret.size() > 0)
+    if (ret[0].name != "Kumpula")
+      TEST_FAILED("Name of LPNN 339 should be Kumpula, not " + ret[0].name);
 
   opts.SetLanguage("sv");
   ret = lq.FetchByName(opts, "339");
-  
-  if(ret.size() > 0)
-	if(ret[0].name != "Gumtäkt")
-	  TEST_FAILED("Name of LPNN 339 should be Gumtäkt, not " + ret[0].name);
+
+  if (ret.size() > 0)
+    if (ret[0].name != "Gumtäkt")
+      TEST_FAILED("Name of LPNN 339 should be Gumtäkt, not " + ret[0].name);
 
   TEST_PASSED();
-
 }
 
 void simple_name_search()
@@ -132,7 +131,8 @@ void simple_name_search()
 
   ret = lq.FetchByName(options, "Helsinki");
 
-  if (ret.size() != 1) TEST_FAILED("Should find 1 match for Helsinki");
+  if (ret.size() != 1)
+    TEST_FAILED("Should find 1 match for Helsinki");
 
   if (ret[0].name != "Helsinki")
     TEST_FAILED("Name of first match should be Helsinki, not " + ret[0].name);
@@ -161,11 +161,32 @@ void simple_name_search()
 
   if (ret[0].country != "Ruotsi")
     TEST_FAILED("Stockholm should be located in Ruotsi, not in " + ret[0].country);
-  if (ret[0].feature != "PPLC") TEST_FAILED("Stockholm should be capital (PPLC)");
+  if (ret[0].feature != "PPLC")
+    TEST_FAILED("Stockholm should be capital (PPLC)");
 
   // Must not find the historic Hievala name
   ret = lq.FetchByName(options, "Evitskog");
-  if (ret[0].name != "Evitskog") TEST_FAILED("Should find Evitskog, not " + ret[0].name);
+  if (ret[0].name != "Evitskog")
+    TEST_FAILED("Should find Evitskog, not " + ret[0].name);
+
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
+
+void utf8_region_search()
+{
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+  Query::return_type ret;
+
+  QueryOptions options;
+  options.SetLanguage("sv");
+
+  ret = lq.FetchByName(options, "åbo,åbo");
+  if (ret.size() < 1)
+    TEST_FAILED("Should find at least 1 match for åbo,åbo, found zero");
+  if (ret[0].name != "Åbo")
+    TEST_FAILED("Name of first match should be Åbo, not " + ret[0].name);
 
   TEST_PASSED();
 }
@@ -197,7 +218,8 @@ void search_with_area()
 
   options.SetCountries("all");
   ret = lq.FetchByName(options, "Bago");
-  if (ret.empty()) TEST_FAILED("Should find 1 Bago (lang=en), not 0");
+  if (ret.empty())
+    TEST_FAILED("Should find 1 Bago (lang=en), not 0");
 
   if (ret[0].country != "Myanmar [Burma]")
     TEST_FAILED("Incorrect country for Bago (lang=en): '" + ret[0].country + "'")
@@ -258,10 +280,13 @@ void search_id()
 
   ret = lq.FetchById(options, 658225);
 
-  if (ret.size() != 1) TEST_FAILED("Should find Helsinki PPLC");
+  if (ret.size() != 1)
+    TEST_FAILED("Should find Helsinki PPLC");
 
-  if (ret[0].name != "Helsinki") TEST_FAILED("Name of first match should be Helsinki");
-  if (ret[0].country != "Suomi") TEST_FAILED("Country of first match should be Helsinki");
+  if (ret[0].name != "Helsinki")
+    TEST_FAILED("Name of first match should be Helsinki");
+  if (ret[0].country != "Suomi")
+    TEST_FAILED("Country of first match should be Helsinki");
   if (ret[0].timezone != "Europe/Helsinki")
     TEST_FAILED("Timezone of first match should be Europe/Helsinki");
 
@@ -319,12 +344,15 @@ void specific_variants()
 
   if (ret[0].name != "Koski Tl")
     TEST_FAILED("Name of first match should be Koski, not " + ret[0].name.substr(0, 9));
-  if (ret[0].country != "Suomi") TEST_FAILED("Country of first match should be Koski");
+  if (ret[0].country != "Suomi")
+    TEST_FAILED("Country of first match should be Koski");
   if (ret[0].timezone != "Europe/Helsinki")
     TEST_FAILED("Timezone of first match should be Europe/Helsinki");
 
-  if (ret.back().name != "Koski") TEST_FAILED("Name of last match should be Koski");
-  if (ret.back().country != "Suomi") TEST_FAILED("Country of last match should be Suomi");
+  if (ret.back().name != "Koski")
+    TEST_FAILED("Name of last match should be Koski");
+  if (ret.back().country != "Suomi")
+    TEST_FAILED("Country of last match should be Suomi");
   if (ret.back().timezone != "Europe/Helsinki")
     TEST_FAILED("Timezone of last match should be Europe/Helsinki");
 
@@ -347,7 +375,8 @@ void specific_countries()
   if (ret.size() != 1)
     TEST_FAILED("Should find Praha 1 time, not " + lexical_cast<string>(ret.size()));
 
-  if (ret[0].name != "Praha") TEST_FAILED("Name of first match should be Praha");
+  if (ret[0].name != "Praha")
+    TEST_FAILED("Name of first match should be Praha");
 
   if (ret[0].timezone != "Europe/Prague")
     TEST_FAILED("Timezone of first match should be Europe/Prague, not " + ret[0].timezone);
@@ -367,17 +396,21 @@ void specific_language()
   options.SetLanguage("sv");
 
   ret = lq.FetchByName(options, "Prague");
-  if (ret.size() != 1) TEST_FAILED("Should find Prague 1 time");
-  if (ret[0].name != "Prag") TEST_FAILED("Name of first match should be Prag, not " + ret[0].name);
+  if (ret.size() != 1)
+    TEST_FAILED("Should find Prague 1 time");
+  if (ret[0].name != "Prag")
+    TEST_FAILED("Name of first match should be Prag, not " + ret[0].name);
   if (ret[0].timezone != "Europe/Prague")
     TEST_FAILED("Timezone of first match should be Europe/Prague");
 
   options.SetCountries("fi");
   ret = lq.FetchByName(options, "Helsinki");
-  if (ret.size() != 1) TEST_FAILED("Should find Helsinki 1 time");
+  if (ret.size() != 1)
+    TEST_FAILED("Should find Helsinki 1 time");
   if (ret[0].name != "Helsingfors")
     TEST_FAILED("Name of first match should be Helsingfors, not " + ret[0].name)
-  if (ret[0].country != "Finland") TEST_FAILED("Country of first match should be Finland");
+  if (ret[0].country != "Finland")
+    TEST_FAILED("Country of first match should be Finland");
 
   TEST_PASSED();
 }
@@ -410,10 +443,13 @@ void specific_features()
   options.SetFeatures("PPLC");
   ret = lq.FetchByName(options, "Praha");
 
-  if (ret.size() != 1) TEST_FAILED("Should find Praha 1 time");
+  if (ret.size() != 1)
+    TEST_FAILED("Should find Praha 1 time");
 
-  if (ret[0].name != "Praha") TEST_FAILED("Name of first match should be Praha");
-  if (ret[0].feature != "PPLC") TEST_FAILED("First match should be the capital");
+  if (ret[0].name != "Praha")
+    TEST_FAILED("Name of first match should be Praha");
+  if (ret[0].feature != "PPLC")
+    TEST_FAILED("First match should be the capital");
 
   TEST_PASSED();
 }
@@ -459,9 +495,11 @@ void simple_lonlat_search()
   options.SetResultLimit(2);
   ret = lq.FetchByLonLat(options, 24.97, 60.10);
 
-  if (ret.size() != 2) TEST_FAILED("Should find 2 matches since limit is 2");
+  if (ret.size() != 2)
+    TEST_FAILED("Should find 2 matches since limit is 2");
 
-  if (ret[0].name != "Harmaja") TEST_FAILED("Name of first match should be Harmaja");
+  if (ret[0].name != "Harmaja")
+    TEST_FAILED("Name of first match should be Harmaja");
 
   if (ret.back().name != "Kuivasaari")
     TEST_FAILED("Name of second match should be Kuivasaari, not " + ret.back().name);
@@ -481,7 +519,8 @@ void simple_latlon_search()
   options.SetResultLimit(2);
   ret = lq.FetchByLatLon(options, 60.10, 24.97);
 
-  if (ret.size() != 2) TEST_FAILED("Should find 2 matches since limit is 2");
+  if (ret.size() != 2)
+    TEST_FAILED("Should find 2 matches since limit is 2");
 
   if (ret[0].name != "Harmaja")
     TEST_FAILED("Name of first match should be Harmaja, not " + ret[0].name);
@@ -503,9 +542,11 @@ void specific_radius()
   QueryOptions options;
   ret = lq.FetchByLonLat(options, 24.97, 60.10, 4);
 
-  if (ret.size() < 10) TEST_FAILED("Should find atleast 10 matches in radius 4km");
+  if (ret.size() < 10)
+    TEST_FAILED("Should find atleast 10 matches in radius 4km");
 
-  if (ret[0].name != "Harmaja") TEST_FAILED("Name of first match should be Harmaja");
+  if (ret[0].name != "Harmaja")
+    TEST_FAILED("Name of first match should be Harmaja");
 
   TEST_PASSED();
 }
@@ -562,7 +603,8 @@ void search_in_autocompletemode()
   options.SetResultLimit(20);
   ret = lq.FetchByName(options, "Ii%");
 
-  if (ret.size() == 0) TEST_FAILED("Found 0 results for autocomplete search Ii%");
+  if (ret.size() == 0)
+    TEST_FAILED("Found 0 results for autocomplete search Ii%");
 
   // Iisalmi has ~22000 people, Ii only 9300
   if (ret[0].name != "Iisalmi")
@@ -572,7 +614,8 @@ void search_in_autocompletemode()
 
   ret = lq.FetchByName(options, "Ii%");
 
-  if (ret[0].name != "Ii") TEST_FAILED("Should find Ii first if autocomplete mode is on");
+  if (ret[0].name != "Ii")
+    TEST_FAILED("Should find Ii first if autocomplete mode is on");
 
   TEST_PASSED();
 }
@@ -590,9 +633,11 @@ void latin1()
 
   ret = lq.FetchById(options, 745044);
 
-  if (ret.size() != 1) TEST_FAILED("Should find Istanbul");
+  if (ret.size() != 1)
+    TEST_FAILED("Should find Istanbul");
 
-  if (ret[0].name != "Istanbul") TEST_FAILED("Name of first match should be Istanbul in Latin1");
+  if (ret[0].name != "Istanbul")
+    TEST_FAILED("Name of first match should be Istanbul in Latin1");
 
   TEST_PASSED();
 }
@@ -681,7 +726,8 @@ void resolve_administrative()
 
   string admin = lq.ResolveAdministrative("13", "DE");
 
-  if (admin != "Saxony") TEST_FAILED("Name for id 13 should be: 'Saxony', NOT '" + admin + "'");
+  if (admin != "Saxony")
+    TEST_FAILED("Name for id 13 should be: 'Saxony', NOT '" + admin + "'");
 
   TEST_PASSED();
 }
@@ -704,11 +750,12 @@ class tests : public tframe::tests
     TEST(escape);
     TEST(search_id);
     TEST(search_in_autocompletemode);
-    TEST(search_with_area);
     TEST(simple_latlon_search);
     TEST(simple_lonlat_search);
     TEST(simple_name_search);
     TEST(name_id_search);
+    TEST(utf8_region_search);
+    TEST(search_with_area);
     TEST(specific_countries);
     TEST(specific_features);
     TEST(specific_keywords);

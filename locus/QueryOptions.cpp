@@ -85,7 +85,10 @@ void QueryOptions::SetCountries(const string& theCountries)
  */
 // ----------------------------------------------------------------------
 
-void QueryOptions::SetCountries(const list<string>& theCountries) { countries = theCountries; }
+void QueryOptions::SetCountries(const list<string>& theCountries)
+{
+  countries = theCountries;
+}
 // ----------------------------------------------------------------------
 /*!
  * Set countries that are not used in search. Takes list of country
@@ -128,7 +131,10 @@ void QueryOptions::SetExcludedCountries(const list<string>& theCountries)
  */
 // ----------------------------------------------------------------------
 
-void QueryOptions::SetResultLimit(unsigned int theLimit) { result_limit = theLimit; }
+void QueryOptions::SetResultLimit(unsigned int theLimit)
+{
+  result_limit = theLimit;
+}
 // ----------------------------------------------------------------------
 /*!
  * Set features used in search. Takes list of feature codes in importance
@@ -154,7 +160,10 @@ void QueryOptions::SetFeatures(const string& theFeatures)
  */
 // ----------------------------------------------------------------------
 
-void QueryOptions::SetFeatures(const list<string>& theFeatures) { features = theFeatures; }
+void QueryOptions::SetFeatures(const list<string>& theFeatures)
+{
+  features = theFeatures;
+}
 // ----------------------------------------------------------------------
 /*!
  * Set keywords used in search.
@@ -177,14 +186,20 @@ void QueryOptions::SetKeywords(const string& theKeywords)
  */
 // ----------------------------------------------------------------------
 
-void QueryOptions::SetKeywords(const list<std::string>& theKeywords) { keywords = theKeywords; }
+void QueryOptions::SetKeywords(const list<std::string>& theKeywords)
+{
+  keywords = theKeywords;
+}
 // ----------------------------------------------------------------------
 /*!
  * \brief Set the character set
  */
 // ----------------------------------------------------------------------
 
-void QueryOptions::SetCharset(const string& theCharset) { charset = theCharset; }
+void QueryOptions::SetCharset(const string& theCharset)
+{
+  charset = theCharset;
+}
 // ----------------------------------------------------------------------
 /*!
  * Set collation. Collations that mysql supports for utf-8 are valid.
@@ -195,7 +210,10 @@ void QueryOptions::SetCharset(const string& theCharset) { charset = theCharset; 
  */
 // ----------------------------------------------------------------------
 
-void QueryOptions::SetCollation(const string& theCollation) { collation = theCollation; }
+void QueryOptions::SetCollation(const string& theCollation)
+{
+  collation = theCollation;
+}
 // ----------------------------------------------------------------------
 /*!
  * Set autocollation. Autocollation allows collation setting defined
@@ -206,7 +224,10 @@ void QueryOptions::SetCollation(const string& theCollation) { collation = theCol
  */
 // ----------------------------------------------------------------------
 
-void QueryOptions::SetAutoCollation(bool theValue) { autocollation = theValue; }
+void QueryOptions::SetAutoCollation(bool theValue)
+{
+  autocollation = theValue;
+}
 // ----------------------------------------------------------------------
 /*!
  *�\brief Get collation string
@@ -215,10 +236,14 @@ void QueryOptions::SetAutoCollation(bool theValue) { autocollation = theValue; }
 
 string QueryOptions::GetCollation() const
 {
-  if (!autocollation) return collation;
-  if (language == "fi") return "utf8_swedish_ci";
-  if (language == "sv") return "utf8_swedish_ci";
-  if (language == "et") return "utf8_estonian_ci";
+  if (!autocollation)
+    return collation;
+  if (language == "fi")
+    return "utf8_swedish_ci";
+  if (language == "sv")
+    return "utf8_swedish_ci";
+  if (language == "et")
+    return "utf8_estonian_ci";
   return "utf8_general_ci";
 }
 
@@ -232,7 +257,10 @@ string QueryOptions::GetCollation() const
  */
 // ----------------------------------------------------------------------
 
-void QueryOptions::SetAutocompleteMode(bool theValue) { autocompletemode = theValue; }
+void QueryOptions::SetAutocompleteMode(bool theValue)
+{
+  autocompletemode = theValue;
+}
 // ----------------------------------------------------------------------
 /*!
  * To purpose of this method was to search all countries if search
@@ -243,7 +271,10 @@ void QueryOptions::SetAutocompleteMode(bool theValue) { autocompletemode = theVa
  */
 // ----------------------------------------------------------------------
 
-void QueryOptions::SetFullCountrySearch(bool theFlag) { fullcountrysearch = theFlag; }
+void QueryOptions::SetFullCountrySearch(bool theFlag)
+{
+  fullcountrysearch = theFlag;
+}
 // ----------------------------------------------------------------------
 /*!
  * Defines should variants be searched. This is on by default
@@ -252,7 +283,10 @@ void QueryOptions::SetFullCountrySearch(bool theFlag) { fullcountrysearch = theF
  */
 // ----------------------------------------------------------------------
 
-void QueryOptions::SetSearchVariants(bool theFlag) { search_variants = theFlag; }
+void QueryOptions::SetSearchVariants(bool theFlag)
+{
+  search_variants = theFlag;
+}
 // ----------------------------------------------------------------------
 /*!
  * Language for results. For example if language 'fi' is set then
@@ -275,7 +309,10 @@ void QueryOptions::SetLanguage(const string& theLanguage)
  */
 // ----------------------------------------------------------------------
 
-void QueryOptions::SetPopulationMin(unsigned int theValue) { population_min = theValue; }
+void QueryOptions::SetPopulationMin(unsigned int theValue)
+{
+  population_min = theValue;
+}
 // ----------------------------------------------------------------------
 /*!
  * \brief Search populated places smaller than this
@@ -284,7 +321,10 @@ void QueryOptions::SetPopulationMin(unsigned int theValue) { population_min = th
  */
 // ----------------------------------------------------------------------
 
-void QueryOptions::SetPopulationMax(unsigned int theValue) { population_max = theValue; }
+void QueryOptions::SetPopulationMax(unsigned int theValue)
+{
+  population_max = theValue;
+}
 // ----------------------------------------------------------------------
 /*!
  * \brief Name type can be 'fmisid','wmo','lpnn' or empty

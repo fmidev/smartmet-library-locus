@@ -5,15 +5,13 @@
 // ======================================================================
 
 #include "Query.h"
-
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/locale/encoding.hpp>
+#include <boost/locale.hpp>
 #include <boost/make_shared.hpp>
 #include <macgyver/StringConversion.h>
-
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -63,6 +61,15 @@ bool contains(const T& theContainer, const S& theObject)
 
 namespace Locus
 {
+// ----------------------------------------------------------------------
+/*!
+ * \brief Default locale
+ */
+// ----------------------------------------------------------------------
+
+boost::locale::generator locale_generator;
+std::locale default_locale = locale_generator("fi_FI.UTF-8");
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Default search radius
@@ -158,7 +165,8 @@ string Query::ResolveFeature(const QueryOptions& theOptions, const string& theCo
 
   string retval;
 
-  if (!res.empty()) retval = res[0][0].as<string>();
+  if (!res.empty())
+    retval = res[0][0].as<string>();
 
   return retval;
 }
@@ -191,7 +199,8 @@ string Query::ResolveNameVariant(const QueryOptions& theOptions,
 
   string retval;
 
-  if (!res.empty()) retval = res[0][0].as<string>();
+  if (!res.empty())
+    retval = res[0][0].as<string>();
 
   return retval;
 }
@@ -214,7 +223,8 @@ boost::optional<int> Query::ResolveFmisid(const QueryOptions& theOptions, const 
 
   pqxx::result res = conn.executeNonTransaction(sqlStmt);
 
-  if (res.empty()) return {};
+  if (res.empty())
+    return {};
 
   return res[0][0].as<int>();
 }
@@ -249,7 +259,8 @@ string Query::ResolveCountry(const QueryOptions& theOptions, const string& theIs
     string localsqlStmt = constructSQLStatement(eResolveCountry2, params);
     pqxx::result localres = conn.executeNonTransaction(localsqlStmt);
 
-    if (!localres.empty()) retval = localres[0][0].as<string>();
+    if (!localres.empty())
+      retval = localres[0][0].as<string>();
   }
 
   return retval;
@@ -279,13 +290,15 @@ string Query::ResolveMunicipality(const QueryOptions& theOptions, const string& 
     retval = res[0][0].as<string>();
   }
 
-  if (theOptions.GetLanguage() == "fi") return retval;
+  if (theOptions.GetLanguage() == "fi")
+    return retval;
 
   sqlStmt = constructSQLStatement(eResolveMunicipality2, params);
   res = conn.executeNonTransaction(sqlStmt);
 
   // default is the original name
-  if (!res.empty()) retval = res[0][0].as<string>();
+  if (!res.empty())
+    retval = res[0][0].as<string>();
 
   return retval;
 }
@@ -386,7 +399,8 @@ void Query::AddFeatureConditions(const QueryOptions& theOptions, string& theQuer
 
   const list<string>& features = theOptions.GetFeatures();
 
-  if (features.empty() || contains(features, "%") || contains(features, "all")) return;
+  if (features.empty() || contains(features, "%") || contains(features, "all"))
+    return;
 
   // Append to the query
 
@@ -413,12 +427,13 @@ void Query::AddKeywordConditions(const QueryOptions& theOptions, string& theQuer
 {
   const list<string>& keywords = theOptions.GetKeywords();
 
-  if (keywords.empty() || contains(keywords, "%") || contains(keywords, "all")) return;
+  if (keywords.empty() || contains(keywords, "%") || contains(keywords, "all"))
+    return;
 
   // Append to the query
 
   int n = 1;
-  for (const auto & keyword : keywords)
+  for (const auto& keyword : keywords)
   {
     if (n == 1)
     {
@@ -434,7 +449,8 @@ void Query::AddKeywordConditions(const QueryOptions& theOptions, string& theQuer
     n++;
   }
 
-  if (n > 1) theQuery += "))";
+  if (n > 1)
+    theQuery += "))";
 }
 
 // ----------------------------------------------------------------------
@@ -450,8 +466,8 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
 {
   map<SQLQueryParameterId, boost::any> params;
   QueryOptions opts = theOptions;
-  if(!opts.GetNameType().empty())
-	opts.SetLanguage(opts.GetNameType());
+  if (!opts.GetNameType().empty())
+    opts.SetLanguage(opts.GetNameType());
   params[eQueryOptions] = opts;
   params[eLocationName] = theName;
 
@@ -460,7 +476,8 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
   // This allows queries like Helsinki, Finland
 
   vector<string> qparts;
-  if (!theName.empty()) boost::algorithm::split(qparts, theName, boost::algorithm::is_any_of(","));
+  if (!theName.empty())
+    boost::algorithm::split(qparts, theName, boost::algorithm::is_any_of(","));
   string searchword = (qparts.empty() ? string("") : qparts[0]);
 
   params[eSearchWord] = searchword;
@@ -491,7 +508,8 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
         country_priorities += Fmi::to_string(n);
       }
     }
-    if (n > 1) country_priorities += " ELSE 1000 END as country_priority ";
+    if (n > 1)
+      country_priorities += " ELSE 1000 END as country_priority ";
   }
   params[eCountryPriorities] = country_priorities;
 
@@ -519,11 +537,15 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
         feature_priorities += Fmi::to_string(n);
       }
     }
-    if (n > 1) feature_priorities += " ELSE 1000 END as feature_priority ";
+    if (n > 1)
+      feature_priorities += " ELSE 1000 END as feature_priority ";
   }
   params[eFeaturePriorities] = feature_priorities;
 
   string sqlStmt = constructSQLStatement(eFetchByName, params);
+
+  // std::cout << "SQL:\n" << sqlStmt << "\n\n\n";
+
   pqxx::result res = conn.executeNonTransaction(sqlStmt);
 
   // Create result list
@@ -533,17 +555,20 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
   else
     locations = build_locations(theOptions, res, searchword);
 
-  if (!locations.empty()) return locations;
+  if (!locations.empty())
+    return locations;
 
   // Prevent endless recursion
 
-  if (recursive_query) return locations;
+  if (recursive_query)
+    return locations;
 
   if (theOptions.GetFullCountrySearch())
   {
     // Search all countries
 
-    if (debug) cout << "Do full country seach because limited search didn't return results" << endl;
+    if (debug)
+      cout << "Do full country seach because limited search didn't return results" << endl;
 
     QueryOptions newoptions = theOptions;
     newoptions.SetCountries("%");
@@ -628,7 +653,8 @@ Query::return_type Query::FetchById(const QueryOptions& theOptions, int theId)
   string sqlStmt = constructSQLStatement(eFetchById, params);
   pqxx::result res = conn.executeNonTransaction(sqlStmt);
 
-  if (res.empty() && theId >= 10000000) return FetchById(theOptions, -theId);
+  if (res.empty() && theId >= 10000000)
+    return FetchById(theOptions, -theId);
 
   return build_locations(theOptions, res, "", "");
 }
@@ -659,7 +685,8 @@ Query::return_type Query::FetchByKeyword(const QueryOptions& theOptions, const s
   string sqlStmt = constructSQLStatement(eFetchByKeyword1, params);
   pqxx::result res = conn.executeNonTransaction(sqlStmt);
 
-  if (res.size() != 1) return *locations;
+  if (res.size() != 1)
+    return *locations;
 
   sqlStmt = constructSQLStatement(eFetchByKeyword2, params);
 
@@ -712,13 +739,15 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
 {
   return_type locations;
 
-  if (theR.empty()) return locations;
+  if (theR.empty())
+    return locations;
 
   // Does the result have a field for overriding names?
   bool has_override_field = false;
   for (unsigned int field = 0; !has_override_field && field < theR.columns(); ++field)
   {
-    if (string(theR.column_name(field)) == string("override_name")) has_override_field = true;
+    if (string(theR.column_name(field)) == string("override_name"))
+      has_override_field = true;
   }
 
   // Caches subquery results
@@ -736,7 +765,8 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
     // NULL timezones should be removed already in the SQL query, otherwise
     // you might get zero results if the result count limit is 1.
 
-    if (row["timezone"].is_null()) continue;
+    if (row["timezone"].is_null())
+      continue;
 
     // Determine name
     string name = (!row["name"].is_null() ? row["name"].as<string>() : "NULL");
@@ -766,10 +796,11 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
       else
         variant = ResolveNameVariant(theOptions, id, theSearchWord);
 
-      if (!variant.empty()) name = variant;
+      if (!variant.empty())
+        name = variant;
     }
 
-    if ((!row["ansiname"].is_null()) && (theOptions.GetCharset() != "utf-8"))
+    if ((!row["ansiname"].is_null()) && (theOptions.GetCharset() != "utf8"))
       name = from_utf(name, row["ansiname"].as<string>(), theOptions.GetCharset());
 
     // Elevation
@@ -794,7 +825,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
       else
       {
         country = ResolveCountry(theOptions, iso2);
-        if (theOptions.GetCharset() != "utf-8")
+        if (theOptions.GetCharset() != "utf8")
           country = from_utf(country, theOptions.GetCharset());
         country_cache[iso2] = country;
       }
@@ -830,7 +861,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
         else
         {
           administrative = ResolveMunicipality(theOptions, municipalities_id);
-          if (theOptions.GetCharset() != "utf-8")
+          if (theOptions.GetCharset() != "utf8")
             administrative = from_utf(administrative, theOptions.GetCharset());
           municipality_cache[municipalities_id] = administrative;
         }
@@ -848,7 +879,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
           else
           {
             administrative = ResolveAdministrative(admin1, localiso2);
-            if (theOptions.GetCharset() != "utf-8")
+            if (theOptions.GetCharset() != "utf8")
               administrative = from_utf(administrative, theOptions.GetCharset());
             admin_cache[key] = administrative;
           }
@@ -861,9 +892,9 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
 
     if (!theArea.empty())
     {
-      string lc_area = boost::algorithm::to_lower_copy(theArea);
-      ok = (lc_area == boost::algorithm::to_lower_copy(country) ||
-            lc_area == boost::algorithm::to_lower_copy(administrative));
+      string lc_area = boost::locale::to_lower(theArea, default_locale);
+      ok = (lc_area == boost::locale::to_lower(country, default_locale) ||
+            lc_area == boost::locale::to_lower(administrative, default_locale));
     }
 
     if (ok)
@@ -1038,12 +1069,12 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
     }
     case eFetchByName:
     {
-      if (theOptions.GetSearchVariants()) sql += "(";
+      if (theOptions.GetSearchVariants())
+        sql += "(";
 
       string theSearchWord = boost::any_cast<string>(theParams.at(eSearchWord));
       string theCountryPriorities = boost::any_cast<string>(theParams.at(eCountryPriorities));
       string theFeaturePriorities = boost::any_cast<string>(theParams.at(eFeaturePriorities));
-      // boost::algorithm::to_lower(theSearchWord);
 
       sql +=
           "SELECT DISTINCT geonames.name AS name,"

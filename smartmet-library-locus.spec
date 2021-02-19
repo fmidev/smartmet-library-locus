@@ -17,14 +17,14 @@ BuildRequires: libpqxx-devel < 1:7.0
 BuildRequires: make
 BuildRequires: postgresql12-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.1.14
+BuildRequires: smartmet-library-macgyver-devel >= 21.1.25
 Requires: boost169-filesystem
 Requires: boost169-locale
 Requires: boost169-regex
 Requires: boost169-system
 Requires: boost169-thread
 Requires: libpqxx < 1:7.0
-Requires: smartmet-library-macgyver >= 21.1.14
+Requires: smartmet-library-macgyver >= 21.1.25
 #TestRequires: boost169-devel
 #TestRequires: gcc-c++
 #TestRequires: make
@@ -78,6 +78,9 @@ FMI Locus library development files
 * Thu Feb 18 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.2.18-1.fmi
 - Added name_type in QueryOptions, so that there is no more need to store fmisid-,wmo-,lpnn-id in 
 language-field in FetchByName-query(BRAINSTORM-1848)
+
+* Tue Feb  2 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.2.2-1.fmi
+- Fixed lower case conversions to use Boost.Locale
 
 * Thu Jan 14 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.14-1.fmi
 - Repackaged smartmet to resolve debuginfo issues
