@@ -287,6 +287,16 @@ void QueryOptions::SetPopulationMin(unsigned int theValue) { population_min = th
 void QueryOptions::SetPopulationMax(unsigned int theValue) { population_max = theValue; }
 // ----------------------------------------------------------------------
 /*!
+ * \brief Name type can be 'fmisid','wmo','lpnn' or empty
+ *
+ * \param theNameType Type of name
+ */
+// ----------------------------------------------------------------------
+
+void QueryOptions::SetNameType(const std::string& theNameType) { name_type = theNameType; }
+
+// ----------------------------------------------------------------------
+/*!
  * Return unique hash value based on the options
  *
  * Deprecated! Use HashValue instead!
@@ -299,7 +309,7 @@ string QueryOptions::Hash() const
 
   hash << fullcountrysearch << ':' << language << ':' << result_limit << ':' << search_variants
        << ':' << charset << ':' << population_min << ':' << population_max << ':' << collation
-       << ':' << autocollation << ':' << autocompletemode << ':';
+       << ':' << autocollation << ':' << autocompletemode << ':' << name_type << ':';
 
   for (const string& c : countries)
     hash << c << ':';
@@ -329,6 +339,7 @@ std::size_t QueryOptions::HashValue() const
   boost::hash_combine(hash, boost::hash_value(collation));
   boost::hash_combine(hash, boost::hash_value(autocollation));
   boost::hash_combine(hash, boost::hash_value(autocompletemode));
+  boost::hash_combine(hash, boost::hash_value(name_type));
 
   for (const string& c : countries)
     boost::hash_combine(hash, boost::hash_value(c));

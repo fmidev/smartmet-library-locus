@@ -60,9 +60,72 @@ namespace QueryTest
 {
 // ----------------------------------------------------------------------
 
+void name_id_search()
+{
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
+  Locus::QueryOptions opts;
+  opts.SetCountries("all");
+  opts.SetSearchVariants(true);
+  opts.SetResultLimit(1);
+  Query::return_type ret;
+
+  // FMISID
+  opts.SetNameType("fmisid");
+  opts.SetLanguage("fi");  
+  ret = lq.FetchByName(opts, "101004");
+  
+  if(ret.size() > 0)
+	if(ret[0].name != "Kumpula")
+	  TEST_FAILED("Name of FMISID 101004 should be Kumpula, not " + ret[0].name);
+
+  opts.SetLanguage("sv");
+  ret = lq.FetchByName(opts, "101004");
+  
+  if(ret.size() > 0)
+	if(ret[0].name != "Gumtäkt")
+	  TEST_FAILED("Name of FMISID 101004 should be Gumtäkt, not " + ret[0].name);
+
+  // WMO
+  opts.SetNameType("wmo");
+  opts.SetLanguage("fi");  
+  ret = lq.FetchByName(opts, "2998");
+  
+  if(ret.size() > 0)
+	if(ret[0].name != "Kumpula")
+	  TEST_FAILED("Name of WMO 2998 should be Kumpula, not " + ret[0].name);
+
+  opts.SetLanguage("sv");
+  ret = lq.FetchByName(opts, "2998");
+  
+  if(ret.size() > 0)
+	if(ret[0].name != "Gumtäkt")
+	  TEST_FAILED("Name of WMO 2998 should be Gumtäkt, not " + ret[0].name);
+
+  // LPNN
+  opts.SetNameType("lpnn");
+  opts.SetLanguage("fi");  
+  ret = lq.FetchByName(opts, "339");
+  
+  if(ret.size() > 0)
+	if(ret[0].name != "Kumpula")
+	  TEST_FAILED("Name of LPNN 339 should be Kumpula, not " + ret[0].name);
+
+  opts.SetLanguage("sv");
+  ret = lq.FetchByName(opts, "339");
+  
+  if(ret.size() > 0)
+	if(ret[0].name != "Gumtäkt")
+	  TEST_FAILED("Name of LPNN 339 should be Gumtäkt, not " + ret[0].name);
+
+  TEST_PASSED();
+
+}
+
 void simple_name_search()
 {
   Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+
   Query::return_type ret;
 
   QueryOptions options;
@@ -645,6 +708,7 @@ class tests : public tframe::tests
     TEST(simple_latlon_search);
     TEST(simple_lonlat_search);
     TEST(simple_name_search);
+    TEST(name_id_search);
     TEST(specific_countries);
     TEST(specific_features);
     TEST(specific_keywords);

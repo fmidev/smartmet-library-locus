@@ -449,7 +449,10 @@ void Query::AddKeywordConditions(const QueryOptions& theOptions, string& theQuer
 Query::return_type Query::FetchByName(const QueryOptions& theOptions, const string& theName)
 {
   map<SQLQueryParameterId, boost::any> params;
-  params[eQueryOptions] = theOptions;
+  QueryOptions opts = theOptions;
+  if(!opts.GetNameType().empty())
+	opts.SetLanguage(opts.GetNameType());
+  params[eQueryOptions] = opts;
   params[eLocationName] = theName;
 
   SetOptions(theOptions);

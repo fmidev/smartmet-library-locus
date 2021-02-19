@@ -9,6 +9,7 @@
 #include <list>
 #include <map>
 #include <string>
+#include <boost/optional.hpp>
 
 namespace Locus
 {
@@ -37,6 +38,7 @@ class QueryOptions
   void SetAutocompleteMode(bool theValue);
   void SetPopulationMin(unsigned int theValue);
   void SetPopulationMax(unsigned int theValue);
+  void SetNameType(const std::string& theNameType);
 
   const std::list<std::string>& GetCountries() const { return countries; }
   const std::list<std::string>& GetExcludedCountries() const { return excluded_countries; }
@@ -50,6 +52,7 @@ class QueryOptions
   std::string GetCollation() const;
   unsigned int GetPopulationMin() const { return population_min; }
   unsigned int GetPopulationMax() const { return population_max; }
+  const std::string& GetNameType() { return name_type; }
   bool GetAutoCompleteMode() const { return autocompletemode; }
   std::string Hash() const;
   std::size_t HashValue() const;
@@ -66,6 +69,7 @@ class QueryOptions
   unsigned int population_min;                // Search populated places bigger than this
   unsigned int population_max;                // Search populated places smaller than this
   std::list<std::string> excluded_countries;  // Countries that are not used in search
+  std::string name_type;                      // Can be 'fmisid','wmo','lpnn' or empty
 
   std::string collation;  // collation for mysql
   bool autocollation;
