@@ -61,6 +61,5 @@ start-geonames-db: geonames-database
 stop-geonames-db:
 	-/usr/share/smartmet/test/db/test-db-ctl.sh $(TEST_DB_DIR) stop -w
 
-.dummy:
+dummy:
 	true
-
