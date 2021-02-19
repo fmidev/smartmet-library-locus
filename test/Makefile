@@ -24,6 +24,8 @@ LIBS += ../libsmartmet-locus.so -lpqxx
 all: $(PROG)
 clean:
 	rm -f $(PROG) *~
+	rm -rf tmp-geonames-db
+	rm -f tmp-geonames-db.log
 
 ifdef CI
 TEST_PREPARE_TARGETS := start-geonames-db
