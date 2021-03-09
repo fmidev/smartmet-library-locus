@@ -1,8 +1,10 @@
 PROG = $(patsubst %.cpp,%,$(wildcard *.cpp))
 # OBS = $(wildcard ../obj/*.o)
 
+TEST_DB_DIR := $(shell pwd)/tmp-geonames-db
+
 ifdef CI
-DATABASE_HOST = "localhost"
+DATABASE_HOST = "$(TEST_DB_DIR)"
 DATABASE_PORT = 5444
 else
 DATABASE_HOST = "smartmet-test"
@@ -34,7 +36,6 @@ else
 TEST_PREPARE_TARGETS := dummy
 TEST_FINISH_TARGETS := dummy
 endif
-TEST_DB_DIR := tmp-geonames-db
 
 test: $(PROG) $(TEST_PREPARE_TARGETS)
 	@echo Running tests:
