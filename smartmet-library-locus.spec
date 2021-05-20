@@ -4,7 +4,7 @@
 Summary: locus library
 Name: %{SPECNAME}
 Version: 21.5.20
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-locus
@@ -17,14 +17,14 @@ BuildRequires: libpqxx-devel < 1:7.0
 BuildRequires: make
 BuildRequires: postgresql12-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.5.19
+BuildRequires: smartmet-library-macgyver-devel >= 21.5.20
 Requires: boost169-filesystem
 Requires: boost169-locale
 Requires: boost169-regex
 Requires: boost169-system
 Requires: boost169-thread
 Requires: libpqxx < 1:7.0
-Requires: smartmet-library-macgyver >= 21.5.19
+Requires: smartmet-library-macgyver >= 21.5.20
 #TestRequires: boost169-devel
 #TestRequires: gcc-c++
 #TestRequires: make
@@ -75,6 +75,9 @@ FMI Locus library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu May 20 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.20-2.fmi
+- Repackaged with improved hashing functions
+
 * Thu May 20 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.20-1.fmi
 - Use Fmi hash functions, boost::combine produces too many collisions
 
