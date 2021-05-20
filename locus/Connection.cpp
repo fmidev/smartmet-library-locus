@@ -83,7 +83,8 @@ bool Connection::open(const std::string& theHost,
       ;
   // clang-format on
 
-  if (!theConnectTimeout.empty()) ss << " connect_timeout=" << theConnectTimeout;
+  if (!theConnectTimeout.empty())
+    ss << " connect_timeout=" << theConnectTimeout;
 
   try
   {
@@ -105,7 +106,8 @@ bool Connection::open(const std::string& theHost,
 
 void Connection::close()
 {
-  if (!conn) return;
+  if (!conn)
+    return;
   conn->disconnect();
 
 #if 0
@@ -124,13 +126,15 @@ void Connection::close()
 
 std::string Connection::quote(const std::string& theString) const
 {
-  if (conn) return conn->quote(theString);
+  if (conn)
+    return conn->quote(theString);
   throw std::runtime_error("Locus: Attempting to quote string without database connection");
 }
 
 pqxx::result Connection::executeNonTransaction(const std::string& theSQLStatement) const
 {
-  if (debug) std::cout << "SQL: " << theSQLStatement << std::endl;
+  if (debug)
+    std::cout << "SQL: " << theSQLStatement << std::endl;
 
   try
   {
@@ -143,11 +147,15 @@ pqxx::result Connection::executeNonTransaction(const std::string& theSQLStatemen
   }
 }
 
-void Connection::startTransaction() { trx = boost::make_shared<pqxx::work>(*conn); }
+void Connection::startTransaction()
+{
+  trx = boost::make_shared<pqxx::work>(*conn);
+}
 
 pqxx::result Connection::executeTransaction(const std::string& theSQLStatement) const
 {
-  if (debug) std::cout << "SQL: " << theSQLStatement << std::endl;
+  if (debug)
+    std::cout << "SQL: " << theSQLStatement << std::endl;
 
   try
   {

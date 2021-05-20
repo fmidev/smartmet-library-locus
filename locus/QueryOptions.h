@@ -6,10 +6,10 @@
 
 #pragma once
 
+#include <boost/optional.hpp>
 #include <list>
 #include <map>
 #include <string>
-#include <boost/optional.hpp>
 
 namespace Locus
 {

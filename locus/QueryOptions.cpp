@@ -8,7 +8,7 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/functional/hash.hpp>
+#include <macgyver/Hash.h>
 #include <sstream>
 #include <stdexcept>
 
@@ -333,7 +333,10 @@ void QueryOptions::SetPopulationMax(unsigned int theValue)
  */
 // ----------------------------------------------------------------------
 
-void QueryOptions::SetNameType(const std::string& theNameType) { name_type = theNameType; }
+void QueryOptions::SetNameType(const std::string& theNameType)
+{
+  name_type = theNameType;
+}
 
 // ----------------------------------------------------------------------
 /*!
@@ -369,26 +372,26 @@ string QueryOptions::Hash() const
 
 std::size_t QueryOptions::HashValue() const
 {
-  std::size_t hash = boost::hash_value(fullcountrysearch);
-  boost::hash_combine(hash, boost::hash_value(language));
-  boost::hash_combine(hash, boost::hash_value(result_limit));
-  boost::hash_combine(hash, boost::hash_value(search_variants));
-  boost::hash_combine(hash, boost::hash_value(charset));
-  boost::hash_combine(hash, boost::hash_value(population_min));
-  boost::hash_combine(hash, boost::hash_value(population_max));
-  boost::hash_combine(hash, boost::hash_value(collation));
-  boost::hash_combine(hash, boost::hash_value(autocollation));
-  boost::hash_combine(hash, boost::hash_value(autocompletemode));
-  boost::hash_combine(hash, boost::hash_value(name_type));
+  std::size_t hash = Fmi::hash_value(fullcountrysearch);
+  Fmi::hash_combine(hash, Fmi::hash_value(language));
+  Fmi::hash_combine(hash, Fmi::hash_value(result_limit));
+  Fmi::hash_combine(hash, Fmi::hash_value(search_variants));
+  Fmi::hash_combine(hash, Fmi::hash_value(charset));
+  Fmi::hash_combine(hash, Fmi::hash_value(population_min));
+  Fmi::hash_combine(hash, Fmi::hash_value(population_max));
+  Fmi::hash_combine(hash, Fmi::hash_value(collation));
+  Fmi::hash_combine(hash, Fmi::hash_value(autocollation));
+  Fmi::hash_combine(hash, Fmi::hash_value(autocompletemode));
+  Fmi::hash_combine(hash, Fmi::hash_value(name_type));
 
   for (const string& c : countries)
-    boost::hash_combine(hash, boost::hash_value(c));
+    Fmi::hash_combine(hash, Fmi::hash_value(c));
   for (const string& f : features)
-    boost::hash_combine(hash, boost::hash_value(f));
+    Fmi::hash_combine(hash, Fmi::hash_value(f));
   for (const string& k : keywords)
-    boost::hash_combine(hash, boost::hash_value(k));
+    Fmi::hash_combine(hash, Fmi::hash_value(k));
   for (const string& c : excluded_countries)
-    boost::hash_combine(hash, boost::hash_value(c));
+    Fmi::hash_combine(hash, Fmi::hash_value(c));
 
   return hash;
 }
