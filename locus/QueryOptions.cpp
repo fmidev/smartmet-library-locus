@@ -8,6 +8,7 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <macgyver/Exception.h>
 #include <macgyver/Hash.h>
 #include <sstream>
 #include <stdexcept>
@@ -36,26 +37,33 @@ QueryOptions::QueryOptions()
       autocollation(false),
       autocompletemode(false)
 {
-  // Remaining initializations
+  try
+  {
+    // Remaining initializations
 
-  countries.emplace_back("fi");
-  features.emplace_back("PPLC");
-  features.emplace_back("ADMD");
-  features.emplace_back("PPLA");
-  features.emplace_back("PPLA2");
-  features.emplace_back("PPLA3");
-  features.emplace_back("PPLG");
-  features.emplace_back("PPL");
-  features.emplace_back("ADM2");
-  features.emplace_back("ISL");
-  features.emplace_back("PPLX");
-  features.emplace_back("POST");
-  features.emplace_back("AIRP");
-  features.emplace_back("HBR");
-  features.emplace_back("SKI");
-  features.emplace_back("MT");
-  features.emplace_back("MTS");
-  features.emplace_back("PRK");
+    countries.emplace_back("fi");
+    features.emplace_back("PPLC");
+    features.emplace_back("ADMD");
+    features.emplace_back("PPLA");
+    features.emplace_back("PPLA2");
+    features.emplace_back("PPLA3");
+    features.emplace_back("PPLG");
+    features.emplace_back("PPL");
+    features.emplace_back("ADM2");
+    features.emplace_back("ISL");
+    features.emplace_back("PPLX");
+    features.emplace_back("POST");
+    features.emplace_back("AIRP");
+    features.emplace_back("HBR");
+    features.emplace_back("SKI");
+    features.emplace_back("MT");
+    features.emplace_back("MTS");
+    features.emplace_back("PRK");
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -70,10 +78,17 @@ QueryOptions::QueryOptions()
 
 void QueryOptions::SetCountries(const string& theCountries)
 {
-  if (!theCountries.empty())
-    boost::algorithm::split(countries, theCountries, boost::algorithm::is_any_of(","));
-  else
-    countries.clear();
+  try
+  {
+    if (!theCountries.empty())
+      boost::algorithm::split(countries, theCountries, boost::algorithm::is_any_of(","));
+    else
+      countries.clear();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -87,8 +102,16 @@ void QueryOptions::SetCountries(const string& theCountries)
 
 void QueryOptions::SetCountries(const list<string>& theCountries)
 {
-  countries = theCountries;
+  try
+  {
+    countries = theCountries;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
+
 // ----------------------------------------------------------------------
 /*!
  * Set countries that are not used in search. Takes list of country
@@ -101,10 +124,17 @@ void QueryOptions::SetCountries(const list<string>& theCountries)
 
 void QueryOptions::SetExcludedCountries(const string& theCountries)
 {
-  if (!theCountries.empty())
-    boost::algorithm::split(excluded_countries, theCountries, boost::algorithm::is_any_of(","));
-  else
-    excluded_countries.clear();
+  try
+  {
+    if (!theCountries.empty())
+      boost::algorithm::split(excluded_countries, theCountries, boost::algorithm::is_any_of(","));
+    else
+      excluded_countries.clear();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -119,7 +149,14 @@ void QueryOptions::SetExcludedCountries(const string& theCountries)
 
 void QueryOptions::SetExcludedCountries(const list<string>& theCountries)
 {
-  excluded_countries = theCountries;
+  try
+  {
+    excluded_countries = theCountries;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -133,7 +170,14 @@ void QueryOptions::SetExcludedCountries(const list<string>& theCountries)
 
 void QueryOptions::SetResultLimit(unsigned int theLimit)
 {
-  result_limit = theLimit;
+  try
+  {
+    result_limit = theLimit;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 // ----------------------------------------------------------------------
 /*!
@@ -147,8 +191,15 @@ void QueryOptions::SetResultLimit(unsigned int theLimit)
 
 void QueryOptions::SetFeatures(const string& theFeatures)
 {
-  if (!theFeatures.empty())
-    boost::algorithm::split(features, theFeatures, boost::algorithm::is_any_of(","));
+  try
+  {
+    if (!theFeatures.empty())
+      boost::algorithm::split(features, theFeatures, boost::algorithm::is_any_of(","));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -162,7 +213,14 @@ void QueryOptions::SetFeatures(const string& theFeatures)
 
 void QueryOptions::SetFeatures(const list<string>& theFeatures)
 {
-  features = theFeatures;
+  try
+  {
+    features = theFeatures;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 // ----------------------------------------------------------------------
 /*!
@@ -174,8 +232,15 @@ void QueryOptions::SetFeatures(const list<string>& theFeatures)
 
 void QueryOptions::SetKeywords(const string& theKeywords)
 {
-  if (!theKeywords.empty())
-    boost::algorithm::split(keywords, theKeywords, boost::algorithm::is_any_of(","));
+  try
+  {
+    if (!theKeywords.empty())
+      boost::algorithm::split(keywords, theKeywords, boost::algorithm::is_any_of(","));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -188,7 +253,14 @@ void QueryOptions::SetKeywords(const string& theKeywords)
 
 void QueryOptions::SetKeywords(const list<std::string>& theKeywords)
 {
-  keywords = theKeywords;
+  try
+  {
+    keywords = theKeywords;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 // ----------------------------------------------------------------------
 /*!
@@ -198,7 +270,14 @@ void QueryOptions::SetKeywords(const list<std::string>& theKeywords)
 
 void QueryOptions::SetCharset(const string& theCharset)
 {
-  charset = theCharset;
+  try
+  {
+    charset = theCharset;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 // ----------------------------------------------------------------------
 /*!
@@ -212,7 +291,14 @@ void QueryOptions::SetCharset(const string& theCharset)
 
 void QueryOptions::SetCollation(const string& theCollation)
 {
-  collation = theCollation;
+  try
+  {
+    collation = theCollation;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 // ----------------------------------------------------------------------
 /*!
@@ -226,25 +312,40 @@ void QueryOptions::SetCollation(const string& theCollation)
 
 void QueryOptions::SetAutoCollation(bool theValue)
 {
-  autocollation = theValue;
+  try
+  {
+    autocollation = theValue;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
+
 // ----------------------------------------------------------------------
 /*!
- *�\brief Get collation string
+ * \brief Get collation string
  */
 // ----------------------------------------------------------------------
 
 string QueryOptions::GetCollation() const
 {
-  if (!autocollation)
-    return collation;
-  if (language == "fi")
-    return "utf8_swedish_ci";
-  if (language == "sv")
-    return "utf8_swedish_ci";
-  if (language == "et")
-    return "utf8_estonian_ci";
-  return "utf8_general_ci";
+  try
+  {
+    if (!autocollation)
+      return collation;
+    if (language == "fi")
+      return "utf8_swedish_ci";
+    if (language == "sv")
+      return "utf8_swedish_ci";
+    if (language == "et")
+      return "utf8_estonian_ci";
+    return "utf8_general_ci";
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -259,8 +360,16 @@ string QueryOptions::GetCollation() const
 
 void QueryOptions::SetAutocompleteMode(bool theValue)
 {
-  autocompletemode = theValue;
+  try
+  {
+    autocompletemode = theValue;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
+
 // ----------------------------------------------------------------------
 /*!
  * To purpose of this method was to search all countries if search
@@ -273,8 +382,16 @@ void QueryOptions::SetAutocompleteMode(bool theValue)
 
 void QueryOptions::SetFullCountrySearch(bool theFlag)
 {
-  fullcountrysearch = theFlag;
+  try
+  {
+    fullcountrysearch = theFlag;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
+
 // ----------------------------------------------------------------------
 /*!
  * Defines should variants be searched. This is on by default
@@ -285,8 +402,16 @@ void QueryOptions::SetFullCountrySearch(bool theFlag)
 
 void QueryOptions::SetSearchVariants(bool theFlag)
 {
-  search_variants = theFlag;
+  try
+  {
+    search_variants = theFlag;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
+
 // ----------------------------------------------------------------------
 /*!
  * Language for results. For example if language 'fi' is set then
@@ -298,7 +423,14 @@ void QueryOptions::SetSearchVariants(bool theFlag)
 
 void QueryOptions::SetLanguage(const string& theLanguage)
 {
-  language = boost::algorithm::to_lower_copy(theLanguage);
+  try
+  {
+    language = boost::algorithm::to_lower_copy(theLanguage);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -311,8 +443,16 @@ void QueryOptions::SetLanguage(const string& theLanguage)
 
 void QueryOptions::SetPopulationMin(unsigned int theValue)
 {
-  population_min = theValue;
+  try
+  {
+    population_min = theValue;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Search populated places smaller than this
@@ -323,8 +463,16 @@ void QueryOptions::SetPopulationMin(unsigned int theValue)
 
 void QueryOptions::SetPopulationMax(unsigned int theValue)
 {
-  population_max = theValue;
+  try
+  {
+    population_max = theValue;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Name type can be 'fmisid','wmo','lpnn' or empty
@@ -335,7 +483,14 @@ void QueryOptions::SetPopulationMax(unsigned int theValue)
 
 void QueryOptions::SetNameType(const std::string& theNameType)
 {
-  name_type = theNameType;
+  try
+  {
+    name_type = theNameType;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -348,20 +503,27 @@ void QueryOptions::SetNameType(const std::string& theNameType)
 
 string QueryOptions::Hash() const
 {
-  ostringstream hash;
+  try
+  {
+    ostringstream hash;
 
-  hash << fullcountrysearch << ':' << language << ':' << result_limit << ':' << search_variants
-       << ':' << charset << ':' << population_min << ':' << population_max << ':' << collation
-       << ':' << autocollation << ':' << autocompletemode << ':' << name_type << ':';
+    hash << fullcountrysearch << ':' << language << ':' << result_limit << ':' << search_variants
+         << ':' << charset << ':' << population_min << ':' << population_max << ':' << collation
+         << ':' << autocollation << ':' << autocompletemode << ':' << name_type << ':';
 
-  for (const string& c : countries)
-    hash << c << ':';
-  for (const string& f : features)
-    hash << f << ':';
-  for (const string& c : excluded_countries)
-    hash << c << ':';
+    for (const string& c : countries)
+      hash << c << ':';
+    for (const string& f : features)
+      hash << f << ':';
+    for (const string& c : excluded_countries)
+      hash << c << ':';
 
-  return hash.str();
+    return hash.str();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -372,28 +534,35 @@ string QueryOptions::Hash() const
 
 std::size_t QueryOptions::HashValue() const
 {
-  std::size_t hash = Fmi::hash_value(fullcountrysearch);
-  Fmi::hash_combine(hash, Fmi::hash_value(language));
-  Fmi::hash_combine(hash, Fmi::hash_value(result_limit));
-  Fmi::hash_combine(hash, Fmi::hash_value(search_variants));
-  Fmi::hash_combine(hash, Fmi::hash_value(charset));
-  Fmi::hash_combine(hash, Fmi::hash_value(population_min));
-  Fmi::hash_combine(hash, Fmi::hash_value(population_max));
-  Fmi::hash_combine(hash, Fmi::hash_value(collation));
-  Fmi::hash_combine(hash, Fmi::hash_value(autocollation));
-  Fmi::hash_combine(hash, Fmi::hash_value(autocompletemode));
-  Fmi::hash_combine(hash, Fmi::hash_value(name_type));
+  try
+  {
+    std::size_t hash = Fmi::hash_value(fullcountrysearch);
+    Fmi::hash_combine(hash, Fmi::hash_value(language));
+    Fmi::hash_combine(hash, Fmi::hash_value(result_limit));
+    Fmi::hash_combine(hash, Fmi::hash_value(search_variants));
+    Fmi::hash_combine(hash, Fmi::hash_value(charset));
+    Fmi::hash_combine(hash, Fmi::hash_value(population_min));
+    Fmi::hash_combine(hash, Fmi::hash_value(population_max));
+    Fmi::hash_combine(hash, Fmi::hash_value(collation));
+    Fmi::hash_combine(hash, Fmi::hash_value(autocollation));
+    Fmi::hash_combine(hash, Fmi::hash_value(autocompletemode));
+    Fmi::hash_combine(hash, Fmi::hash_value(name_type));
 
-  for (const string& c : countries)
-    Fmi::hash_combine(hash, Fmi::hash_value(c));
-  for (const string& f : features)
-    Fmi::hash_combine(hash, Fmi::hash_value(f));
-  for (const string& k : keywords)
-    Fmi::hash_combine(hash, Fmi::hash_value(k));
-  for (const string& c : excluded_countries)
-    Fmi::hash_combine(hash, Fmi::hash_value(c));
+    for (const string& c : countries)
+      Fmi::hash_combine(hash, Fmi::hash_value(c));
+    for (const string& f : features)
+      Fmi::hash_combine(hash, Fmi::hash_value(f));
+    for (const string& k : keywords)
+      Fmi::hash_combine(hash, Fmi::hash_value(k));
+    for (const string& c : excluded_countries)
+      Fmi::hash_combine(hash, Fmi::hash_value(c));
 
-  return hash;
+    return hash;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 }  // namespace Locus
