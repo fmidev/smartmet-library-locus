@@ -21,53 +21,6 @@ namespace Locus
 {
 // ----------------------------------------------------------------------
 /*!
- * \brief Default constructor
- */
-// ----------------------------------------------------------------------
-
-QueryOptions::QueryOptions()
-    : fullcountrysearch(false),
-      language("fi"),
-      result_limit(100),
-      search_variants(true),
-      charset("utf8"),
-      population_min(0),
-      population_max(0),
-      collation("utf8_general_ci"),
-      autocollation(false),
-      autocompletemode(false)
-{
-  try
-  {
-    // Remaining initializations
-
-    countries.emplace_back("fi");
-    features.emplace_back("PPLC");
-    features.emplace_back("ADMD");
-    features.emplace_back("PPLA");
-    features.emplace_back("PPLA2");
-    features.emplace_back("PPLA3");
-    features.emplace_back("PPLG");
-    features.emplace_back("PPL");
-    features.emplace_back("ADM2");
-    features.emplace_back("ISL");
-    features.emplace_back("PPLX");
-    features.emplace_back("POST");
-    features.emplace_back("AIRP");
-    features.emplace_back("HBR");
-    features.emplace_back("SKI");
-    features.emplace_back("MT");
-    features.emplace_back("MTS");
-    features.emplace_back("PRK");
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
  * Set countries used in search. Takes list of country codes in importance
  * order separated with comma. Special value 'all' can be used to define
  * all countries to be searched.

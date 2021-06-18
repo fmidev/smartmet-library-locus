@@ -23,11 +23,14 @@ namespace Locus
 class Query
 {
  public:
-  typedef std::vector<SimpleLocation> return_type;
+  using return_type = std::vector<SimpleLocation>;
   static const float default_radius;
 
- public:
+  ~Query() = default;
   Query() = delete;
+  Query(const Query& other) = delete;
+  Query& operator=(const Query& other) = delete;
+
   Query(const std::string& theHost,
         const std::string& theUser,
         const std::string& thePass,
@@ -38,8 +41,6 @@ class Query
         const std::string& thePass,
         const std::string& theDatabase,
         const std::string& thePort);
-
-  ~Query();
 
   void SetDebug(bool theFlag);
 
@@ -78,7 +79,6 @@ class Query
 
   void SetOptions(const QueryOptions& theOptions);
 
- private:
   // ids for queries
   enum SQLQueryId
   {
@@ -119,9 +119,9 @@ class Query
     eKeyword
   };
 
-  Connection conn;       // Location database connecton
-  bool debug;            // Print debug information if true
-  bool recursive_query;  // Infinite recursion prevention
+  Connection conn;               // Location database connecton
+  bool debug = false;            // Print debug information if true
+  bool recursive_query = false;  // Infinite recursion prevention
 
   std::string constructSQLStatement(
       SQLQueryId theQueryId,

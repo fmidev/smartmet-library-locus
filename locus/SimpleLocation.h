@@ -19,8 +19,8 @@ class SimpleLocation
 {
  public:
   std::string name;
-  float lat;
-  float lon;
+  float lat = 0.0;
+  float lon = 0.0;
   std::string country;
   std::string feature;
   std::string description;
@@ -28,11 +28,10 @@ class SimpleLocation
   std::string timezone;
   unsigned int population;
   std::string iso2;
-  int id;
-  int elevation;
+  int id = 0;
+  int elevation = 0;
   boost::optional<int> fmisid;
 
- public:
   SimpleLocation(const std::string& theName,
                  float theLongitude,
                  float theLatitude,

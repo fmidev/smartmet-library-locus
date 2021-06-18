@@ -16,8 +16,6 @@ namespace Locus
 class QueryOptions
 {
  public:
-  QueryOptions();
-
   // Set search conditions
 
   void SetCountries(const std::string& theCountries);
@@ -58,22 +56,38 @@ class QueryOptions
   std::size_t HashValue() const;
 
  private:
-  std::list<std::string> countries;           // List of countries to be searched
-  bool fullcountrysearch;                     // Search all if above list fails?
-  std::string language;                       // Language used in results
-  unsigned int result_limit;                  // Limit for the number of results
-  std::list<std::string> features;            // Features to search for
+  std::list<std::string> features{"PPLC",
+                                  "ADMD",
+                                  "PPLA",
+                                  "PPLA2",
+                                  "PPLA3",
+                                  "PPLG",
+                                  "PPL",
+                                  "ADM2",
+                                  "ISL",
+                                  "PPLX",
+                                  "POST",
+                                  "AIRP",
+                                  "HBR",
+                                  "SKI",
+                                  "MT",
+                                  "MTS",
+                                  "PRK"};     // Features to search for
+  std::list<std::string> countries{"fi"};     // List of countries to be searched
   std::list<std::string> keywords;            // Keywords to search for
-  bool search_variants;                       // Include variants in search?
-  std::string charset;                        // Character set used in result
-  unsigned int population_min;                // Search populated places bigger than this
-  unsigned int population_max;                // Search populated places smaller than this
   std::list<std::string> excluded_countries;  // Countries that are not used in search
+  std::string language = "fi";                // Language used in results
+  std::string charset = "utf8";               // Character set used in result
   std::string name_type;                      // Can be 'fmisid','wmo','lpnn' or empty
+  unsigned int result_limit = 100;            // Limit for the number of results
+  unsigned int population_max = 0;            // Search populated places smaller than this
+  unsigned int population_min = 0;            // Search populated places bigger than this
+  bool fullcountrysearch = false;             // Search all if above list fails?
+  bool search_variants = true;                // Include variants in search?
 
-  std::string collation;  // collation for mysql
-  bool autocollation;
-  bool autocompletemode;
+  std::string collation = "utf8_general_ci";  // collation for mysql
+  bool autocollation = false;
+  bool autocompletemode = false;
 
 };  // class QueryOptions
 

@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 21.6.16
-Release: 1%{?dist}.fmi
+Version: 21.6.18
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-locus
@@ -76,6 +76,13 @@ Requires: %{SPECNAME} = %version-%release
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Jun 18 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.18-2.fmi
+- Silenced CodeChecker warnings
+
+* Fri Jul 18 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.6.18-1.fmi
+- Remove explicit RPM dependency on libpqxx (smartmet-library-macgyver provides it)
+- Support also libpqxx 7
+
 * Wed Jun 16 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.16-1.fmi
 - Use Fmi::Exception
 
