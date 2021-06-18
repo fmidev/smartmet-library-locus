@@ -147,18 +147,18 @@ void Connection::close()
     if (!conn)
       return;
 
+#if PQXX_VERSION_MAJOR < 7
     conn->disconnect();
-
-#if 0
-    // disconnect does not throw according to documentation
+#else
+    // TODO:checked whether this works with libpqxx7
     try
     {
       if(conn->is_open())
-        conn->disconnect();
+        conn->close();
     }
     catch(const std::exception& e)
     {
-      throw Fmi::Exception(BCP,string("Failed to close connection to PostgreSQL: ") + e.what());
+      throw Fmi::Exception(BCP, std::string("Failed to close connection to PostgreSQL: ") + e.what());
     }
 #endif
   }
