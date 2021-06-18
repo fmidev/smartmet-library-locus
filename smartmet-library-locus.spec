@@ -13,7 +13,6 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 
 BuildRequires: boost169-devel
 BuildRequires: gcc-c++
-BuildRequires: libpqxx-devel < 1:7.0
 BuildRequires: make
 BuildRequires: postgresql12-devel
 BuildRequires: rpm-build
@@ -23,7 +22,6 @@ Requires: boost169-locale
 Requires: boost169-regex
 Requires: boost169-system
 Requires: boost169-thread
-Requires: libpqxx < 1:7.0
 Requires: smartmet-library-macgyver >= 21.6.16
 #TestRequires: boost169-devel
 #TestRequires: gcc-c++
