@@ -79,7 +79,7 @@ Requires: %{SPECNAME} = %version-%release
 * Fri Jun 18 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.18-2.fmi
 - Silenced CodeChecker warnings
 
-* Fri Jul 18 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.6.18-1.fmi
+* Fri Jun 18 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.6.18-1.fmi
 - Remove explicit RPM dependency on libpqxx (smartmet-library-macgyver provides it)
 - Support also libpqxx 7
 
