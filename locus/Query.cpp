@@ -111,6 +111,7 @@ Query::Query(const string& theHost,
              const string& theUser,
              const string& thePass,
              const string& theDatabase)
+  : conn(new Fmi::Database::PostgreSQLConnection)
 {
   try
   {
@@ -121,7 +122,7 @@ Query::Query(const string& theHost,
     opt.password = thePass;
     opt.database = theDatabase;
     opt.encoding = CLIENT_ENCODING;
-    conn.open(opt);
+    conn->open(opt);
     //conn.open(theHost, theUser, thePass, theDatabase, CLIENT_ENCODING);
   }
   catch (...)
@@ -141,6 +142,7 @@ Query::Query(const string& theHost,
              const string& thePass,
              const string& theDatabase,
              const string& thePort)
+    : conn(new Fmi::Database::PostgreSQLConnection)
 {
   try
   {
@@ -152,7 +154,7 @@ Query::Query(const string& theHost,
     opt.password = thePass;
     opt.database = theDatabase;
     opt.encoding = CLIENT_ENCODING;
-    conn.open(opt);
+    conn->open(opt);
     //conn.open(theHost, theUser, thePass, theDatabase, CLIENT_ENCODING, thePort);
   }
   catch (...)
@@ -171,7 +173,7 @@ void Query::SetOptions(const QueryOptions& theOptions)
 {
   try
   {
-    conn.setClientEncoding(theOptions.GetCharset());
+    conn->setClientEncoding(theOptions.GetCharset());
   }
   catch (...)
   {
@@ -193,7 +195,7 @@ void Query::SetDebug(bool theFlag)
   try
   {
     debug = theFlag;
-    conn.setDebug(theFlag);
+    conn->setDebug(theFlag);
   }
   catch (...)
   {
@@ -219,7 +221,7 @@ string Query::ResolveFeature(const QueryOptions& theOptions, const string& theCo
     params[eFeatureCode] = theCode;
 
     string sqlStmt = constructSQLStatement(eResolveFeature, params);
-    pqxx::result res = conn.executeNonTransaction(sqlStmt);
+    pqxx::result res = conn->executeNonTransaction(sqlStmt);
 
     string retval;
 
@@ -260,7 +262,7 @@ string Query::ResolveNameVariant(const QueryOptions& theOptions,
     params[eSearchWord] = theSearchWord;
 
     string sqlStmt = constructSQLStatement(eResolveNameVariant, params);
-    pqxx::result res = conn.executeNonTransaction(sqlStmt);
+    pqxx::result res = conn->executeNonTransaction(sqlStmt);
 
     string retval;
 
@@ -293,7 +295,7 @@ boost::optional<int> Query::ResolveFmisid(const QueryOptions& theOptions, const 
     params[eGeonamesId] = theId;
     string sqlStmt = constructSQLStatement(eResolveFmisid, params);
 
-    pqxx::result res = conn.executeNonTransaction(sqlStmt);
+    pqxx::result res = conn->executeNonTransaction(sqlStmt);
 
     if (res.empty())
       return {};
@@ -324,7 +326,7 @@ string Query::ResolveCountry(const QueryOptions& theOptions, const string& theIs
     params[eCountryIso2Code] = theIsoCode;
 
     string sqlStmt = constructSQLStatement(eResolveCountry1, params);
-    pqxx::result res = conn.executeNonTransaction(sqlStmt);
+    pqxx::result res = conn->executeNonTransaction(sqlStmt);
 
     string retval;
 
@@ -336,7 +338,7 @@ string Query::ResolveCountry(const QueryOptions& theOptions, const string& theIs
     {
       // If variant is not found use name in countries-table
       string localsqlStmt = constructSQLStatement(eResolveCountry2, params);
-      pqxx::result localres = conn.executeNonTransaction(localsqlStmt);
+      pqxx::result localres = conn->executeNonTransaction(localsqlStmt);
 
       if (!localres.empty())
         retval = localres[0][0].as<string>();
@@ -367,7 +369,7 @@ string Query::ResolveMunicipality(const QueryOptions& theOptions, const string& 
     params[eMunicipalityId] = theId;
 
     string sqlStmt = constructSQLStatement(eResolveMunicipality1, params);
-    pqxx::result res = conn.executeNonTransaction(sqlStmt);
+    pqxx::result res = conn->executeNonTransaction(sqlStmt);
 
     string retval;
 
@@ -380,7 +382,7 @@ string Query::ResolveMunicipality(const QueryOptions& theOptions, const string& 
       return retval;
 
     sqlStmt = constructSQLStatement(eResolveMunicipality2, params);
-    res = conn.executeNonTransaction(sqlStmt);
+    res = conn->executeNonTransaction(sqlStmt);
 
     // default is the original name
     if (!res.empty())
@@ -414,7 +416,7 @@ string Query::ResolveAdministrative(const string& theCode, const string& theCoun
     params[eAdminCode] = adminCode;
 
     string sqlStmt = constructSQLStatement(eResolveAdministrative, params);
-    pqxx::result res = conn.executeNonTransaction(sqlStmt);
+    pqxx::result res = conn->executeNonTransaction(sqlStmt);
 
     string retval;
 
@@ -459,7 +461,7 @@ void Query::AddCountryConditions(const QueryOptions& theOptions, string& theQuer
           theQuery += " AND geonames.countries_iso2 IN (";
         else
           theQuery += ",";
-        theQuery += conn.quote(country_iso2);
+        theQuery += conn->quote(country_iso2);
       }
 
       theQuery += ")";
@@ -480,7 +482,7 @@ void Query::AddCountryConditions(const QueryOptions& theOptions, string& theQuer
           theQuery += " AND geonames.countries_iso2 NOT IN (";
         else
           theQuery += ",";
-        theQuery += conn.quote(country_iso2);
+        theQuery += conn->quote(country_iso2);
       }
 
       theQuery += ")";
@@ -516,7 +518,7 @@ void Query::AddFeatureConditions(const QueryOptions& theOptions, string& theQuer
     {
       theQuery += (n == 1 ? " AND (" : " OR ");
       theQuery += "features_code=";
-      theQuery += conn.quote(*it);
+      theQuery += conn->quote(*it);
     }
 
     theQuery += ")";
@@ -553,12 +555,12 @@ void Query::AddKeywordConditions(const QueryOptions& theOptions, string& theQuer
       {
         theQuery +=
             " AND geonames.id IN (SELECT geonames_id FROM keywords_has_geonames WHERE keyword IN (";
-        theQuery += conn.quote(keyword);
+        theQuery += conn->quote(keyword);
       }
       else
       {
         theQuery += ",";
-        theQuery += conn.quote(keyword);
+        theQuery += conn->quote(keyword);
       }
       n++;
     }
@@ -618,13 +620,13 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
       {
         if (n == 1)
         {
-          country_priorities += conn.quote(*it);
+          country_priorities += conn->quote(*it);
           country_priorities += " THEN 1 ";
         }
         else
         {
           country_priorities += " WHEN ";
-          country_priorities += conn.quote(*it);
+          country_priorities += conn->quote(*it);
           country_priorities += " THEN ";
           country_priorities += Fmi::to_string(n);
         }
@@ -647,13 +649,13 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
       {
         if (n == 1)
         {
-          feature_priorities += conn.quote(*it);
+          feature_priorities += conn->quote(*it);
           feature_priorities += " THEN 1 ";
         }
         else
         {
           feature_priorities += " WHEN ";
-          feature_priorities += conn.quote(*it);
+          feature_priorities += conn->quote(*it);
           feature_priorities += " THEN ";
           feature_priorities += Fmi::to_string(n);
         }
@@ -667,7 +669,7 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
 
     // std::cout << "SQL:\n" << sqlStmt << "\n\n\n";
 
-    pqxx::result res = conn.executeNonTransaction(sqlStmt);
+    pqxx::result res = conn->executeNonTransaction(sqlStmt);
 
     // Create result list
     return_type locations;
@@ -759,7 +761,7 @@ Query::return_type Query::FetchByLonLat(const QueryOptions& theOptions,
     SetOptions(theOptions);
 
     string sqlStmt = constructSQLStatement(eFetchByLonLat, params);
-    pqxx::result res = conn.executeNonTransaction(sqlStmt);
+    pqxx::result res = conn->executeNonTransaction(sqlStmt);
 
     auto ret = build_locations(theOptions, res, "", "");
 
@@ -793,7 +795,7 @@ Query::return_type Query::FetchById(const QueryOptions& theOptions, int theId)
     params[eGeonameId] = theId;
 
     string sqlStmt = constructSQLStatement(eFetchById, params);
-    pqxx::result res = conn.executeNonTransaction(sqlStmt);
+    pqxx::result res = conn->executeNonTransaction(sqlStmt);
 
     if (res.empty() && theId >= 10000000)
       return FetchById(theOptions, -theId);
@@ -832,14 +834,14 @@ Query::return_type Query::FetchByKeyword(const QueryOptions& theOptions, const s
     auto locations = boost::make_shared<Locus::Query::return_type>();
 
     string sqlStmt = constructSQLStatement(eFetchByKeyword1, params);
-    pqxx::result res = conn.executeNonTransaction(sqlStmt);
+    pqxx::result res = conn->executeNonTransaction(sqlStmt);
 
     if (res.size() != 1)
       return *locations;
 
     sqlStmt = constructSQLStatement(eFetchByKeyword2, params);
 
-    res = conn.executeNonTransaction(sqlStmt);
+    res = conn->executeNonTransaction(sqlStmt);
 
     auto ret = build_locations(options, res, "", "");
 
@@ -873,7 +875,7 @@ unsigned int Query::CountKeywordLocations(const QueryOptions& theOptions, const 
     auto locations = boost::make_shared<Locus::Query::return_type>();
 
     string sqlStmt = constructSQLStatement(eCountKeywordLocations, params);
-    pqxx::result res = conn.executeNonTransaction(sqlStmt);
+    pqxx::result res = conn->executeNonTransaction(sqlStmt);
 
     return res[0]["count"].as<unsigned int>();
   }
@@ -1138,7 +1140,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
       {
         auto theCode = boost::any_cast<string>(theParams.at(eFeatureCode));
         sql += "SELECT shortdesc FROM features WHERE code=";
-        sql += conn.quote(theCode);
+        sql += conn->quote(theCode);
         break;
       }
       case eResolveNameVariant:
@@ -1152,9 +1154,9 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         {
           sql +=
               "SELECT name,length(name) AS l, priority FROM alternate_geonames WHERE geonames_id=";
-          sql += conn.quote(theGeonamesId);
+          sql += conn->quote(theGeonamesId);
           sql += " AND language=";
-          sql += conn.quote(language);
+          sql += conn->quote(language);
           sql +=
               " AND historic=false ORDER BY priority ASC, preferred DESC, l ASC, name ASC LIMIT 1";
         }
@@ -1162,11 +1164,11 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         {
           sql +=
               "SELECT name,length(name) As l, priority FROM alternate_geonames WHERE geonames_id=";
-          sql += conn.quote(theGeonamesId);
+          sql += conn->quote(theGeonamesId);
           sql += " AND language=";
-          sql += conn.quote(language);
+          sql += conn->quote(language);
           sql += " AND name LIKE ";
-          sql += conn.quote(theSearchWord);
+	  sql += conn->quote(theSearchWord);
           sql +=
               " AND historic=false ORDER BY priority ASC, preferred DESC, l ASC, name ASC LIMIT 1";
         }
@@ -1176,7 +1178,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
       {
         auto theGeonamesId = boost::any_cast<string>(theParams.at(eGeonamesId));
         sql += "SELECT name FROM alternate_geonames WHERE language='fmisid' AND geonames_id=";
-        sql += conn.quote(theGeonamesId);
+        sql += conn->quote(theGeonamesId);
         break;
       }
       case eResolveCountry1:
@@ -1193,17 +1195,17 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
               " FROM geonames, alternate_geonames"
               " WHERE geonames.features_code='PCLI'"
               " AND geonames.countries_iso2=";
-          sql += conn.quote(iso2);
+          sql += conn->quote(iso2);
           sql +=
               " AND geonames.id=alternate_geonames.geonames_id"
               " AND alternate_geonames.language=";
-          sql += conn.quote(language);
+          sql += conn->quote(language);
           sql += " ORDER BY preferred DESC, alternate_geonames.priority ASC, l ASC LIMIT 1";
         }
         else
         {
           sql += "SELECT name FROM countries WHERE iso2=";
-          sql += conn.quote(iso2);
+          sql += conn->quote(iso2);
         }
         break;
       }
@@ -1217,14 +1219,14 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         if (theQueryId == eResolveMunicipality1)
         {
           sql += "SELECT name FROM municipalities WHERE id=";
-          sql += conn.quote(theMunicipalityId);
+          sql += conn->quote(theMunicipalityId);
         }
         else
         {
           sql += "SELECT name FROM alternate_municipalities WHERE municipalities_id=";
-          sql += conn.quote(theMunicipalityId);
+          sql += conn->quote(theMunicipalityId);
           sql += " AND language=";
-          sql += conn.quote(language);
+          sql += conn->quote(language);
         }
         break;
       }
@@ -1233,7 +1235,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         auto theAdminCode = boost::any_cast<string>(theParams.at(eAdminCode));
         Fmi::ascii_tolower(theAdminCode);
         sql += "SELECT name FROM admin1codes WHERE code=";
-        sql += conn.quote(theAdminCode);
+        sql += conn->quote(theAdminCode);
         break;
       }
       case eFetchByName:
@@ -1257,13 +1259,13 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         sql += ' ';
         sql += theFeaturePriorities;
         sql += " FROM geonames WHERE LOWER(geonames.name) LIKE LOWER(";
-        sql += conn.quote(theSearchWord);
+        sql += conn->quote(theSearchWord);
         sql += ')';
 
-        if (conn.collateSupported())
+        if (conn->collateSupported())
         {
           sql += " COLLATE ";
-          sql += conn.quote(theOptions.GetCollation());
+          sql += conn->quote(theOptions.GetCollation());
         }
 
         // PHP version does not do this, but we cannot tolerate it in brainstorm
@@ -1302,19 +1304,19 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
           sql += theFeaturePriorities;
           sql +=
               " FROM geonames, alternate_geonames WHERE LOWER(alternate_geonames.name) LIKE LOWER(";
-          sql += conn.quote(theSearchWord);
+          sql += conn->quote(theSearchWord);
           sql += ")";
 
-          if (conn.collateSupported())
+          if (conn->collateSupported())
           {
             sql += " COLLATE ";
-            sql += conn.quote(theOptions.GetCollation());
+            sql += conn->quote(theOptions.GetCollation());
           }
 
           sql +=
               " AND alternate_geonames.geonames_id=geonames.id AND alternate_geonames.language "
               "LIKE ";
-          sql += conn.quote(language);
+          sql += conn->quote(language);
 
           if (theOptions.GetPopulationMin() > 0)
           {
@@ -1329,7 +1331,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
           if (theOptions.GetAutoCompleteMode())
           {
             sql += " AND alternate_geonames.language=";
-            sql += conn.quote(language);
+            sql += conn->quote(language);
           }
 
           AddFeatureConditions(theOptions, sql);
@@ -1343,10 +1345,10 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         sql += (theFeaturePriorities.empty() ? "" : "feature_priority, ");
         sql += " population DESC, name";
 
-        if (conn.collateSupported())
+        if (conn->collateSupported())
         {
           sql += " COLLATE ";
-          sql += conn.quote(theOptions.GetCollation());
+          sql += conn->quote(theOptions.GetCollation());
         }
 
         break;
@@ -1445,7 +1447,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         if (theQueryId == eFetchByKeyword1)
         {
           sql += "SELECT keyword FROM keywords WHERE keyword=";
-          sql += conn.quote(theKeyword);
+          sql += conn->quote(theKeyword);
         }
         else if (theQueryId == eFetchByKeyword2)
         {
@@ -1458,7 +1460,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
               "keywords_has_geonames.name AS override_name FROM \n "
               "geonames, keywords_has_geonames WHERE\n "
               "keywords_has_geonames.keyword=";
-          sql += conn.quote(theKeyword);
+          sql += conn->quote(theKeyword);
           sql +=
               " AND geonames.id=keywords_has_geonames.geonames_id"
               " ORDER BY name";
@@ -1498,7 +1500,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
               "  FROM geonames, keywords_has_geonames, features, countries\n"
               "  WHERE geonames.id=keywords_has_geonames.geonames_id\n"
               "  AND keywords_has_geonames.keyword=";
-          sql += conn.quote(theKeyword);
+          sql += conn->quote(theKeyword);
           sql +=
               "  AND features.code=geonames.features_code\n"
               "  AND geonames.countries_iso2=countries.iso2\n"
@@ -1516,7 +1518,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
               "LEFT JOIN alternate_municipalities\n"
               "ON (georesults.municipalities_id=alternate_municipalities.municipalities_id\n"
               "    AND alternate_municipalities.language=";
-          sql += conn.quote(theOptions.GetLanguage());
+          sql += conn->quote(theOptions.GetLanguage());
           sql +=
               "   )\n"
               "\n"
@@ -1538,9 +1540,9 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
               "    WHERE geonames.id=alternate_geonames.geonames_id\n"
               "    AND keywords_has_geonames.geonames_id=geonames.id\n"
               "    AND keywords_has_geonames.keyword=";
-          sql += conn.quote(theKeyword);
+          sql += conn->quote(theKeyword);
           sql += "    AND alternate_geonames.language=";
-          sql += conn.quote(theOptions.GetLanguage());
+          sql += conn->quote(theOptions.GetLanguage());
           sql +=
               "    ORDER BY preferred DESC,l\n"
               "  )\n"
@@ -1563,7 +1565,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
               "    WHERE geonames.features_code='PCLI'\n"
               "    AND geonames.id=alternate_geonames.geonames_id\n"
               "    AND alternate_geonames.language=";
-          sql += conn.quote(theOptions.GetLanguage());
+          sql += conn->quote(theOptions.GetLanguage());
           sql +=
               "    ORDER BY preferred DESC,l\n"
               "  )\n"
@@ -1581,7 +1583,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         auto theKeyword = boost::any_cast<string>(theParams.at(eKeyword));
 
         sql += "SELECT count(*) AS count FROM keywords_has_geonames WHERE keyword=";
-        sql += conn.quote(theKeyword);
+        sql += conn->quote(theKeyword);
         break;
       }
         // With -Weverything complains as all cases are covered

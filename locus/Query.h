@@ -14,6 +14,7 @@
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <memory>
 #include <pqxx/pqxx>
 #include <string>
 #include <vector>
@@ -119,7 +120,7 @@ class Query
     eKeyword
   };
 
-  Fmi::Database::PostgreSQLConnection conn;       // Location database connecton
+  std::unique_ptr<Fmi::Database::PostgreSQLConnection> conn;       // Location database connecton
   bool debug = false;            // Print debug information if true
   bool recursive_query = false;  // Infinite recursion prevention
 
