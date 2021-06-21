@@ -6,10 +6,10 @@
 
 #pragma once
 
-#include "Connection.h"
 #include "QueryOptions.h"
 #include "SimpleLocation.h"
 
+#include <macgyver/PostgreSQLConnection.h>
 #include <boost/any.hpp>
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
@@ -119,7 +119,7 @@ class Query
     eKeyword
   };
 
-  Connection conn;               // Location database connecton
+  Fmi::Database::PostgreSQLConnection conn;       // Location database connecton
   bool debug = false;            // Print debug information if true
   bool recursive_query = false;  // Infinite recursion prevention
 

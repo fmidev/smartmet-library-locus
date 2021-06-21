@@ -9,6 +9,7 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/locale.hpp>
 #include <boost/make_shared.hpp>
 #include <macgyver/Exception.h>
@@ -114,7 +115,14 @@ Query::Query(const string& theHost,
   try
   {
     /* Make a connection to the database */
-    conn.open(theHost, theUser, thePass, theDatabase, CLIENT_ENCODING);
+    Fmi::Database::PostgreSQLConnectionOptions opt;
+    opt.host = theHost;
+    opt.username = theUser;
+    opt.password = thePass;
+    opt.database = theDatabase;
+    opt.encoding = CLIENT_ENCODING;
+    conn.open(opt);
+    //conn.open(theHost, theUser, thePass, theDatabase, CLIENT_ENCODING);
   }
   catch (...)
   {
@@ -137,7 +145,15 @@ Query::Query(const string& theHost,
   try
   {
     /* Make a connection to the database */
-    conn.open(theHost, theUser, thePass, theDatabase, CLIENT_ENCODING, thePort);
+    Fmi::Database::PostgreSQLConnectionOptions opt;
+    opt.host = theHost;
+    opt.port = boost::lexical_cast<unsigned int>(thePort);
+    opt.username = theUser;
+    opt.password = thePass;
+    opt.database = theDatabase;
+    opt.encoding = CLIENT_ENCODING;
+    conn.open(opt);
+    //conn.open(theHost, theUser, thePass, theDatabase, CLIENT_ENCODING, thePort);
   }
   catch (...)
   {
