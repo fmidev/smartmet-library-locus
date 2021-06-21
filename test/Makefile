@@ -21,7 +21,7 @@ CFLAGS = -DUNIX -D_REENTRANT -O0 -g $(MAINFLAGS) -DDATABASE_PORT=\"$(DATABASE_PO
 
 INCLUDES += -I../locus
 
-LIBS += ../libsmartmet-locus.so -lpqxx
+LIBS += ../libsmartmet-locus.so -lsmartmet-macgyver -lpqxx
 
 all: $(PROG)
 clean:
