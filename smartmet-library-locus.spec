@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 21.6.18
-Release: 2%{?dist}.fmi
+Version: 21.6.21
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-locus
@@ -76,6 +76,9 @@ Requires: %{SPECNAME} = %version-%release
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Jul 21 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.6.21-1.fmi
+- Use Fmi::Database::PostgreSQLConnection instead of own connection class
+
 * Fri Jun 18 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.18-2.fmi
 - Silenced CodeChecker warnings
 
