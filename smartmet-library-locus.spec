@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 21.6.21
+Version: 21.7.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -13,18 +13,30 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 
 BuildRequires: boost169-devel
 BuildRequires: gcc-c++
-BuildRequires: libpqxx-devel < 1:7.0
 BuildRequires: make
 BuildRequires: postgresql12-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.6.16
+BuildRequires: smartmet-library-macgyver-devel >= 21.7.8
 Requires: boost169-filesystem
 Requires: boost169-locale
 Requires: boost169-regex
 Requires: boost169-system
 Requires: boost169-thread
+Requires: smartmet-library-macgyver >= 21.7.8
+
+%if %{defined el7}
 Requires: libpqxx < 1:7.0
-Requires: smartmet-library-macgyver >= 21.6.16
+BuildRequires: libpqxx-devel < 1:7.0
+%else
+%if %{defined el8}
+Requires: libpqxx >= 1:7.0
+BuildRequires: libpqxx-devel >= 1:7.0
+%else
+Requires: libpqxx
+BuildRequires: libpqxx-devel
+%endif
+%endif
+
 #TestRequires: boost169-devel
 #TestRequires: gcc-c++
 #TestRequires: make
@@ -76,7 +88,10 @@ Requires: %{SPECNAME} = %version-%release
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
-* Mon Jul 21 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.6.21-1.fmi
+* Thu Jul  8 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.7.8-1.fmi
+- Use libpqxx7 for RHEL8
+
+* Mon Jun 21 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.6.21-1.fmi
 - Use Fmi::Database::PostgreSQLConnection instead of own connection class
 
 * Fri Jun 18 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.18-2.fmi
