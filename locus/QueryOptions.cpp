@@ -5,11 +5,11 @@
 // ======================================================================
 
 #include "QueryOptions.h"
-#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <macgyver/Exception.h>
 #include <macgyver/Hash.h>
+#include <macgyver/StringConversion.h>
 #include <sstream>
 #include <stdexcept>
 
@@ -378,7 +378,7 @@ void QueryOptions::SetLanguage(const string& theLanguage)
 {
   try
   {
-    language = boost::algorithm::to_lower_copy(theLanguage);
+    language = Fmi::ascii_tolower_copy(theLanguage);
   }
   catch (...)
   {

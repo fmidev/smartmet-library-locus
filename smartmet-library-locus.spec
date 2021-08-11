@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 21.7.8
+Version: 21.8.11
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -88,6 +88,9 @@ Requires: %{SPECNAME} = %version-%release
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Aug 11 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.8.11-1.fmi
+- Avoid boost tolower functions for using std::locale
+
 * Thu Jul  8 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.7.8-1.fmi
 - Use libpqxx7 for RHEL8
 
