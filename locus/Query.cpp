@@ -111,7 +111,7 @@ Query::Query(const string& theHost,
              const string& theUser,
              const string& thePass,
              const string& theDatabase)
-  : conn(new Fmi::Database::PostgreSQLConnection)
+    : conn(new Fmi::Database::PostgreSQLConnection)
 {
   try
   {
@@ -123,7 +123,7 @@ Query::Query(const string& theHost,
     opt.database = theDatabase;
     opt.encoding = CLIENT_ENCODING;
     conn->open(opt);
-    //conn.open(theHost, theUser, thePass, theDatabase, CLIENT_ENCODING);
+    // conn.open(theHost, theUser, thePass, theDatabase, CLIENT_ENCODING);
   }
   catch (...)
   {
@@ -155,7 +155,7 @@ Query::Query(const string& theHost,
     opt.database = theDatabase;
     opt.encoding = CLIENT_ENCODING;
     conn->open(opt);
-    //conn.open(theHost, theUser, thePass, theDatabase, CLIENT_ENCODING, thePort);
+    // conn.open(theHost, theUser, thePass, theDatabase, CLIENT_ENCODING, thePort);
   }
   catch (...)
   {
@@ -955,7 +955,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
       if (!override_done && !theOptions.GetLanguage().empty())
       {
         string variant;
-        string id = row["id"].as<string>();
+        auto id = row["id"].as<string>();
         if (!theOptions.GetAutoCompleteMode())
           variant = ResolveNameVariant(theOptions, id);
         else
@@ -1016,7 +1016,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
       string administrative;
       if (!row["municipalities_id"].is_null())
       {
-        string municipalities_id = row["municipalities_id"].as<string>();
+        auto municipalities_id = row["municipalities_id"].as<string>();
 
         if (!municipalities_id.empty())
         {
@@ -1033,10 +1033,10 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
         }
         else
         {
-          string admin1 = row["admin1"].as<string>();
+          auto admin1 = row["admin1"].as<string>();
           if (!admin1.empty())
           {
-            string localiso2 = row["iso2"].as<string>();
+            auto localiso2 = row["iso2"].as<string>();
             string key = admin1 + '|' + localiso2;
             const auto pos = admin_cache.find(key);
             if (pos != admin_cache.end())
@@ -1168,7 +1168,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
           sql += " AND language=";
           sql += conn->quote(language);
           sql += " AND name LIKE ";
-	  sql += conn->quote(theSearchWord);
+          sql += conn->quote(theSearchWord);
           sql +=
               " AND historic=false ORDER BY priority ASC, preferred DESC, l ASC, name ASC LIMIT 1";
         }
