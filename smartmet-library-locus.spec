@@ -14,7 +14,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 BuildRequires: boost169-devel
 BuildRequires: gcc-c++
 BuildRequires: make
-BuildRequires: postgresql12-devel
+BuildRequires: postgresql13-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-macgyver-devel >= 21.7.8
 Requires: boost169-filesystem
@@ -40,7 +40,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: boost169-devel
 #TestRequires: gcc-c++
 #TestRequires: make
-#TestRequires: postgresql12-libs
+#TestRequires: postgresql13-libs
 #TestRequires: smartmet-library-macgyver-devel
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-test-db >= 20.6.9
