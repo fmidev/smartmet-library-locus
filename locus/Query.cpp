@@ -909,7 +909,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
 
     // Does the result have a field for overriding names?
     bool has_override_field = false;
-    for (unsigned int field = 0; !has_override_field && field < theR.columns(); ++field)
+    for (unsigned int field = 0; !has_override_field && field < unsigned(theR.columns()); ++field)
     {
       if (string(theR.column_name(field)) == string("override_name"))
         has_override_field = true;
