@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 21.8.11
+Version: 21.12.2
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -16,21 +16,22 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: postgresql13-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.7.8
+BuildRequires: smartmet-library-macgyver-devel >= 21.12.1
 Requires: boost169-filesystem
 Requires: boost169-locale
 Requires: boost169-regex
 Requires: boost169-system
 Requires: boost169-thread
-Requires: smartmet-library-macgyver >= 21.7.8
+Requires: smartmet-library-macgyver >= 21.12.1
 
 %if %{defined el7}
 Requires: libpqxx < 1:7.0
 BuildRequires: libpqxx-devel < 1:7.0
 %else
 %if %{defined el8}
-Requires: libpqxx >= 1:7.0
-BuildRequires: libpqxx-devel >= 1:7.0
+Requires: libpqxx >= 1:7.6.0, libpqxx < 1:7.7.0
+BuildRequires: libpqxx-devel >= 1:7.6.0, libpqxx-devel < 1:7.7.0
+#TestRequires: libpqxx-devel >= 1:7.6.0, libpqxx-devel < 1:7.7.0
 %else
 Requires: libpqxx
 BuildRequires: libpqxx-devel
@@ -41,7 +42,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: gcc-c++
 #TestRequires: make
 #TestRequires: postgresql13-libs
-#TestRequires: smartmet-library-macgyver-devel
+#TestRequires: smartmet-library-macgyver-devel >= 21.12.1
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-test-db >= 20.6.9
 Provides: %{SPECNAME}
