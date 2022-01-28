@@ -1599,6 +1599,26 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
   }
 }
 
+boost::shared_ptr<const ISO639> Query::get_iso639_table()
+{
+  boost::shared_ptr<ISO639>& iso639 = get_mutable_iso639_table();
+  return boost::atomic_load(&iso639);
+}
+
+
+boost::shared_ptr<ISO639>& Query::get_mutable_iso639_table()
+{
+  // Initially initialize with empty table
+  static boost::shared_ptr<ISO639> iso639(new ISO639);
+  return iso639;
+}
+
+void Query::load_iso639_table(const std::vector<std::string>& special_codes)
+{
+  boost::shared_ptr<ISO639> new_table(new ISO639(*conn, special_codes));
+  boost::atomic_store(&get_mutable_iso639_table(), new_table);
+}
+
 }  // namespace Locus
 
 // ======================================================================

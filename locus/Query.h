@@ -8,6 +8,7 @@
 
 #include "QueryOptions.h"
 #include "SimpleLocation.h"
+#include "ISO639.h"
 
 #include <macgyver/PostgreSQLConnection.h>
 #include <boost/any.hpp>
@@ -59,6 +60,10 @@ class Query
   return_type FetchByKeyword(const QueryOptions& theOptions, const std::string& theKeyword);
   unsigned int CountKeywordLocations(const QueryOptions& theOptions, const std::string& theKeyword);
 
+  boost::shared_ptr<const ISO639> get_iso639_table();
+
+  void load_iso639_table(const std::vector<std::string>& special_codes = std::vector<std::string>());
+
  private:
   // Helper methods
   boost::optional<int> ResolveFmisid(const QueryOptions& theOptions, const std::string& theId);
@@ -79,6 +84,8 @@ class Query
                               const std::string& theArea = "");
 
   void SetOptions(const QueryOptions& theOptions);
+
+  static boost::shared_ptr<ISO639>& get_mutable_iso639_table();
 
   // ids for queries
   enum SQLQueryId
