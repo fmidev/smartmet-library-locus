@@ -111,3 +111,22 @@ std::ostream& Locus::operator << (std::ostream& os, const Locus::ISO639::Entry& 
   os << ", \"description\": \"" << entry.name << "\"}";
   return os;
 }
+
+std::vector<std::string> Locus::ISO639::get_codes(const std::string& name) const
+{
+  std::vector<std::string> result;
+  boost::optional<Entry> entry = get(name);
+  if (entry) {
+    result.push_back(entry->iso639_3);
+    if (entry->iso639_2 && (entry->iso639_2 != entry->iso639_3)) {
+      result.push_back(*entry->iso639_2);
+    }
+    if (entry->iso639_1) {
+      result.push_back(*entry->iso639_1);
+    }
+  } else {
+    // FIXME: do we need this
+    result.push_back(name);
+  }
+  return result;
+}

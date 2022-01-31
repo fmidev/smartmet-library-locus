@@ -38,6 +38,8 @@ class ISO639
 
   boost::optional<Entry> get(const std::string& name) const;
 
+  std::vector<std::string> get_codes(const std::string& name) const;
+
  private:
   std::map<std::string, const Entry*> iso639_1_map;
   std::map<std::string, const Entry*> iso639_2_map;
