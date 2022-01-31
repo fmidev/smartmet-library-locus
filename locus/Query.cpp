@@ -1132,6 +1132,27 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
   {
     std::string sql;
 
+    const auto constructLanguageCodeCondition =
+      [this](const std::string& language) -> std::string
+      {
+	const std::vector<std::string> codes = get_iso639_table()->get_codes(language);
+	if (codes.empty()) {
+	  return "=" + conn->quote(language);
+	} else if (codes.size() == 1) {
+	  return "=" + conn->quote(codes.at(0));
+	} else {
+	  std::string result = " in (";
+	  for (std::size_t i = 0; i < codes.size(); i++) {
+	    if (i) {
+	      result += ", ";
+	    }
+	    result += conn->quote(codes.at(i));
+	  }
+	  result += ") ";
+	  return result;
+	}
+      };
+
     const auto& theOptions = boost::any_cast<const QueryOptions&>(theParams.at(eQueryOptions));
 
     switch (theQueryId)
@@ -1155,8 +1176,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
           sql +=
               "SELECT name,length(name) AS l, priority FROM alternate_geonames WHERE geonames_id=";
           sql += conn->quote(theGeonamesId);
-          sql += " AND language=";
-          sql += conn->quote(language);
+          sql += " AND language" + constructLanguageCodeCondition(language);
           sql +=
               " AND historic=false ORDER BY priority ASC, preferred DESC, l ASC, name ASC LIMIT 1";
         }
@@ -1165,8 +1185,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
           sql +=
               "SELECT name,length(name) As l, priority FROM alternate_geonames WHERE geonames_id=";
           sql += conn->quote(theGeonamesId);
-          sql += " AND language=";
-          sql += conn->quote(language);
+          sql += " AND language" + constructLanguageCodeCondition(language);
           sql += " AND name LIKE ";
           sql += conn->quote(theSearchWord);
           sql +=
@@ -1198,8 +1217,8 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
           sql += conn->quote(iso2);
           sql +=
               " AND geonames.id=alternate_geonames.geonames_id"
-              " AND alternate_geonames.language=";
-          sql += conn->quote(language);
+              " AND alternate_geonames.language";
+          sql +=  constructLanguageCodeCondition(language);
           sql += " ORDER BY preferred DESC, alternate_geonames.priority ASC, l ASC LIMIT 1";
         }
         else
@@ -1225,8 +1244,8 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         {
           sql += "SELECT name FROM alternate_municipalities WHERE municipalities_id=";
           sql += conn->quote(theMunicipalityId);
-          sql += " AND language=";
-          sql += conn->quote(language);
+          sql += " AND language";
+          sql += constructLanguageCodeCondition(language);
         }
         break;
       }
@@ -1313,6 +1332,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
             sql += conn->quote(theOptions.GetCollation());
           }
 
+	  // FIXME: update this
           sql +=
               " AND alternate_geonames.geonames_id=geonames.id AND alternate_geonames.language "
               "LIKE ";
@@ -1330,8 +1350,8 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
           }
           if (theOptions.GetAutoCompleteMode())
           {
-            sql += " AND alternate_geonames.language=";
-            sql += conn->quote(language);
+            sql += " AND alternate_geonames.language";
+            sql += constructLanguageCodeCondition(language);
           }
 
           AddFeatureConditions(theOptions, sql);
@@ -1517,8 +1537,8 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
               "\n"
               "LEFT JOIN alternate_municipalities\n"
               "ON (georesults.municipalities_id=alternate_municipalities.municipalities_id\n"
-              "    AND alternate_municipalities.language=";
-          sql += conn->quote(theOptions.GetLanguage());
+              "    AND alternate_municipalities.language";
+          sql += constructLanguageCodeCondition(theOptions.GetLanguage());
           sql +=
               "   )\n"
               "\n"
@@ -1541,8 +1561,8 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
               "    AND keywords_has_geonames.geonames_id=geonames.id\n"
               "    AND keywords_has_geonames.keyword=";
           sql += conn->quote(theKeyword);
-          sql += "    AND alternate_geonames.language=";
-          sql += conn->quote(theOptions.GetLanguage());
+          sql += "    AND alternate_geonames.language";
+          sql += constructLanguageCodeCondition(theOptions.GetLanguage());
           sql +=
               "    ORDER BY preferred DESC,l\n"
               "  )\n"
@@ -1564,8 +1584,8 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
               "    FROM geonames, alternate_geonames\n"
               "    WHERE geonames.features_code='PCLI'\n"
               "    AND geonames.id=alternate_geonames.geonames_id\n"
-              "    AND alternate_geonames.language=";
-          sql += conn->quote(theOptions.GetLanguage());
+              "    AND alternate_geonames.language";
+          sql += constructLanguageCodeCondition(theOptions.GetLanguage());
           sql +=
               "    ORDER BY preferred DESC,l\n"
               "  )\n"
