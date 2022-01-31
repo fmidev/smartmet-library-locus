@@ -1,5 +1,5 @@
 #include "ISO639.h"
-#include <regex>
+#include <boost/regex.hpp>
 #include <macgyver/Exception.h>
 
 Locus::ISO639::ISO639(Fmi::Database::PostgreSQLConnection& conn,
@@ -34,9 +34,9 @@ Locus::ISO639::ISO639(Fmi::Database::PostgreSQLConnection& conn,
 
 void Locus::ISO639::add(const Locus::ISO639::Entry& entry)
 {
-  const std::regex r_c2("[a-z][a-z]");
-  const std::regex r_c3("[a-z][a-z][a-z]");
-  if (!std::regex_match(entry.iso639_3, r_c3)) {
+  const boost::regex r_c2("[a-z][a-z]");
+  const boost::regex r_c3("[a-z][a-z][a-z]");
+  if (!boost::regex_match(entry.iso639_3, r_c3)) {
     throw Fmi::Exception(BCP, "Invalid ISO 639-3 language code " + entry.iso639_3);
   }
   
@@ -46,7 +46,7 @@ void Locus::ISO639::add(const Locus::ISO639::Entry& entry)
   }
   const Locus::ISO639::Entry* current = &i3.first->second;
   if (entry.iso639_1) {
-    if (!std::regex_match(*entry.iso639_1, r_c2)) {
+    if (!boost::regex_match(*entry.iso639_1, r_c2)) {
       throw Fmi::Exception(BCP, "Invalid ISO 639-1 language code " + *entry.iso639_1);
     }
     auto i1 = iso639_1_map.emplace(*entry.iso639_1, current);
@@ -56,7 +56,7 @@ void Locus::ISO639::add(const Locus::ISO639::Entry& entry)
   }
 
   if (entry.iso639_2 && (*entry.iso639_2 != entry.iso639_3)) {
-    if (!std::regex_match(*entry.iso639_2, r_c3)) {
+    if (!boost::regex_match(*entry.iso639_2, r_c3)) {
       throw Fmi::Exception(BCP, "Invalid ISO 639-2 language code " + *entry.iso639_2);
     }
     auto i2 = iso639_2_map.emplace(*entry.iso639_2, current);
