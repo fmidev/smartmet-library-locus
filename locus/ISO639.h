@@ -36,7 +36,7 @@ class ISO639
   void add(const Entry& entry);
   void add_special_code(const std::string& code);
 
-  const Entry* get(const std::string& name) const;
+  boost::optional<Entry> get(const std::string& name) const;
 
  private:
   std::map<std::string, const Entry*> iso639_1_map;

@@ -35,7 +35,7 @@ namespace ISO639Test
     iso639.add(e1);
     iso639.add(e2);
 
-    const ISO639::Entry* entry;
+    boost::optional<ISO639::Entry> entry;
     entry = iso639.get("fi");
     if (!entry) {
       TEST_FAILED("Did not found language codes for Finland");
@@ -83,7 +83,7 @@ namespace ISO639Test
   {
     Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
 
-    const ISO639::Entry* entry;
+    boost::optional<ISO639::Entry> entry;
 
     entry = lq.get_iso639_table()->get("lv");
     if (entry) {
@@ -128,8 +128,8 @@ namespace ISO639Test
 //	TEST_FAILED("Searching 'ger' should also return language codes for Germany");
 //    }
 
-      const ISO639::Entry* entry3 = lq.get_iso639_table()->get("deu");
-      if (entry3 != entry) {
+      boost::optional<ISO639::Entry> entry3 = lq.get_iso639_table()->get("deu");
+      if (!entry3 || (entry3->iso639_3 != entry->iso639_3)) {
 	TEST_FAILED("Searching 'deu' should also return language codes for Germany");
       }
     }

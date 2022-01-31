@@ -73,29 +73,29 @@ void Locus::ISO639::add_special_code(const std::string& code)
     iso639_3_map.emplace(code, entry);
 }
 
-const Locus::ISO639::Entry* Locus::ISO639::get(const std::string& name) const
+boost::optional<Locus::ISO639::Entry> Locus::ISO639::get(const std::string& name) const
 {
   if (name.length() == 2) {
     auto it = iso639_1_map.find(name);
     if (it == iso639_1_map.end()) {
-      return nullptr;
+      return boost::none;
     } else {
-      return it->second;
+      return *it->second;
     }
   } else if (name.length() >= 3) {
     auto it1 = iso639_3_map.find(name);
     if (it1 == iso639_3_map.end()) {
       auto it2 = iso639_2_map.find(name);
       if (it2 == iso639_2_map.end()) {
-	return nullptr;
+	return boost::none;
       } else {
-	return it2->second;
+	return *it2->second;
       }
     } else {
-      return &it1->second;
+      return it1->second;
     }
   } else {
-    return nullptr;
+    return boost::none;
   }
 }
 
