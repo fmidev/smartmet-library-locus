@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 21.12.7
+Version: 22.1.31
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -89,6 +89,9 @@ Requires: %{SPECNAME} = %version-%release
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Jan 31 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.1.31-1.fmi
+- Use language codes table from geonames database if loaded
+
 * Tue Dec  7 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.12.7-1.fmi
 - Update to postgresql 13 and gdal 3.3
 
