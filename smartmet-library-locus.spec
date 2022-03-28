@@ -16,13 +16,13 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: postgresql13-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.12.1
+BuildRequires: smartmet-library-macgyver-devel >= 22.3.28
 Requires: boost169-filesystem
 Requires: boost169-locale
 Requires: boost169-regex
 Requires: boost169-system
 Requires: boost169-thread
-Requires: smartmet-library-macgyver >= 21.12.1
+Requires: smartmet-library-macgyver >= 22.3.28
 
 %if %{defined el7}
 Requires: libpqxx < 1:7.0
@@ -42,7 +42,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: gcc-c++
 #TestRequires: make
 #TestRequires: postgresql13-libs
-#TestRequires: smartmet-library-macgyver-devel >= 21.12.1
+#TestRequires: smartmet-library-macgyver-devel >= 22.3.28
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-test-db >= 20.6.9
 Provides: %{SPECNAME}
