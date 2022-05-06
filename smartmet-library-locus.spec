@@ -83,6 +83,7 @@ Obsoletes: libsmartmet-locus-devel  < 16.12.20
 %description -n %{SPECNAME}-devel
 FMI Locus library development files
 Requires: %{SPECNAME} = %version-%release
+Requires: smartmet-library-macgyver-devel
 
 %files -n %{SPECNAME}-devel
 %defattr(0664,root,root,0775)
