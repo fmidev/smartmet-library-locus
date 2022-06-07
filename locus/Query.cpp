@@ -1132,26 +1132,32 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
   {
     std::string sql;
 
-    const auto constructLanguageCodeCondition =
-      [this](const std::string& language) -> std::string
+    const auto constructLanguageCodeCondition = [this](const std::string& language) -> std::string
+    {
+      const std::vector<std::string> codes = get_iso639_table()->get_codes(language);
+      if (codes.empty())
       {
-	const std::vector<std::string> codes = get_iso639_table()->get_codes(language);
-	if (codes.empty()) {
-	  return "=" + conn->quote(language);
-	} else if (codes.size() == 1) {
-	  return "=" + conn->quote(codes.at(0));
-	} else {
-	  std::string result = " in (";
-	  for (std::size_t i = 0; i < codes.size(); i++) {
-	    if (i) {
-	      result += ", ";
-	    }
-	    result += conn->quote(codes.at(i));
-	  }
-	  result += ") ";
-	  return result;
-	}
-      };
+        return "=" + conn->quote(language);
+      }
+      else if (codes.size() == 1)
+      {
+        return "=" + conn->quote(codes.at(0));
+      }
+      else
+      {
+        std::string result = " in (";
+        for (std::size_t i = 0; i < codes.size(); i++)
+        {
+          if (i)
+          {
+            result += ", ";
+          }
+          result += conn->quote(codes.at(i));
+        }
+        result += ") ";
+        return result;
+      }
+    };
 
     const auto& theOptions = boost::any_cast<const QueryOptions&>(theParams.at(eQueryOptions));
 
@@ -1178,7 +1184,8 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
           sql += conn->quote(theGeonamesId);
           sql += " AND language" + constructLanguageCodeCondition(language);
           sql +=
-              " AND historic=false ORDER BY priority ASC, preferred DESC, l ASC, name ASC LIMIT 1";
+              " AND historic=false AND colloquial=false ORDER BY priority ASC, preferred DESC, l "
+              "ASC, name ASC LIMIT 1";
         }
         else
         {
@@ -1189,7 +1196,8 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
           sql += " AND name LIKE ";
           sql += conn->quote(theSearchWord);
           sql +=
-              " AND historic=false ORDER BY priority ASC, preferred DESC, l ASC, name ASC LIMIT 1";
+              " AND historic=false AND colloquial=false ORDER BY priority ASC, preferred DESC, l "
+              "ASC, name ASC LIMIT 1";
         }
         break;
       }
@@ -1218,7 +1226,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
           sql +=
               " AND geonames.id=alternate_geonames.geonames_id"
               " AND alternate_geonames.language";
-          sql +=  constructLanguageCodeCondition(language);
+          sql += constructLanguageCodeCondition(language);
           sql += " ORDER BY preferred DESC, alternate_geonames.priority ASC, l ASC LIMIT 1";
         }
         else
@@ -1332,7 +1340,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
             sql += conn->quote(theOptions.GetCollation());
           }
 
-	  // FIXME: update this
+          // FIXME: update this
           sql +=
               " AND alternate_geonames.geonames_id=geonames.id AND alternate_geonames.language "
               "LIKE ";
@@ -1624,7 +1632,6 @@ boost::shared_ptr<const ISO639> Query::get_iso639_table()
   boost::shared_ptr<ISO639>& iso639 = get_mutable_iso639_table();
   return boost::atomic_load(&iso639);
 }
-
 
 boost::shared_ptr<ISO639>& Query::get_mutable_iso639_table()
 {
