@@ -11,38 +11,44 @@ URL: https://github.com/fmidev/smartmet-library-locus
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 
-BuildRequires: boost169-devel
+%if 0%{?rhel} && 0%{rhel} < 9
+%define smartmet_boost boost169
+%else
+%define smartmet_boost boost
+%endif
+
+BuildRequires: %{smartmet_boost}-devel
 BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: postgresql13-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 22.3.28
-Requires: boost169-filesystem
-Requires: boost169-locale
-Requires: boost169-regex
-Requires: boost169-system
-Requires: boost169-thread
-Requires: smartmet-library-macgyver >= 22.3.28
+BuildRequires: smartmet-library-macgyver-devel >= 22.6.16
+Requires: %{smartmet_boost}-filesystem
+Requires: %{smartmet_boost}-locale
+Requires: %{smartmet_boost}-regex
+Requires: %{smartmet_boost}-system
+Requires: %{smartmet_boost}-thread
+Requires: smartmet-library-macgyver >= 22.6.16
 
 %if %{defined el7}
 Requires: libpqxx < 1:7.0
 BuildRequires: libpqxx-devel < 1:7.0
 %else
-%if %{defined el8}
-Requires: libpqxx >= 1:7.6.0, libpqxx < 1:7.7.0
-BuildRequires: libpqxx-devel >= 1:7.6.0, libpqxx-devel < 1:7.7.0
-#TestRequires: libpqxx-devel >= 1:7.6.0, libpqxx-devel < 1:7.7.0
+%if 0%{?rhel} && 0%{rhel} >= 8
+Requires: libpqxx >= 1:7.7.0, libpqxx < 1:7.8.0
+BuildRequires: libpqxx-devel >= 1:7.7.0, libpqxx-devel < 1:7.8.0
+#TestRequires: libpqxx-devel >= 1:7.7.0, libpqxx-devel < 1:7.8.0
 %else
 Requires: libpqxx
 BuildRequires: libpqxx-devel
 %endif
 %endif
 
-#TestRequires: boost169-devel
+#TestRequires: %{smartmet_boost}-devel
 #TestRequires: gcc-c++
 #TestRequires: make
 #TestRequires: postgresql13-libs
-#TestRequires: smartmet-library-macgyver-devel >= 22.3.28
+#TestRequires: smartmet-library-macgyver-devel >= 22.6.16
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-test-db >= 20.6.9
 Provides: %{SPECNAME}
