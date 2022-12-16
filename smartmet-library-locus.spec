@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 22.6.17
+Version: 22.12.16
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -22,13 +22,13 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: postgresql13-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 22.6.16
+BuildRequires: smartmet-library-macgyver-devel >= 22.12.16
 Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-locale
 Requires: %{smartmet_boost}-regex
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: smartmet-library-macgyver >= 22.6.16
+Requires: smartmet-library-macgyver >= 22.12.16
 
 %if %{defined el7}
 Requires: libpqxx < 1:7.0
@@ -48,9 +48,9 @@ BuildRequires: libpqxx-devel
 #TestRequires: gcc-c++
 #TestRequires: make
 #TestRequires: postgresql13-libs
-#TestRequires: smartmet-library-macgyver-devel >= 22.6.16
+#TestRequires: smartmet-library-macgyver-devel >= 22.12.16
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-test-db >= 20.6.9
+#TestRequires: smartmet-test-db >= 22.4.14
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet-locus < 16.12.20
 Obsoletes: libsmartmet-locus-debuginfo < 16.12.20
@@ -96,6 +96,9 @@ Requires: smartmet-library-macgyver-devel
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Dec 16 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.12.16-1.fmi
+- Repackaged since PostgreSQLConnection ABI changed
+
 * Fri Jun 17 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.6.17-1.fmi
 - Add support for RHEL9. Update libpqxx to 7.7.0 (rhel8+) and fmt to 8.1.1
 
