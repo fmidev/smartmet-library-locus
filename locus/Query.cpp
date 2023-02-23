@@ -1397,7 +1397,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         sql += Fmi::to_string(theLongitude);
         sql += ' ';
         sql += Fmi::to_string(theLatitude);
-        sql += ")'), the_geog) as distance FROM geonames WHERE ";
+        sql += ")'), the_geog, true) as distance FROM geonames WHERE ";
 
         // PHP version does not do this, but we cannot tolerate it in brainstorm
         sql += " timezone IS NOT NULL";
