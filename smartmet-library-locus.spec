@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 22.12.16
+Version: 23.2.24
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -96,6 +96,9 @@ Requires: smartmet-library-macgyver-devel
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Feb 24 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.2.24-1.fmi
+- Fix SQL errors with PostGIS 3.2.4
+
 * Fri Dec 16 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.12.16-1.fmi
 - Repackaged since PostgreSQLConnection ABI changed
 
