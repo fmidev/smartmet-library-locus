@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 23.2.24
+Version: 23.2.27
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -96,6 +96,9 @@ Requires: smartmet-library-macgyver-devel
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Feb 27 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.2.27-1.fmi
+- Query: added method cancel() to cancel database operation (or reconnection attempts)
+
 * Fri Feb 24 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.2.24-1.fmi
 - Fix SQL errors with PostGIS 3.2.4
 
