@@ -203,6 +203,11 @@ void Query::SetDebug(bool theFlag)
   }
 }
 
+void Query::cancel()
+{
+  conn->cancel();
+}
+
 // ----------------------------------------------------------------------
 /*!
  * Resolves name for the feature code

@@ -64,6 +64,8 @@ class Query
 
   void load_iso639_table(const std::vector<std::string>& special_codes = std::vector<std::string>());
 
+  void cancel();
+
  private:
   // Helper methods
   boost::optional<int> ResolveFmisid(const QueryOptions& theOptions, const std::string& theId);
