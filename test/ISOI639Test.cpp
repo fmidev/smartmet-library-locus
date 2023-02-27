@@ -1,6 +1,7 @@
 #include "ISO639.h"
 #include "Query.h"
 #include <regression/tframe.h>
+#include <macgyver/PostgreSQLConnection.h>
 
 #include <iostream>
 #include <sstream>
@@ -170,6 +171,7 @@ int main(void)
   cout << endl
        << "ISO639 (languge codes) tester" << endl
        << "=============================" << endl;
+  Fmi::Database::PostgreSQLConnection::disableReconnect();
   ISO639Test::tests t;
   return t.run();
 }

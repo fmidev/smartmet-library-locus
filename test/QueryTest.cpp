@@ -2,6 +2,7 @@
 #include "QueryOptions.h"
 #include <boost/lexical_cast.hpp>
 #include <regression/tframe.h>
+#include <macgyver/PostgreSQLConnection.h>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -781,6 +782,7 @@ class tests : public tframe::tests
 int main(void)
 {
   cout << endl << "Query tester" << endl << "=============" << endl;
+  Fmi::Database::PostgreSQLConnection::disableReconnect();
   QueryTest::tests t;
   return t.run();
 }
