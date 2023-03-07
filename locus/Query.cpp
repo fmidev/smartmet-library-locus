@@ -1141,27 +1141,21 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
     {
       const std::vector<std::string> codes = get_iso639_table()->get_codes(language);
       if (codes.empty())
-      {
         return "=" + conn->quote(language);
-      }
-      else if (codes.size() == 1)
-      {
+
+      if (codes.size() == 1)
         return "=" + conn->quote(codes.at(0));
-      }
-      else
+
+      std::string result = " in (";
+      for (std::size_t i = 0; i < codes.size(); i++)
       {
-        std::string result = " in (";
-        for (std::size_t i = 0; i < codes.size(); i++)
-        {
-          if (i)
-          {
-            result += ", ";
-          }
-          result += conn->quote(codes.at(i));
-        }
-        result += ") ";
-        return result;
+        if (i)
+          result += ", ";
+
+        result += conn->quote(codes.at(i));
       }
+      result += ") ";
+      return result;
     };
 
     const auto& theOptions = boost::any_cast<const QueryOptions&>(theParams.at(eQueryOptions));

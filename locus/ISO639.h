@@ -1,15 +1,14 @@
 #pragma once
 
+#include <boost/optional.hpp>
+#include <macgyver/PostgreSQLConnection.h>
 #include <map>
 #include <ostream>
 #include <string>
 #include <vector>
-#include <boost/optional.hpp>
-#include <macgyver/PostgreSQLConnection.h>
 
 namespace Locus
 {
-
 /**
  *   @brief Provides mapping of ISO 639 language code (all 3 types)
  *
@@ -27,11 +26,8 @@ class ISO639
   };
 
   ISO639() = default;
-
   ISO639(Fmi::Database::PostgreSQLConnection& conn,
-	 const std::vector<std::string>& special_codes = std::vector<std::string>());
-
-  virtual ~ISO639() = default;
+         const std::vector<std::string>& special_codes = std::vector<std::string>());
 
   void add(const Entry& entry);
   void add_special_code(const std::string& code);
@@ -46,6 +42,6 @@ class ISO639
   std::map<std::string, Entry> iso639_3_map;
 };
 
-std::ostream& operator << (std::ostream& os, const ISO639::Entry& entry);
-  
-}
+std::ostream& operator<<(std::ostream& os, const ISO639::Entry& entry);
+
+}  // namespace Locus

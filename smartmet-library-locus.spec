@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 23.2.27
+Version: 23.3.7
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -22,13 +22,13 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: postgresql13-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 22.12.16
+BuildRequires: smartmet-library-macgyver-devel >= 23.3.3
 Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-locale
 Requires: %{smartmet_boost}-regex
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: smartmet-library-macgyver >= 22.12.16
+Requires: smartmet-library-macgyver >= 23.3.3
 
 %if %{defined el7}
 Requires: libpqxx < 1:7.0
@@ -48,9 +48,9 @@ BuildRequires: libpqxx-devel
 #TestRequires: gcc-c++
 #TestRequires: make
 #TestRequires: postgresql13-libs
-#TestRequires: smartmet-library-macgyver-devel >= 22.12.16
+#TestRequires: smartmet-library-macgyver-devel >= 23.3.3
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-test-db >= 22.4.14
+#TestRequires: smartmet-test-db >= 23.2.24
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet-locus < 16.12.20
 Obsoletes: libsmartmet-locus-debuginfo < 16.12.20
@@ -96,6 +96,9 @@ Requires: smartmet-library-macgyver-devel
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Mar  7 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.3.7-1.fmi
+- Silenced CodeChecker warnings
+
 * Mon Feb 27 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.2.27-1.fmi
 - Query: added method cancel() to cancel database operation (or reconnection attempts)
 

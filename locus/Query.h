@@ -6,14 +6,14 @@
 
 #pragma once
 
+#include "ISO639.h"
 #include "QueryOptions.h"
 #include "SimpleLocation.h"
-#include "ISO639.h"
 
-#include <macgyver/PostgreSQLConnection.h>
 #include <boost/any.hpp>
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
+#include <macgyver/PostgreSQLConnection.h>
 
 #include <memory>
 #include <pqxx/pqxx>
@@ -32,6 +32,8 @@ class Query
   Query() = delete;
   Query(const Query& other) = delete;
   Query& operator=(const Query& other) = delete;
+  Query(Query&& other) = delete;
+  Query& operator=(Query&& other) = delete;
 
   Query(const std::string& theHost,
         const std::string& theUser,
@@ -60,9 +62,10 @@ class Query
   return_type FetchByKeyword(const QueryOptions& theOptions, const std::string& theKeyword);
   unsigned int CountKeywordLocations(const QueryOptions& theOptions, const std::string& theKeyword);
 
-  boost::shared_ptr<const ISO639> get_iso639_table();
+  static boost::shared_ptr<const ISO639> get_iso639_table();
 
-  void load_iso639_table(const std::vector<std::string>& special_codes = std::vector<std::string>());
+  void load_iso639_table(
+      const std::vector<std::string>& special_codes = std::vector<std::string>());
 
   void cancel();
 
@@ -129,9 +132,9 @@ class Query
     eKeyword
   };
 
-  std::unique_ptr<Fmi::Database::PostgreSQLConnection> conn;       // Location database connecton
-  bool debug = false;            // Print debug information if true
-  bool recursive_query = false;  // Infinite recursion prevention
+  std::unique_ptr<Fmi::Database::PostgreSQLConnection> conn;  // Location database connecton
+  bool debug = false;                                         // Print debug information if true
+  bool recursive_query = false;                               // Infinite recursion prevention
 
   std::string constructSQLStatement(
       SQLQueryId theQueryId,
