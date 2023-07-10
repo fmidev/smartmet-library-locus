@@ -20,7 +20,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: gcc-c++
 BuildRequires: make
-BuildRequires: postgresql13-devel
+BuildRequires: postgresql15-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-macgyver-devel >= 23.3.3
 Requires: %{smartmet_boost}-filesystem
@@ -47,7 +47,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: %{smartmet_boost}-devel
 #TestRequires: gcc-c++
 #TestRequires: make
-#TestRequires: postgresql13-libs
+#TestRequires: postgresql15-libs
 #TestRequires: smartmet-library-macgyver-devel >= 23.3.3
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-test-db >= 23.2.24
