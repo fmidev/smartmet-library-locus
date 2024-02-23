@@ -1,4 +1,5 @@
 #include "ISO639.h"
+#include <iostream>
 #include <boost/regex.hpp>
 #include <macgyver/Exception.h>
 
