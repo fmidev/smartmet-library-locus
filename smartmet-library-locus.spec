@@ -31,13 +31,14 @@ Requires: %{smartmet_boost}-thread
 Requires: smartmet-library-macgyver >= 23.7.28
 
 %if %{defined el7}
-Requires: libpqxx < 1:7.0
-BuildRequires: libpqxx-devel < 1:7.0
-%else
-%if 0%{?rhel} && 0%{rhel} >= 8
 Requires: libpqxx >= 1:7.7.0, libpqxx < 1:7.8.0
 BuildRequires: libpqxx-devel >= 1:7.7.0, libpqxx-devel < 1:7.8.0
 #TestRequires: libpqxx-devel >= 1:7.7.0, libpqxx-devel < 1:7.8.0
+%else
+%if 0%{?rhel} && 0%{rhel} >= 8
+Requires: libpqxx >= 1:7.9.0, libpqxx < 1:7.10.0
+BuildRequires: libpqxx-devel >= 1:7.9.0, libpqxx-devel < 1:7.10.0
+#TestRequires: libpqxx-devel >= 1:7.9.0, libpqxx-devel < 1:7.10.0
 %else
 Requires: libpqxx
 BuildRequires: libpqxx-devel
