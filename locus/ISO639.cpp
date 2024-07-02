@@ -89,19 +89,19 @@ void Locus::ISO639::add_special_code(const std::string& code)
   iso639_3_map.emplace(code, entry);
 }
 
-boost::optional<Locus::ISO639::Entry> Locus::ISO639::get(const std::string& name) const
+std::optional<Locus::ISO639::Entry> Locus::ISO639::get(const std::string& name) const
 {
   if (name.length() == 2)
   {
     auto it = iso639_1_map.find(name);
     if (it == iso639_1_map.end())
-      return boost::none;
+      return std::nullopt;
 
     return *it->second;
   }
 
   if (name.length() < 3)
-    return boost::none;
+    return std::nullopt;
 
   auto it1 = iso639_3_map.find(name);
   if (it1 != iso639_3_map.end())
@@ -109,7 +109,7 @@ boost::optional<Locus::ISO639::Entry> Locus::ISO639::get(const std::string& name
 
   auto it2 = iso639_2_map.find(name);
   if (it2 == iso639_2_map.end())
-    return boost::none;
+    return std::nullopt;
 
   return *it2->second;
 }
@@ -132,7 +132,7 @@ std::ostream& Locus::operator<<(std::ostream& os, const Locus::ISO639::Entry& en
 std::vector<std::string> Locus::ISO639::get_codes(const std::string& name) const
 {
   std::vector<std::string> result;
-  boost::optional<Entry> entry = get(name);
+  std::optional<Entry> entry = get(name);
   if (entry)
   {
     result.push_back(entry->iso639_3);

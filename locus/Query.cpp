@@ -291,7 +291,7 @@ string Query::ResolveNameVariant(const QueryOptions& theOptions,
  */
 // ----------------------------------------------------------------------
 
-boost::optional<int> Query::ResolveFmisid(const QueryOptions& theOptions, const string& theId)
+std::optional<int> Query::ResolveFmisid(const QueryOptions& theOptions, const string& theId)
 {
   try
   {
@@ -770,7 +770,7 @@ Query::return_type Query::FetchByLonLat(const QueryOptions& theOptions,
 
     auto ret = build_locations(theOptions, res, "", "");
 
-    auto copyret = boost::make_shared<Locus::Query::return_type>(ret);
+    auto copyret = std::make_shared<Locus::Query::return_type>(ret);
 
     return ret;
   }
@@ -836,7 +836,7 @@ Query::return_type Query::FetchByKeyword(const QueryOptions& theOptions, const s
     params[eKeyword] = theKeyword;
     params[eQueryOptions] = options;
 
-    auto locations = boost::make_shared<Locus::Query::return_type>();
+    auto locations = std::make_shared<Locus::Query::return_type>();
 
     string sqlStmt = constructSQLStatement(eFetchByKeyword1, params);
     pqxx::result res = conn->executeNonTransaction(sqlStmt);
@@ -877,7 +877,7 @@ unsigned int Query::CountKeywordLocations(const QueryOptions& theOptions, const 
     params[eQueryOptions] = theOptions;
     params[eKeyword] = theKeyword;
 
-    auto locations = boost::make_shared<Locus::Query::return_type>();
+    auto locations = std::make_shared<Locus::Query::return_type>();
 
     string sqlStmt = constructSQLStatement(eCountKeywordLocations, params);
     pqxx::result res = conn->executeNonTransaction(sqlStmt);
@@ -1626,23 +1626,23 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
   }
 }
 
-boost::shared_ptr<const ISO639> Query::get_iso639_table()
+std::shared_ptr<const ISO639> Query::get_iso639_table()
 {
-  boost::shared_ptr<ISO639>& iso639 = get_mutable_iso639_table();
-  return boost::atomic_load(&iso639);
+  std::shared_ptr<ISO639>& iso639 = get_mutable_iso639_table();
+  return std::atomic_load(&iso639);
 }
 
-boost::shared_ptr<ISO639>& Query::get_mutable_iso639_table()
+std::shared_ptr<ISO639>& Query::get_mutable_iso639_table()
 {
   // Initially initialize with empty table
-  static boost::shared_ptr<ISO639> iso639(new ISO639);
+  static std::shared_ptr<ISO639> iso639(new ISO639);
   return iso639;
 }
 
 void Query::load_iso639_table(const std::vector<std::string>& special_codes)
 {
-  boost::shared_ptr<ISO639> new_table(new ISO639(*conn, special_codes));
-  boost::atomic_store(&get_mutable_iso639_table(), new_table);
+  std::shared_ptr<ISO639> new_table(new ISO639(*conn, special_codes));
+  std::atomic_store(&get_mutable_iso639_table(), new_table);
 }
 
 }  // namespace Locus
