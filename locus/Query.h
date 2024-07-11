@@ -10,7 +10,7 @@
 #include "QueryOptions.h"
 #include "SimpleLocation.h"
 
-#include <boost/any.hpp>
+#include <any>
 #include <optional>
 #include <memory>
 #include <macgyver/PostgreSQLConnection.h>
@@ -139,7 +139,7 @@ class Query
   std::string constructSQLStatement(
       SQLQueryId theQueryId,
       const std::map<SQLQueryParameterId,
-                     boost::any>& theParams);  // construct SQL statement
+                     std::any>& theParams);  // construct SQL statement
 };                                             // class Query
 
 }  // namespace Locus

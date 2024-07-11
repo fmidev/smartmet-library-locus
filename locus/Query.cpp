@@ -221,7 +221,7 @@ string Query::ResolveFeature(const QueryOptions& theOptions, const string& theCo
 {
   try
   {
-    map<SQLQueryParameterId, boost::any> params;
+    map<SQLQueryParameterId, std::any> params;
     params[eQueryOptions] = theOptions;
     params[eFeatureCode] = theCode;
 
@@ -261,7 +261,7 @@ string Query::ResolveNameVariant(const QueryOptions& theOptions,
     // because there may be multiple variants like Tokio and
     // Tokion prefektuuri.
 
-    map<SQLQueryParameterId, boost::any> params;
+    map<SQLQueryParameterId, std::any> params;
     params[eQueryOptions] = theOptions;
     params[eGeonamesId] = theId;
     params[eSearchWord] = theSearchWord;
@@ -295,7 +295,7 @@ std::optional<int> Query::ResolveFmisid(const QueryOptions& theOptions, const st
 {
   try
   {
-    map<SQLQueryParameterId, boost::any> params;
+    map<SQLQueryParameterId, std::any> params;
     params[eQueryOptions] = theOptions;
     params[eGeonamesId] = theId;
     string sqlStmt = constructSQLStatement(eResolveFmisid, params);
@@ -326,7 +326,7 @@ string Query::ResolveCountry(const QueryOptions& theOptions, const string& theIs
 {
   try
   {
-    map<SQLQueryParameterId, boost::any> params;
+    map<SQLQueryParameterId, std::any> params;
     params[eQueryOptions] = theOptions;
     params[eCountryIso2Code] = theIsoCode;
 
@@ -369,7 +369,7 @@ string Query::ResolveMunicipality(const QueryOptions& theOptions, const string& 
 {
   try
   {
-    map<SQLQueryParameterId, boost::any> params;
+    map<SQLQueryParameterId, std::any> params;
     params[eQueryOptions] = theOptions;
     params[eMunicipalityId] = theId;
 
@@ -415,7 +415,7 @@ string Query::ResolveAdministrative(const string& theCode, const string& theCoun
 {
   try
   {
-    map<SQLQueryParameterId, boost::any> params;
+    map<SQLQueryParameterId, std::any> params;
     params[eQueryOptions] = QueryOptions();
     string adminCode = theCountry + "." + theCode;
     params[eAdminCode] = adminCode;
@@ -592,7 +592,7 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
 {
   try
   {
-    map<SQLQueryParameterId, boost::any> params;
+    map<SQLQueryParameterId, std::any> params;
     QueryOptions opts = theOptions;
     if (!opts.GetNameType().empty())
       opts.SetLanguage(opts.GetNameType());
@@ -757,7 +757,7 @@ Query::return_type Query::FetchByLonLat(const QueryOptions& theOptions,
 {
   try
   {
-    map<SQLQueryParameterId, boost::any> params;
+    map<SQLQueryParameterId, std::any> params;
     params[eQueryOptions] = theOptions;
     params[eLongitude] = theLongitude;
     params[eLatitude] = theLatitude;
@@ -795,7 +795,7 @@ Query::return_type Query::FetchById(const QueryOptions& theOptions, int theId)
   {
     SetOptions(theOptions);
 
-    map<SQLQueryParameterId, boost::any> params;
+    map<SQLQueryParameterId, std::any> params;
     params[eQueryOptions] = theOptions;
     params[eGeonameId] = theId;
 
@@ -832,7 +832,7 @@ Query::return_type Query::FetchByKeyword(const QueryOptions& theOptions, const s
     QueryOptions options = theOptions;
     options.SetResultLimit(0);
 
-    map<SQLQueryParameterId, boost::any> params;
+    map<SQLQueryParameterId, std::any> params;
     params[eKeyword] = theKeyword;
     params[eQueryOptions] = options;
 
@@ -873,7 +873,7 @@ unsigned int Query::CountKeywordLocations(const QueryOptions& theOptions, const 
   {
     SetOptions(theOptions);
 
-    map<SQLQueryParameterId, boost::any> params;
+    map<SQLQueryParameterId, std::any> params;
     params[eQueryOptions] = theOptions;
     params[eKeyword] = theKeyword;
 
@@ -1131,7 +1131,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
 }
 
 string Query::constructSQLStatement(SQLQueryId theQueryId,
-                                    const map<SQLQueryParameterId, boost::any>& theParams)
+                                    const map<SQLQueryParameterId, std::any>& theParams)
 {
   try
   {
@@ -1158,21 +1158,21 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
       return result;
     };
 
-    const auto& theOptions = boost::any_cast<const QueryOptions&>(theParams.at(eQueryOptions));
+    const auto& theOptions = std::any_cast<const QueryOptions&>(theParams.at(eQueryOptions));
 
     switch (theQueryId)
     {
       case eResolveFeature:
       {
-        auto theCode = boost::any_cast<string>(theParams.at(eFeatureCode));
+        auto theCode = std::any_cast<string>(theParams.at(eFeatureCode));
         sql += "SELECT shortdesc FROM features WHERE code=";
         sql += conn->quote(theCode);
         break;
       }
       case eResolveNameVariant:
       {
-        auto theGeonamesId = boost::any_cast<string>(theParams.at(eGeonamesId));
-        auto theSearchWord = boost::any_cast<string>(theParams.at(eSearchWord));
+        auto theGeonamesId = std::any_cast<string>(theParams.at(eGeonamesId));
+        auto theSearchWord = std::any_cast<string>(theParams.at(eSearchWord));
         string language = theOptions.GetLanguage();
         Fmi::ascii_tolower(language);
 
@@ -1202,7 +1202,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
       }
       case eResolveFmisid:
       {
-        auto theGeonamesId = boost::any_cast<string>(theParams.at(eGeonamesId));
+        auto theGeonamesId = std::any_cast<string>(theParams.at(eGeonamesId));
         sql += "SELECT name FROM alternate_geonames WHERE language='fmisid' AND geonames_id=";
         sql += conn->quote(theGeonamesId);
         break;
@@ -1210,7 +1210,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
       case eResolveCountry1:
       case eResolveCountry2:
       {
-        auto iso2 = boost::any_cast<string>(theParams.at(eCountryIso2Code));
+        auto iso2 = std::any_cast<string>(theParams.at(eCountryIso2Code));
         string language = theOptions.GetLanguage();
         Fmi::ascii_tolower(language);
 
@@ -1238,7 +1238,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
       case eResolveMunicipality1:
       case eResolveMunicipality2:
       {
-        auto theMunicipalityId = boost::any_cast<string>(theParams.at(eMunicipalityId));
+        auto theMunicipalityId = std::any_cast<string>(theParams.at(eMunicipalityId));
         string language = theOptions.GetLanguage();
         Fmi::ascii_tolower(language);
 
@@ -1258,7 +1258,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
       }
       case eResolveAdministrative:
       {
-        auto theAdminCode = boost::any_cast<string>(theParams.at(eAdminCode));
+        auto theAdminCode = std::any_cast<string>(theParams.at(eAdminCode));
         Fmi::ascii_tolower(theAdminCode);
         sql += "SELECT name FROM admin1codes WHERE code=";
         sql += conn->quote(theAdminCode);
@@ -1269,9 +1269,9 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         if (theOptions.GetSearchVariants())
           sql += "(";
 
-        auto theSearchWord = boost::any_cast<string>(theParams.at(eSearchWord));
-        auto theCountryPriorities = boost::any_cast<string>(theParams.at(eCountryPriorities));
-        auto theFeaturePriorities = boost::any_cast<string>(theParams.at(eFeaturePriorities));
+        auto theSearchWord = std::any_cast<string>(theParams.at(eSearchWord));
+        auto theCountryPriorities = std::any_cast<string>(theParams.at(eCountryPriorities));
+        auto theFeaturePriorities = std::any_cast<string>(theParams.at(eFeaturePriorities));
 
         sql +=
             "SELECT DISTINCT geonames.name AS name,"
@@ -1382,9 +1382,9 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
       }
       case eFetchByLonLat:
       {
-        auto theLongitude = boost::any_cast<float>(theParams.at(eLongitude));
-        auto theLatitude = boost::any_cast<float>(theParams.at(eLatitude));
-        auto theRadius = boost::any_cast<float>(theParams.at(eRadius));
+        auto theLongitude = std::any_cast<float>(theParams.at(eLongitude));
+        auto theLatitude = std::any_cast<float>(theParams.at(eLatitude));
+        auto theRadius = std::any_cast<float>(theParams.at(eRadius));
 
         sql +=
             "WITH candidates AS ("
@@ -1455,7 +1455,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
       }
       case eFetchById:
       {
-        auto theId = boost::any_cast<int>(theParams.at(eGeonameId));
+        auto theId = std::any_cast<int>(theParams.at(eGeonameId));
 
         sql +=
             "SELECT id, name, ansiname, lat, lon, countries_iso2 AS iso2, features_code,"
@@ -1469,7 +1469,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
       case eFetchByKeyword2:
       case eFetchByKeyword3:
       {
-        auto theKeyword = boost::any_cast<string>(theParams.at(eKeyword));
+        auto theKeyword = std::any_cast<string>(theParams.at(eKeyword));
 
         if (theQueryId == eFetchByKeyword1)
         {
@@ -1607,7 +1607,7 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
       }
       case eCountKeywordLocations:
       {
-        auto theKeyword = boost::any_cast<string>(theParams.at(eKeyword));
+        auto theKeyword = std::any_cast<string>(theParams.at(eKeyword));
 
         sql += "SELECT count(*) AS count FROM keywords_has_geonames WHERE keyword=";
         sql += conn->quote(theKeyword);
