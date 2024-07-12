@@ -22,12 +22,12 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: postgresql15-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 23.7.28
+BuildRequires: smartmet-library-macgyver-devel >= 24.7.12
 Requires: %{smartmet_boost}-locale
 Requires: %{smartmet_boost}-regex
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: smartmet-library-macgyver >= 23.7.28
+Requires: smartmet-library-macgyver >= 24.7.12
 
 %if %{defined el7}
 Requires: libpqxx < 1:7.0
@@ -47,7 +47,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: gcc-c++
 #TestRequires: make
 #TestRequires: postgresql15-libs
-#TestRequires: smartmet-library-macgyver-devel >= 23.7.28
+#TestRequires: smartmet-library-macgyver-devel >= 24.7.12
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-test-db >= 23.2.24
 Provides: %{SPECNAME}
