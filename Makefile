@@ -11,7 +11,6 @@ DEFINES = -DUNIX -D_REENTRANT
 
 LIBS += -L$(libdir) \
 	-lsmartmet-macgyver \
-	-lboost_filesystem \
 	-lboost_locale \
 	-lboost_regex \
 	-lboost_thread \

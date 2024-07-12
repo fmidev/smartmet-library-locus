@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <fstream>
 #include <iostream>
@@ -30,7 +30,7 @@ class SimpleLocation
   std::string iso2;
   int id = 0;
   int elevation = 0;
-  boost::optional<int> fmisid;
+  std::optional<int> fmisid;
 
   SimpleLocation(std::string theName,
                  float theLongitude,

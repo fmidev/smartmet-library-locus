@@ -23,7 +23,6 @@ BuildRequires: make
 BuildRequires: postgresql15-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-macgyver-devel >= 23.7.28
-Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-locale
 Requires: %{smartmet_boost}-regex
 Requires: %{smartmet_boost}-system
