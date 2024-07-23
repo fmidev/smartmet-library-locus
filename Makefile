@@ -9,7 +9,8 @@ include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
 
 DEFINES = -DUNIX -D_REENTRANT
 
-LIBS += -L$(libdir) \
+LIBS += \
+	$(PREFIX_LDFLAGS) \
 	-lsmartmet-macgyver \
 	-lboost_locale \
 	-lboost_regex \
@@ -57,6 +58,7 @@ $(LIBFILE): $(OBJS)
 clean:
 	rm -f $(LIBFILE) *~ $(SUBNAME)/*~
 	rm -rf $(objdir)
+	$(MAKE) -C test clean
 
 format:
 	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp test/*.cpp
