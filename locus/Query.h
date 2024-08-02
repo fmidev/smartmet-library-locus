@@ -10,9 +10,9 @@
 #include "QueryOptions.h"
 #include "SimpleLocation.h"
 
-#include <boost/any.hpp>
-#include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <any>
+#include <optional>
+#include <memory>
 #include <macgyver/PostgreSQLConnection.h>
 
 #include <memory>
@@ -62,7 +62,7 @@ class Query
   return_type FetchByKeyword(const QueryOptions& theOptions, const std::string& theKeyword);
   unsigned int CountKeywordLocations(const QueryOptions& theOptions, const std::string& theKeyword);
 
-  static boost::shared_ptr<const ISO639> get_iso639_table();
+  static std::shared_ptr<const ISO639> get_iso639_table();
 
   void load_iso639_table(
       const std::vector<std::string>& special_codes = std::vector<std::string>());
@@ -71,7 +71,7 @@ class Query
 
  private:
   // Helper methods
-  boost::optional<int> ResolveFmisid(const QueryOptions& theOptions, const std::string& theId);
+  std::optional<int> ResolveFmisid(const QueryOptions& theOptions, const std::string& theId);
   std::string ResolveFeature(const QueryOptions& theOptions, const std::string& theCode);
   std::string ResolveNameVariant(const QueryOptions& theOptions,
                                  const std::string& theId,
@@ -90,7 +90,7 @@ class Query
 
   void SetOptions(const QueryOptions& theOptions);
 
-  static boost::shared_ptr<ISO639>& get_mutable_iso639_table();
+  static std::shared_ptr<ISO639>& get_mutable_iso639_table();
 
   // ids for queries
   enum SQLQueryId
@@ -139,7 +139,7 @@ class Query
   std::string constructSQLStatement(
       SQLQueryId theQueryId,
       const std::map<SQLQueryParameterId,
-                     boost::any>& theParams);  // construct SQL statement
+                     std::any>& theParams);  // construct SQL statement
 };                                             // class Query
 
 }  // namespace Locus

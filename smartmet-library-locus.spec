@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 23.7.28
+Version: 24.7.12
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -22,13 +22,12 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: postgresql15-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 23.7.28
-Requires: %{smartmet_boost}-filesystem
+BuildRequires: smartmet-library-macgyver-devel >= 24.7.12
 Requires: %{smartmet_boost}-locale
 Requires: %{smartmet_boost}-regex
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: smartmet-library-macgyver >= 23.7.28
+Requires: smartmet-library-macgyver >= 24.7.12
 
 %if 0%{?rhel} && 0%{rhel} == 8
 Requires: libpqxx >= 1:7.7.0, libpqxx < 1:7.8.0
@@ -49,7 +48,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: gcc-c++
 #TestRequires: make
 #TestRequires: postgresql15-libs
-#TestRequires: smartmet-library-macgyver-devel >= 23.7.28
+#TestRequires: smartmet-library-macgyver-devel >= 24.7.12
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-test-db >= 23.2.24
 Provides: %{SPECNAME}
@@ -97,6 +96,9 @@ Requires: smartmet-library-macgyver-devel
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Jul 12 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.12-1.fmi
+- Replace many boost library types with C++ standard library ones
+
 * Fri Jul 28 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.7.28-1.fmi
 - Repackage due to bulk ABI changes in macgyver/newbase/spine
 

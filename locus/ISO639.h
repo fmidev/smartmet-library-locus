@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/optional.hpp>
+#include <optional>
 #include <macgyver/PostgreSQLConnection.h>
 #include <map>
 #include <ostream>
@@ -19,8 +19,8 @@ class ISO639
  public:
   struct Entry
   {
-    boost::optional<std::string> iso639_1;
-    boost::optional<std::string> iso639_2;
+    std::optional<std::string> iso639_1;
+    std::optional<std::string> iso639_2;
     std::string iso639_3;
     std::string name;
   };
@@ -32,7 +32,7 @@ class ISO639
   void add(const Entry& entry);
   void add_special_code(const std::string& code);
 
-  boost::optional<Entry> get(const std::string& name) const;
+  std::optional<Entry> get(const std::string& name) const;
 
   std::vector<std::string> get_codes(const std::string& name) const;
 
