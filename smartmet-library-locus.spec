@@ -22,12 +22,12 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: postgresql15-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 24.7.12
+BuildRequires: smartmet-library-macgyver-devel >= 24.8.7
 Requires: %{smartmet_boost}-locale
 Requires: %{smartmet_boost}-regex
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: smartmet-library-macgyver >= 24.7.12
+Requires: smartmet-library-macgyver >= 24.8.7
 
 %if 0%{?rhel} && 0%{rhel} == 8
 Requires: libpqxx >= 1:7.7.0, libpqxx < 1:7.8.0
@@ -48,9 +48,9 @@ BuildRequires: libpqxx-devel
 #TestRequires: gcc-c++
 #TestRequires: make
 #TestRequires: postgresql15-libs
-#TestRequires: smartmet-library-macgyver-devel >= 24.7.12
+#TestRequires: smartmet-library-macgyver-devel >= 24.8.7
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-test-db >= 23.2.24
+#TestRequires: smartmet-test-db >= 24.8.7
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet-locus < 16.12.20
 Obsoletes: libsmartmet-locus-debuginfo < 16.12.20
