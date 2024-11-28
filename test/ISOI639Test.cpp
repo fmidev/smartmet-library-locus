@@ -7,7 +7,6 @@
 #include <sstream>
 
 using namespace std;
-using namespace boost;
 using namespace Locus;
 
 #ifndef DATABASE_HOST
