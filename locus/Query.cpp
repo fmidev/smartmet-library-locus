@@ -16,6 +16,7 @@
 #include <macgyver/StringConversion.h>
 #include <algorithm>
 #include <cmath>
+#include <queue>
 #include <stdexcept>
 
 using namespace std;
@@ -250,7 +251,6 @@ string Query::ResolveFeature(const QueryOptions& theOptions, const string& theCo
  * \return feature Name of the feature or false if not found
  */
 // ----------------------------------------------------------------------
-
 string Query::ResolveNameVariant(const QueryOptions& theOptions,
                                  const string& theId,
                                  const string& theSearchWord)
@@ -280,6 +280,33 @@ string Query::ResolveNameVariant(const QueryOptions& theOptions,
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
+}
+
+std::map<std::string, std::string>
+Query::ResolveNameVariants(const QueryOptions& theOptions,
+                           const vector<string>& theIds)
+{
+  map<SQLQueryParameterId, std::any> params;
+  params[eQueryOptions] = theOptions;
+  params[eGeonamesId] = theIds;
+
+  string sqlStmt = constructSQLStatement(eResolveNameVariants, params);
+  pqxx::result res = conn->executeNonTransaction(sqlStmt);
+
+  std::map<std::string, std::string> retval;
+  for (const auto& row : res)
+  {
+    if (row.size() < 2)
+      continue;
+
+    string id = row[0].as<string>();
+    string name = row[1].as<string>();
+
+    // If name is empty or already present in result map then skip it
+    if (!name.empty() and not retval.count(id))
+      retval[id] = name;
+  }
+  return retval;
 }
 
 // ----------------------------------------------------------------------
@@ -848,7 +875,7 @@ Query::return_type Query::FetchByKeyword(const QueryOptions& theOptions, const s
 
     res = conn->executeNonTransaction(sqlStmt);
 
-    auto ret = build_locations(options, res, "", "");
+    auto ret = build_locations(options, res, "", "", true);
 
     return ret;
   }
@@ -903,7 +930,8 @@ unsigned int Query::CountKeywordLocations(const QueryOptions& theOptions, const 
 Query::return_type Query::build_locations(const QueryOptions& theOptions,
                                           const pqxx::result& theR,
                                           const string& theSearchWord,
-                                          const string& theArea /* = ""*/)
+                                          const string& theArea /* = ""*/,
+                                          bool batch /* = false */)
 {
   try
   {
@@ -927,16 +955,15 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
     map<string, string> municipality_cache;  // id --> municipality
     map<string, string> admin_cache;         // name|iso2 --> admin
 
-    // Process one location at a time
-
+    // Resolve names at first
+    std::map<std::string, std::string> name_variants;
+    std::queue<std::string> variant_resolve_postponed;
     for (pqxx::result::const_iterator row = theR.begin(); row != theR.end(); ++row)
     {
-      // Do not handle locations without timezones. This is just a safety check,
-      // NULL timezones should be removed already in the SQL query, otherwise
-      // you might get zero results if the result count limit is 1.
-
       if (row["timezone"].is_null())
         continue;
+
+      auto id = row["id"].as<string>();
 
       // Determine name
       string name = (!row["name"].is_null() ? row["name"].as<string>() : "NULL");
@@ -955,23 +982,85 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
         }
       }
 
-      // Search for possible translations
+      // Search for possible translations (postpone resolution if one can do it
+      // for several sites in the same SQL request)
 
       if (!override_done && !theOptions.GetLanguage().empty())
       {
         string variant;
-        auto id = row["id"].as<string>();
         if (!theOptions.GetAutoCompleteMode())
-          variant = ResolveNameVariant(theOptions, id);
+        {
+          if (batch)
+          {
+            variant_resolve_postponed.push(id);
+            continue;
+          }
+          else
+            variant = ResolveNameVariant(theOptions, id, theSearchWord);
+        }
         else
+        {
           variant = ResolveNameVariant(theOptions, id, theSearchWord);
+        }
 
         if (!variant.empty())
-          name = variant;
+        name = variant;
+
+      }
+      if ((!row["ansiname"].is_null()) && (theOptions.GetCharset() != "utf8"))
+      name = from_utf(name, row["ansiname"].as<string>(), theOptions.GetCharset());
+
+      name_variants[id] = name;
+    }
+
+    // Resolve postponed name variants
+    while (!variant_resolve_postponed.empty())
+    {
+      // Resolve names in batches of 1000 to avoid too long SQL queries
+      std::vector<std::string> ids;
+      while (!variant_resolve_postponed.empty() && ids.size() < 1000)
+      {
+        ids.push_back(variant_resolve_postponed.front());
+        variant_resolve_postponed.pop();
       }
 
-      if ((!row["ansiname"].is_null()) && (theOptions.GetCharset() != "utf8"))
-        name = from_utf(name, row["ansiname"].as<string>(), theOptions.GetCharset());
+      std::map<std::string, std::string> variants =
+          ResolveNameVariants(theOptions, ids);
+
+      for (const auto& variant : variants)
+      {
+        const auto& id = variant.first;
+        const auto& name = variant.second;
+
+        // If name is empty or already present in result map then skip it
+        if (!name.empty() && !name_variants.count(id))
+          name_variants[id] = name;
+      }
+    }
+
+    // Process one location at a time
+
+    for (pqxx::result::const_iterator row = theR.begin(); row != theR.end(); ++row)
+    {
+      // Do not handle locations without timezones. This is just a safety check,
+      // NULL timezones should be removed already in the SQL query, otherwise
+      // you might get zero results if the result count limit is 1.
+
+      if (row["timezone"].is_null())
+        continue;
+
+      auto id = row["id"].as<string>();
+
+      // Determine name
+      auto it1 = name_variants.find(id);
+      if (it1 == name_variants.end())
+      {
+        // If name is not found, use the original name
+        if (debug)
+          cout << "Name variant not found for id: " << id << endl;
+        continue;
+      }
+      string name = it1->second;
 
       // Elevation
 
@@ -1200,6 +1289,22 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         }
         break;
       }
+      case eResolveNameVariants:
+        {
+          auto theGeonamesIds = std::any_cast<std::vector<string>>(theParams.at(eGeonamesId));
+          string language = theOptions.GetLanguage();
+          Fmi::ascii_tolower(language);
+
+          sql +=
+              "SELECT geonames_id, name,length(name) AS l, priority FROM alternate_geonames WHERE ";
+          sql += selectByValueCond("geonames_id", theGeonamesIds);
+          sql += " AND language" + constructLanguageCodeCondition(language);
+          sql +=
+              " AND historic=false AND colloquial=false ORDER BY priority ASC, preferred DESC, l "
+              "ASC, name ASC";
+        }
+        break;
+
       case eResolveFmisid:
       {
         auto theGeonamesId = std::any_cast<string>(theParams.at(eGeonamesId));
