@@ -14,8 +14,6 @@
 #include <optional>
 #include <memory>
 #include <macgyver/PostgreSQLConnection.h>
-#include <macgyver/StringConversion.h>
-#include <macgyver/TypeTraits.h>
 
 #include <memory>
 #include <pqxx/pqxx>
@@ -78,10 +76,6 @@ class Query
   std::string ResolveNameVariant(const QueryOptions& theOptions,
                                  const std::string& theId,
                                  const std::string& theSearchWord = "%");
-  std::map<std::string, std::string>
-  ResolveNameVariants(const QueryOptions& theOptions,
-                      const std::vector<std::string>& theIds);
-
   std::string ResolveCountry(const QueryOptions& theOptions, const std::string& theIsoCode);
   std::string ResolveMunicipality(const QueryOptions& theOptions, const std::string& theId);
   std::string ResolveAdministrative(const std::string& theCode, const std::string& theCountry);
@@ -92,8 +86,7 @@ class Query
   return_type build_locations(const QueryOptions& theOptions,
                               const pqxx::result& theR,
                               const std::string& theSearchWord,
-                              const std::string& theArea = "",
-                              bool batch = false);
+                              const std::string& theArea = "");
 
   void SetOptions(const QueryOptions& theOptions);
 
@@ -104,7 +97,6 @@ class Query
   {
     eResolveFeature,
     eResolveNameVariant,
-    eResolveNameVariants,
     eResolveCountry1,
     eResolveCountry2,
     eResolveMunicipality1,
@@ -148,53 +140,6 @@ class Query
       SQLQueryId theQueryId,
       const std::map<SQLQueryParameterId,
                      std::any>& theParams);  // construct SQL statement
-
-  template <typename ValueType>
-  typename std::enable_if<std::is_same<ValueType, std::string>::value, std::string>::type
-  quote(const ValueType& value) const
-  {
-    return conn->quote(value);
-  }
-
-  template <typename ValueType>
-  typename std::enable_if<std::is_integral<ValueType>::value, std::string>::type
-  quote(const ValueType& value) const
-  {
-    return Fmi::to_string(value);
-  }
-
-  template <typename ValueType>
-  typename std::enable_if<
-    std::is_same_v<ValueType, std::string> || std::is_integral_v<ValueType>,
-    std::string>::type
-  selectByValueCond(const std::string& column, const ValueType& value)
-  {
-    return column + "=" + quote(value);
-  }
-
-  template <typename ContainerType>
-  typename std::enable_if<Fmi::is_iterable<ContainerType>::value, std::string>::type
-  selectByValueCond(const std::string& column, const ContainerType& values) const
-  {
-    if (values.empty())
-      return "";
-    else if (values.size() == 1)
-    {
-      return column + "=" + quote(*values.begin());
-    }
-    else
-    {
-      std::string result = column + " IN (";
-      for (auto it = values.begin(); it != values.end(); ++it)
-      {
-        if (it != values.begin())
-          result += ", ";
-        result += quote(*it);
-      }
-      result += ")";
-      return result;
-    }
-  }
 };                                             // class Query
 
 }  // namespace Locus
