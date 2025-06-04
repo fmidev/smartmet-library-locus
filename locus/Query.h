@@ -14,6 +14,8 @@
 #include <optional>
 #include <memory>
 #include <macgyver/PostgreSQLConnection.h>
+#include <macgyver/StringConversion.h>
+#include <macgyver/TypeTraits.h>
 
 #include <memory>
 #include <pqxx/pqxx>
@@ -71,13 +73,14 @@ class Query
 
  private:
   // Helper methods
-  std::optional<int> ResolveFmisid(const QueryOptions& theOptions, const std::string& theId);
   std::string ResolveFeature(const QueryOptions& theOptions, const std::string& theCode);
   std::string ResolveNameVariant(const QueryOptions& theOptions,
-                                 const std::string& theId,
+                                 int theId,
                                  const std::string& theSearchWord = "%");
-  std::string ResolveCountry(const QueryOptions& theOptions, const std::string& theIsoCode);
-  std::string ResolveMunicipality(const QueryOptions& theOptions, const std::string& theId);
+  std::map<int, std::string>
+  ResolveNameVariants(const QueryOptions& theOptions,
+                      const std::vector<int>& theIds);
+
   std::string ResolveAdministrative(const std::string& theCode, const std::string& theCountry);
   void AddCountryConditions(const QueryOptions& theOptions, std::string& theQuery) const;
   void AddFeatureConditions(const QueryOptions& theOptions, std::string& theQuery) const;
@@ -88,6 +91,25 @@ class Query
                               const std::string& theSearchWord,
                               const std::string& theArea = "");
 
+  std::map<int, std::string> getNameVariants(
+      const QueryOptions& theOptions,
+      const pqxx::result& theR,
+      const std::string& theSearchWord = "%");
+
+  std::map<std::string, std::string> getCountryNames(
+      const QueryOptions& theOptions,
+      const pqxx::result& theR);
+
+  std::map<int, std::string> getMunicipalityNames(
+      const QueryOptions& theOptions,
+      const pqxx::result& theR);
+
+  std::map<int, int> getFmisids(
+      const QueryOptions& theOptions,
+      const pqxx::result& theR);
+
+  std::vector<std::string> getLanguageCodes(const std::string& language);
+
   void SetOptions(const QueryOptions& theOptions);
 
   static std::shared_ptr<ISO639>& get_mutable_iso639_table();
@@ -97,6 +119,7 @@ class Query
   {
     eResolveFeature,
     eResolveNameVariant,
+    eResolveNameVariants,
     eResolveCountry1,
     eResolveCountry2,
     eResolveMunicipality1,
@@ -140,6 +163,66 @@ class Query
       SQLQueryId theQueryId,
       const std::map<SQLQueryParameterId,
                      std::any>& theParams);  // construct SQL statement
+
+  template <typename ValueType>
+  typename std::enable_if<std::is_same<ValueType, std::string>::value, std::string>::type
+  quote(const ValueType& value) const
+  {
+    return conn->quote(value);
+  }
+
+  template <typename ValueType>
+  typename std::enable_if<std::is_integral<ValueType>::value, std::string>::type
+  quote(const ValueType& value) const
+  {
+    return Fmi::to_string(value);
+  }
+
+  template <typename ContainerType>
+  typename std::enable_if<Fmi::is_iterable<ContainerType>::value
+     && !std::is_same_v<ContainerType, std::string>, std::string>::type
+  quote(const ContainerType& value) const
+  {
+    std::string result;
+    for (const auto& item : value)
+    {
+      if (!result.empty())
+        result += ", ";
+      result += quote(item);
+    }
+    return result;
+  }
+
+  template <typename ValueType>
+  typename std::enable_if<
+    std::is_same_v<ValueType, std::string> || std::is_integral_v<ValueType>,
+    std::string>::type
+  selectByValueCond(const std::string& column, const ValueType& value)
+  {
+    return column + "=" + quote(value);
+  }
+
+  template <typename ContainerType>
+  typename std::enable_if<Fmi::is_iterable<ContainerType>::value, std::string>::type
+  selectByValueCond(const std::string& column, const ContainerType& values) const
+  {
+    if (values.empty())
+    {
+      return "";
+    }
+    else
+    {
+      std::string result = column + " IN (";
+      for (const auto& item : values)
+      {
+        if (!result.empty() && result.back() != '(')
+          result += ", ";
+        result += quote(item);
+      }
+      result += ")";
+      return result;
+    }
+  }
 };                                             // class Query
 
 }  // namespace Locus

@@ -17,10 +17,14 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 %define smartmet_boost boost
 %endif
 
+%define smartmet_fmt_min 11.0.0
+%define smartmet_fmt_max 12.0.0
+
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: postgresql15-devel
+BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-macgyver-devel >= 25.2.18
 Requires: %{smartmet_boost}-locale
