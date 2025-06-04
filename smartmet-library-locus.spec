@@ -4,7 +4,7 @@
 Summary: locus library
 Name: %{SPECNAME}
 Version: 25.6.4
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-locus
@@ -100,6 +100,9 @@ Requires: smartmet-library-macgyver-devel
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jun  4 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.6.4-2.fmi
+- Additional database use optimisation
+
 * Wed Jun  4 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.6.4-1.fmi
 - Database use optimisation
 
