@@ -260,39 +260,6 @@ void Query::cancel()
 
 // ----------------------------------------------------------------------
 /*!
- * Resolves name for the feature code
- *
- * \param theCode Feature code
- * \return feature Name of the feature or false if not found
- */
-// ----------------------------------------------------------------------
-
-string Query::ResolveFeature(const QueryOptions& theOptions, const string& theCode)
-{
-  try
-  {
-    map<SQLQueryParameterId, std::any> params;
-    params[eQueryOptions] = theOptions;
-    params[eFeatureCode] = theCode;
-
-    string sqlStmt = constructSQLStatement(eResolveFeature, params);
-    pqxx::result res = conn->executeNonTransaction(sqlStmt);
-
-    string retval;
-
-    if (!res.empty())
-      retval = res[0][0].as<string>();
-
-    return retval;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
  * Helper method to return variant name for search result using
  * correct language
  *
@@ -366,43 +333,6 @@ Query::ResolveNameVariants(const QueryOptions& theOptions,
   }
 
   return retval;
-}
-
-// ----------------------------------------------------------------------
-/*!
- * Resolves name for administrative area (state)
- *
- * \param theCode Administrative area code
- * \param theCountry Country iso code
- * \return administrative Name of the state or false if not found
- */
-// ----------------------------------------------------------------------
-
-string Query::ResolveAdministrative(const string& theCode, const string& theCountry)
-{
-  try
-  {
-    map<SQLQueryParameterId, std::any> params;
-    params[eQueryOptions] = QueryOptions();
-    string adminCode = theCountry + "." + theCode;
-    params[eAdminCode] = adminCode;
-
-    string sqlStmt = constructSQLStatement(eResolveAdministrative, params);
-    pqxx::result res = conn->executeNonTransaction(sqlStmt);
-
-    string retval;
-
-    if (!res.empty())
-    {
-      retval = res[0][0].as<string>();
-    }
-
-    return retval;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
 }
 
 // ----------------------------------------------------------------------
@@ -948,6 +878,34 @@ std::vector<std::string> Query::getLanguageCodes(const std::string& language)
   return codes;
 }
 
+
+std::map<std::string, std::string> Query::getFeatures(
+    const QueryOptions& theOptions,
+    const pqxx::result& theR)
+{
+  std::map<std::string, std::string> features;
+  std::set<std::string> feature_codes = get_unique_values<string>(theR, "features_code");
+  if (feature_codes.empty())
+    return features;  // No features to process
+
+  constexpr const char* sql = "SELECT code, shortdesc FROM features WHERE code IN ({:s})";
+  std::string sqlStmt = fmt::format(sql, quote(feature_codes));
+  pqxx::result res = conn->executeNonTransaction(sqlStmt);
+  for (const auto& row : res)
+  {
+    if (row.size() < 2)
+      continue;  // Skip rows that do not have the expected columns
+    std::string code = row[0].as<std::string>();
+    std::string shortdesc = row[1].as<std::string>();
+    if (!shortdesc.empty())
+    {
+        features[code] = shortdesc;
+    }
+  }
+  return features;
+}
+
+
 std::map<std::string, std::string> Query::getCountryNames(
     const QueryOptions& theOptions,
     const pqxx::result& theR)
@@ -1120,6 +1078,79 @@ catch (...)
 }
 
 
+// ----------------------------------------------------------------------
+/*!
+ * Resolve names for administrative areas (state) which references are present in the result set.
+ *
+ * \param theOptions Query options
+ * \param theR Result set
+ * \return mapping of admin area code to its name
+ */
+// ----------------------------------------------------------------------
+
+std::map<std::string, std::string> Query::getAdministrativeNames(
+    const QueryOptions& theOptions,
+    const pqxx::result& theR)
+{
+  constexpr  const char* sql = "SELECT code, name FROM admin1codes WHERE code IN ({})";
+
+  std::map<std::string, std::string> admin_names;
+
+  const std::optional<int> opt_admin1_col = find_column(theR, "admin1");
+  const std::optional<int> opt_country_col = find_column(theR, "country_iso2");
+  if (!opt_admin1_col || !opt_country_col)
+    return admin_names;  // No admin1 or country_iso2 columns found
+
+  const int admin1_col = *opt_admin1_col;
+  const int country_col = *opt_country_col;
+
+  // Collect used admin1 codes. Unfortunately in this case we cannot use
+  // get_unique_values because we need to combine country_iso2 and admin1
+  std::set<std::string> admin_codes;
+  for (const auto& row : theR)
+  {
+    if (row[admin1_col].is_null() or row[country_col].is_null())
+      continue;  // Skip rows that do not have the expected columns
+
+    const std::string admin1 = row[admin1_col].as<std::string>();
+    const std::string country_iso2 = row[country_col].as<std::string>();
+    if (admin1.empty() || country_iso2.empty())
+      continue;  // Skip empty admin1 or country_iso2
+
+    const std::string key = country_iso2 + "." + admin1;
+    admin_codes.insert(key);
+  }
+
+  // Query the admin1codes table to get the names
+  // We need to query the admin1codes table in batches to avoid too large queries (total size could be acceptable,
+  // but limit however single query to no more than 1000 admin1 codes).
+  for (std::set<std::string>::const_iterator it = admin_codes.begin(); it != admin_codes.end(); )
+  {
+    std::vector<std::string> curr_admin_codes;
+    for (; it != admin_codes.end() && curr_admin_codes.size() < 1000; ++it)
+    {
+      curr_admin_codes.push_back(*it);
+    }
+    const std::string sqlStmt = fmt::format(sql, quote(curr_admin_codes));
+    pqxx::result res = conn->executeNonTransaction(sqlStmt);
+    for (const auto& row : res)
+    {
+      if (row.size() < 2 || row[0].is_null() || row[1].is_null())
+        continue;  // Skip rows that do not have the expected columns or id or their values are NULL
+      const std::string code = row[0].as<std::string>();
+      const std::string name = row[1].as<std::string>();
+      if (!name.empty())
+      {
+        // Use the admin code as key and name as value
+        admin_names[*it] = name;
+      }
+    }
+  }
+
+  return admin_names;
+}
+
+
 std::map<int, int> Query::getFmisids(
     const QueryOptions& theOptions,
     const pqxx::result& theR)
@@ -1187,14 +1218,12 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
 
     // Caches subquery results
 
-    //map<string, string> country_cache;       // iso2 --> country
-    map<string, string> feature_cache;       // feature_code --> description
-
     const std::map<int, std::string> name_variants = getNameVariants(theOptions, theR, theSearchWord);
     const std::map<std::string, std::string> country_cache = getCountryNames(theOptions, theR);
     const std::map<int, std::string> municipality_cache = getMunicipalityNames(theOptions, theR);
-    std::map<std::string, std::string> admin_cache;
+    const std::map<std::string, std::string> admin_cache = getAdministrativeNames(theOptions, theR);
     const std::map<int, int> fmisids = getFmisids(theOptions, theR);
+    const map<string, string> feature_cache = getFeatures(theOptions, theR);
 
     // Process one location at a time
 
@@ -1249,11 +1278,6 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
         const auto pos = feature_cache.find(features_code);
         if (pos != feature_cache.end())
           description = pos->second;
-        else
-        {
-          description = ResolveFeature(theOptions, features_code);
-          feature_cache[features_code] = description;
-        }
       }
 
       // Administrative areas
@@ -1272,13 +1296,6 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
           const auto pos = admin_cache.find(key);
           if (pos != admin_cache.end())
             administrative = pos->second;
-          else
-          {
-            administrative = ResolveAdministrative(admin1, localiso2);
-            if (theOptions.GetCharset() != "utf8")
-              administrative = from_utf(administrative, theOptions.GetCharset());
-            admin_cache[key] = administrative;
-          }
         }
       }
       else
@@ -1400,13 +1417,6 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
 
     switch (theQueryId)
     {
-      case eResolveFeature:
-      {
-        auto theCode = std::any_cast<string>(theParams.at(eFeatureCode));
-        sql += "SELECT shortdesc FROM features WHERE code=";
-        sql += conn->quote(theCode);
-        break;
-      }
       case eResolveNameVariant:
       {
         auto theGeonamesId = std::any_cast<int>(theParams.at(eGeonamesId));
@@ -1454,70 +1464,6 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         }
         break;
 
-      case eResolveFmisid:
-      {
-        auto theGeonamesId = std::any_cast<int>(theParams.at(eGeonamesId));
-        sql += "SELECT name FROM alternate_geonames WHERE language='fmisid' AND geonames_id=";
-        sql += quote(theGeonamesId);
-        break;
-      }
-      case eResolveCountry1:
-      case eResolveCountry2:
-      {
-        auto iso2 = std::any_cast<string>(theParams.at(eCountryIso2Code));
-        string language = theOptions.GetLanguage();
-        Fmi::ascii_tolower(language);
-
-        if (theQueryId == eResolveCountry1)
-        {
-          sql +=
-              "SELECT alternate_geonames.name AS name, length(alternate_geonames.name) AS l"
-              " FROM geonames, alternate_geonames"
-              " WHERE geonames.features_code='PCLI'"
-              " AND geonames.countries_iso2=";
-          sql += conn->quote(iso2);
-          sql +=
-              " AND geonames.id=alternate_geonames.geonames_id"
-              " AND alternate_geonames.language";
-          sql += constructLanguageCodeCondition(language);
-          sql += " ORDER BY preferred DESC, alternate_geonames.priority ASC, l ASC LIMIT 1";
-        }
-        else
-        {
-          sql += "SELECT name FROM countries WHERE iso2=";
-          sql += conn->quote(iso2);
-        }
-        break;
-      }
-      case eResolveMunicipality1:
-      case eResolveMunicipality2:
-      {
-        auto theMunicipalityId = std::any_cast<int>(theParams.at(eMunicipalityId));
-        string language = theOptions.GetLanguage();
-        Fmi::ascii_tolower(language);
-
-        if (theQueryId == eResolveMunicipality1)
-        {
-          sql += "SELECT name FROM municipalities WHERE id=";
-          sql += Fmi::to_string(theMunicipalityId);
-        }
-        else
-        {
-          sql += "SELECT name FROM alternate_municipalities WHERE municipalities_id=";
-          sql += Fmi::to_string(theMunicipalityId);
-          sql += " AND language";
-          sql += constructLanguageCodeCondition(language);
-        }
-        break;
-      }
-      case eResolveAdministrative:
-      {
-        auto theAdminCode = std::any_cast<string>(theParams.at(eAdminCode));
-        Fmi::ascii_tolower(theAdminCode);
-        sql += "SELECT name FROM admin1codes WHERE code=";
-        sql += conn->quote(theAdminCode);
-        break;
-      }
       case eFetchByName:
       {
         if (theOptions.GetSearchVariants())

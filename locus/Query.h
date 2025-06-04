@@ -73,7 +73,6 @@ class Query
 
  private:
   // Helper methods
-  std::string ResolveFeature(const QueryOptions& theOptions, const std::string& theCode);
   std::string ResolveNameVariant(const QueryOptions& theOptions,
                                  int theId,
                                  const std::string& theSearchWord = "%");
@@ -81,7 +80,6 @@ class Query
   ResolveNameVariants(const QueryOptions& theOptions,
                       const std::vector<int>& theIds);
 
-  std::string ResolveAdministrative(const std::string& theCode, const std::string& theCountry);
   void AddCountryConditions(const QueryOptions& theOptions, std::string& theQuery) const;
   void AddFeatureConditions(const QueryOptions& theOptions, std::string& theQuery) const;
   void AddKeywordConditions(const QueryOptions& theOptions, std::string& theQuery) const;
@@ -96,6 +94,10 @@ class Query
       const pqxx::result& theR,
       const std::string& theSearchWord = "%");
 
+  std::map<std::string, std::string> getFeatures(
+      const QueryOptions& theOptions,
+      const pqxx::result& theR);
+
   std::map<std::string, std::string> getCountryNames(
       const QueryOptions& theOptions,
       const pqxx::result& theR);
@@ -103,6 +105,10 @@ class Query
   std::map<int, std::string> getMunicipalityNames(
       const QueryOptions& theOptions,
       const pqxx::result& theR);
+
+  std::map<std::string, std::string> getAdministrativeNames(
+    const QueryOptions& theOptions,
+    const pqxx::result& theR);
 
   std::map<int, int> getFmisids(
       const QueryOptions& theOptions,
@@ -117,15 +123,8 @@ class Query
   // ids for queries
   enum SQLQueryId
   {
-    eResolveFeature,
     eResolveNameVariant,
     eResolveNameVariants,
-    eResolveCountry1,
-    eResolveCountry2,
-    eResolveMunicipality1,
-    eResolveMunicipality2,
-    eResolveAdministrative,
-    eResolveFmisid,
     eFetchByName,
     eFetchByLonLat,
     eFetchById,
