@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 25.2.18
+Version: 25.6.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -100,6 +100,9 @@ Requires: smartmet-library-macgyver-devel
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jun  4 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.6.4-1.fmi
+- Database use optimisation
+
 * Tue Feb 18 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.2.18-1.fmi
 - Update to gdal-3.10, geos-3.13 and proj-9.5
 
