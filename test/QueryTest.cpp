@@ -1,8 +1,8 @@
 #include "Query.h"
 #include "QueryOptions.h"
 #include <boost/lexical_cast.hpp>
-#include <regression/tframe.h>
 #include <macgyver/PostgreSQLConnection.h>
+#include <regression/tframe.h>
 #include <iostream>
 #include <sstream>
 #include <string>
