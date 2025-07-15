@@ -12,14 +12,13 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/locale.hpp>
 #include <boost/make_shared.hpp>
+#include <fmt/format.h>
 #include <macgyver/Exception.h>
 #include <macgyver/Join.h>
 #include <macgyver/StringConversion.h>
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
-#include <fmt/format.h>
-
 
 using namespace std;
 
@@ -84,8 +83,7 @@ bool contains(const T& theContainer, const S& theObject)
   }
 }
 
-std::optional<int> find_column(
-    const pqxx::result& theResult, const std::string& theColumnName)
+std::optional<int> find_column(const pqxx::result& theResult, const std::string& theColumnName)
 {
   try
   {
@@ -103,8 +101,8 @@ std::optional<int> find_column(
 }
 
 template <typename ValueType>
-std::set<ValueType> get_unique_values(
-    const pqxx::result& theResult, const std::string& theColumnName)
+std::set<ValueType> get_unique_values(const pqxx::result& theResult,
+                                      const std::string& theColumnName)
 {
   try
   {
@@ -298,9 +296,8 @@ string Query::ResolveNameVariant(const QueryOptions& theOptions,
   }
 }
 
-std::map<int, std::string>
-Query::ResolveNameVariants(const QueryOptions& theOptions,
-                           const vector<int>& theIds)
+std::map<int, std::string> Query::ResolveNameVariants(const QueryOptions& theOptions,
+                                                      const vector<int>& theIds)
 {
   map<SQLQueryParameterId, std::any> params;
   params[eQueryOptions] = theOptions;
@@ -785,11 +782,9 @@ unsigned int Query::CountKeywordLocations(const QueryOptions& theOptions, const 
   }
 }
 
-std::map<int, std::string>
-Query::getNameVariants(
-    const QueryOptions& theOptions,
-    const pqxx::result& theR,
-    const string& theSearchWord)
+std::map<int, std::string> Query::getNameVariants(const QueryOptions& theOptions,
+                                                  const pqxx::result& theR,
+                                                  const string& theSearchWord)
 {
   std::map<int, std::string> name_variants;
   std::vector<int> variant_resolve_postponed;
@@ -818,7 +813,7 @@ Query::getNameVariants(
     bool override_done = false;
     if (override_field_ind)
     {
-      const auto & override = row[*override_field_ind];
+      const auto& override = row[*override_field_ind];
       string altname = !override.is_null() ? override.as<string>() : "NULL";
       if (!altname.empty() && altname != "NULL")
       {
@@ -878,10 +873,8 @@ std::vector<std::string> Query::getLanguageCodes(const std::string& language)
   return codes;
 }
 
-
-std::map<std::string, std::string> Query::getFeatures(
-    const QueryOptions& theOptions,
-    const pqxx::result& theR)
+std::map<std::string, std::string> Query::getFeatures(const QueryOptions& theOptions,
+                                                      const pqxx::result& theR)
 {
   std::map<std::string, std::string> features;
   std::set<std::string> feature_codes = get_unique_values<string>(theR, "features_code");
@@ -899,38 +892,35 @@ std::map<std::string, std::string> Query::getFeatures(
     std::string shortdesc = row[1].as<std::string>();
     if (!shortdesc.empty())
     {
-        features[code] = shortdesc;
+      features[code] = shortdesc;
     }
   }
   return features;
 }
 
-
-std::map<std::string, std::string> Query::getCountryNames(
-    const QueryOptions& theOptions,
-    const pqxx::result& theR)
+std::map<std::string, std::string> Query::getCountryNames(const QueryOptions& theOptions,
+                                                          const pqxx::result& theR)
 try
 {
   constexpr const char* sql1 =
-    "SELECT"
-    " geonames.countries_iso2 AS iso2,"
-    " alternate_geonames.name AS name,"
-    " length(alternate_geonames.name) AS l "
-    "FROM"
-    " geonames,"
-    " alternate_geonames "
-    "WHERE"
-    " geonames.features_code='PCLI'"
-    " AND geonames.countries_iso2 IN ({:s})"
-    " AND geonames.id=alternate_geonames.geonames_id"
-    " AND alternate_geonames.language IN ({:s}) "
-    "ORDER BY"
-    " preferred DESC,"
-    " alternate_geonames.priority ASC,"
-    " l ASC";
+      "SELECT"
+      " geonames.countries_iso2 AS iso2,"
+      " alternate_geonames.name AS name,"
+      " length(alternate_geonames.name) AS l "
+      "FROM"
+      " geonames,"
+      " alternate_geonames "
+      "WHERE"
+      " geonames.features_code='PCLI'"
+      " AND geonames.countries_iso2 IN ({:s})"
+      " AND geonames.id=alternate_geonames.geonames_id"
+      " AND alternate_geonames.language IN ({:s}) "
+      "ORDER BY"
+      " preferred DESC,"
+      " alternate_geonames.priority ASC,"
+      " l ASC";
 
-  constexpr const char* sql2 =
-    "SELECT iso2, name FROM countries WHERE iso2 IN ({:s})";
+  constexpr const char* sql2 = "SELECT iso2, name FROM countries WHERE iso2 IN ({:s})";
 
   std::map<std::string, std::string> country_names;
   std::set<std::string> countries = get_unique_values<string>(theR, "iso2");
@@ -988,28 +978,26 @@ catch (const Fmi::Exception& e)
   throw;
 }
 
-std::map<int, std::string> Query::getMunicipalityNames(
-    const QueryOptions& theOptions,
-    const pqxx::result& theR)
+std::map<int, std::string> Query::getMunicipalityNames(const QueryOptions& theOptions,
+                                                       const pqxx::result& theR)
 try
 {
-  constexpr const char *sql1 = "SELECT id, name FROM municipalities WHERE id IN ({})";
+  constexpr const char* sql1 = "SELECT id, name FROM municipalities WHERE id IN ({})";
 
-  constexpr const char *sql2 =
-     "SELECT"
-     "   municipalities_id id, name "
-     "FROM"
-     "   alternate_municipalities "
-     "WHERE municipalities_id IN ({})"
-     " AND language IN ({})";
+  constexpr const char* sql2 =
+      "SELECT"
+      "   municipalities_id id, name "
+      "FROM"
+      "   alternate_municipalities "
+      "WHERE municipalities_id IN ({})"
+      " AND language IN ({})";
 
   const bool is_fi = theOptions.GetLanguage() == "fi";
   std::map<int, std::string> municipality_names;
   std::set<int> municipalities = get_unique_values<int>(theR, "municipalities_id");
   const std::vector<std::string> language_codes = getLanguageCodes(theOptions.GetLanguage());
 
-  for (std::set<int>::const_iterator it = municipalities.begin();
-       it != municipalities.end(); )
+  for (std::set<int>::const_iterator it = municipalities.begin(); it != municipalities.end();)
   {
     std::vector<int> currMunicipalities;
     for (; it != municipalities.end() && currMunicipalities.size() < 1000; ++it)
@@ -1043,8 +1031,7 @@ try
   // FIXME: onko tämä oikea tapa ulkomaanasennusten tapauksessa?
   if (not is_fi)
   {
-    for (std::set<int>::const_iterator it = municipalities.begin();
-         it != municipalities.end(); )
+    for (std::set<int>::const_iterator it = municipalities.begin(); it != municipalities.end();)
     {
       std::vector<int> currMunicipalities;
       for (; it != municipalities.end() && currMunicipalities.size() < 1000; ++it)
@@ -1052,7 +1039,8 @@ try
         currMunicipalities.push_back(*it);
       }
 
-      const std::string sqlStmt2 = fmt::format(sql2, quote(currMunicipalities), quote(language_codes));
+      const std::string sqlStmt2 =
+          fmt::format(sql2, quote(currMunicipalities), quote(language_codes));
       const auto res = conn->executeNonTransaction(sqlStmt2);
       for (const auto& row : res)
       {
@@ -1077,7 +1065,6 @@ catch (...)
   throw Fmi::Exception::Trace(BCP, "Operation failed");
 }
 
-
 // ----------------------------------------------------------------------
 /*!
  * Resolve names for administrative areas (state) which references are present in the result set.
@@ -1088,11 +1075,10 @@ catch (...)
  */
 // ----------------------------------------------------------------------
 
-std::map<std::string, std::string> Query::getAdministrativeNames(
-    const QueryOptions& theOptions,
-    const pqxx::result& theR)
+std::map<std::string, std::string> Query::getAdministrativeNames(const QueryOptions& theOptions,
+                                                                 const pqxx::result& theR)
 {
-  constexpr  const char* sql = "SELECT code, name FROM admin1codes WHERE code IN ({})";
+  constexpr const char* sql = "SELECT code, name FROM admin1codes WHERE code IN ({})";
 
   std::map<std::string, std::string> admin_names;
 
@@ -1122,9 +1108,9 @@ std::map<std::string, std::string> Query::getAdministrativeNames(
   }
 
   // Query the admin1codes table to get the names
-  // We need to query the admin1codes table in batches to avoid too large queries (total size could be acceptable,
-  // but limit however single query to no more than 1000 admin1 codes).
-  for (std::set<std::string>::const_iterator it = admin_codes.begin(); it != admin_codes.end(); )
+  // We need to query the admin1codes table in batches to avoid too large queries (total size could
+  // be acceptable, but limit however single query to no more than 1000 admin1 codes).
+  for (std::set<std::string>::const_iterator it = admin_codes.begin(); it != admin_codes.end();)
   {
     std::vector<std::string> curr_admin_codes;
     for (; it != admin_codes.end() && curr_admin_codes.size() < 1000; ++it)
@@ -1150,22 +1136,19 @@ std::map<std::string, std::string> Query::getAdministrativeNames(
   return admin_names;
 }
 
-
-std::map<int, int> Query::getFmisids(
-    const QueryOptions& theOptions,
-    const pqxx::result& theR)
+std::map<int, int> Query::getFmisids(const QueryOptions& theOptions, const pqxx::result& theR)
 try
 {
   constexpr const char* sql =
-    "SELECT geonames_id, name FROM alternate_geonames "
-    "WHERE language='fmisid' AND geonames_id IN ({})";
+      "SELECT geonames_id, name FROM alternate_geonames "
+      "WHERE language='fmisid' AND geonames_id IN ({})";
 
   const std::set<std::string> ids = get_unique_values<string>(theR, "id");
   std::map<int, int> fmisids;
   for (std::set<std::string>::const_iterator it = ids.begin(); it != ids.end();)
   {
     std::vector<std::string> currIds;
-    for (; it != ids.end() and currIds.size() < 1000; )
+    for (; it != ids.end() and currIds.size() < 1000;)
     {
       currIds.push_back(*it++);
     }
@@ -1218,7 +1201,8 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
 
     // Caches subquery results
 
-    const std::map<int, std::string> name_variants = getNameVariants(theOptions, theR, theSearchWord);
+    const std::map<int, std::string> name_variants =
+        getNameVariants(theOptions, theR, theSearchWord);
     const std::map<std::string, std::string> country_cache = getCountryNames(theOptions, theR);
     const std::map<int, std::string> municipality_cache = getMunicipalityNames(theOptions, theR);
     const std::map<std::string, std::string> admin_cache = getAdministrativeNames(theOptions, theR);
@@ -1245,7 +1229,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
         name = it1->second;
 
       if ((!row["ansiname"].is_null()) && (theOptions.GetCharset() != "utf8"))
-      name = from_utf(name, row["ansiname"].as<string>(), theOptions.GetCharset());
+        name = from_utf(name, row["ansiname"].as<string>(), theOptions.GetCharset());
 
       // Elevation
 
@@ -1308,7 +1292,6 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
         if (pos != municipality_cache.end())
           administrative = pos->second;
       }
-
 
       // Check if area is correct
       bool ok = true;
@@ -1449,20 +1432,20 @@ string Query::constructSQLStatement(SQLQueryId theQueryId,
         break;
       }
       case eResolveNameVariants:
-        {
-          auto theGeonamesIds = std::any_cast<std::vector<int>>(theParams.at(eGeonamesId));
-          string language = theOptions.GetLanguage();
-          Fmi::ascii_tolower(language);
+      {
+        auto theGeonamesIds = std::any_cast<std::vector<int>>(theParams.at(eGeonamesId));
+        string language = theOptions.GetLanguage();
+        Fmi::ascii_tolower(language);
 
-          sql +=
-              "SELECT geonames_id, name,length(name) AS l, priority FROM alternate_geonames WHERE ";
-          sql += selectByValueCond("geonames_id", theGeonamesIds);
-          sql += " AND language" + constructLanguageCodeCondition(language);
-          sql +=
-              " AND historic=false AND colloquial=false ORDER BY priority ASC, preferred DESC, l "
-              "ASC, name ASC";
-        }
-        break;
+        sql +=
+            "SELECT geonames_id, name,length(name) AS l, priority FROM alternate_geonames WHERE ";
+        sql += selectByValueCond("geonames_id", theGeonamesIds);
+        sql += " AND language" + constructLanguageCodeCondition(language);
+        sql +=
+            " AND historic=false AND colloquial=false ORDER BY priority ASC, preferred DESC, l "
+            "ASC, name ASC";
+      }
+      break;
 
       case eFetchByName:
       {

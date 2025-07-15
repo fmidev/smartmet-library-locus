@@ -1,7 +1,7 @@
 #include "ISO639.h"
-#include <iostream>
 #include <boost/regex.hpp>
 #include <macgyver/Exception.h>
+#include <iostream>
 
 Locus::ISO639::ISO639(Fmi::Database::PostgreSQLConnection& conn,
                       const std::vector<std::string>& special_codes)

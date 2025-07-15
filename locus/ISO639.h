@@ -1,8 +1,8 @@
 #pragma once
 
-#include <optional>
 #include <macgyver/PostgreSQLConnection.h>
 #include <map>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <vector>

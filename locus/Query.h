@@ -10,12 +10,12 @@
 #include "QueryOptions.h"
 #include "SimpleLocation.h"
 
-#include <any>
-#include <optional>
-#include <memory>
 #include <macgyver/PostgreSQLConnection.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/TypeTraits.h>
+#include <any>
+#include <memory>
+#include <optional>
 
 #include <memory>
 #include <pqxx/pqxx>
@@ -76,9 +76,8 @@ class Query
   std::string ResolveNameVariant(const QueryOptions& theOptions,
                                  int theId,
                                  const std::string& theSearchWord = "%");
-  std::map<int, std::string>
-  ResolveNameVariants(const QueryOptions& theOptions,
-                      const std::vector<int>& theIds);
+  std::map<int, std::string> ResolveNameVariants(const QueryOptions& theOptions,
+                                                 const std::vector<int>& theIds);
 
   void AddCountryConditions(const QueryOptions& theOptions, std::string& theQuery) const;
   void AddFeatureConditions(const QueryOptions& theOptions, std::string& theQuery) const;
@@ -89,30 +88,23 @@ class Query
                               const std::string& theSearchWord,
                               const std::string& theArea = "");
 
-  std::map<int, std::string> getNameVariants(
-      const QueryOptions& theOptions,
-      const pqxx::result& theR,
-      const std::string& theSearchWord = "%");
+  std::map<int, std::string> getNameVariants(const QueryOptions& theOptions,
+                                             const pqxx::result& theR,
+                                             const std::string& theSearchWord = "%");
 
-  std::map<std::string, std::string> getFeatures(
-      const QueryOptions& theOptions,
-      const pqxx::result& theR);
+  std::map<std::string, std::string> getFeatures(const QueryOptions& theOptions,
+                                                 const pqxx::result& theR);
 
-  std::map<std::string, std::string> getCountryNames(
-      const QueryOptions& theOptions,
-      const pqxx::result& theR);
+  std::map<std::string, std::string> getCountryNames(const QueryOptions& theOptions,
+                                                     const pqxx::result& theR);
 
-  std::map<int, std::string> getMunicipalityNames(
-      const QueryOptions& theOptions,
-      const pqxx::result& theR);
+  std::map<int, std::string> getMunicipalityNames(const QueryOptions& theOptions,
+                                                  const pqxx::result& theR);
 
-  std::map<std::string, std::string> getAdministrativeNames(
-    const QueryOptions& theOptions,
-    const pqxx::result& theR);
+  std::map<std::string, std::string> getAdministrativeNames(const QueryOptions& theOptions,
+                                                            const pqxx::result& theR);
 
-  std::map<int, int> getFmisids(
-      const QueryOptions& theOptions,
-      const pqxx::result& theR);
+  std::map<int, int> getFmisids(const QueryOptions& theOptions, const pqxx::result& theR);
 
   std::vector<std::string> getLanguageCodes(const std::string& language);
 
@@ -164,22 +156,23 @@ class Query
                      std::any>& theParams);  // construct SQL statement
 
   template <typename ValueType>
-  typename std::enable_if<std::is_same<ValueType, std::string>::value, std::string>::type
-  quote(const ValueType& value) const
+  typename std::enable_if<std::is_same<ValueType, std::string>::value, std::string>::type quote(
+      const ValueType& value) const
   {
     return conn->quote(value);
   }
 
   template <typename ValueType>
-  typename std::enable_if<std::is_integral<ValueType>::value, std::string>::type
-  quote(const ValueType& value) const
+  typename std::enable_if<std::is_integral<ValueType>::value, std::string>::type quote(
+      const ValueType& value) const
   {
     return Fmi::to_string(value);
   }
 
   template <typename ContainerType>
-  typename std::enable_if<Fmi::is_iterable<ContainerType>::value
-     && !std::is_same_v<ContainerType, std::string>, std::string>::type
+  typename std::enable_if<Fmi::is_iterable<ContainerType>::value &&
+                              !std::is_same_v<ContainerType, std::string>,
+                          std::string>::type
   quote(const ContainerType& value) const
   {
     std::string result;
@@ -193,9 +186,8 @@ class Query
   }
 
   template <typename ValueType>
-  typename std::enable_if<
-    std::is_same_v<ValueType, std::string> || std::is_integral_v<ValueType>,
-    std::string>::type
+  typename std::enable_if<std::is_same_v<ValueType, std::string> || std::is_integral_v<ValueType>,
+                          std::string>::type
   selectByValueCond(const std::string& column, const ValueType& value)
   {
     return column + "=" + quote(value);
@@ -222,7 +214,7 @@ class Query
       return result;
     }
   }
-};                                             // class Query
+};  // class Query
 
 }  // namespace Locus
 

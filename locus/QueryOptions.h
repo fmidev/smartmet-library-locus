@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <optional>
 #include <list>
 #include <map>
+#include <optional>
 #include <string>
 
 namespace Locus
