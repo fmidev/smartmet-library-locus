@@ -9,15 +9,12 @@
 #include "ISO639.h"
 #include "QueryOptions.h"
 #include "SimpleLocation.h"
-
 #include <macgyver/PostgreSQLConnection.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/TypeTraits.h>
 #include <any>
 #include <memory>
 #include <optional>
-
-#include <memory>
 #include <pqxx/pqxx>
 #include <string>
 #include <vector>
