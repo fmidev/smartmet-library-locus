@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 25.6.4
-Release: 2%{?dist}.fmi
+Version: 25.9.29
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-locus
@@ -33,12 +33,12 @@ BuildRequires: make
 BuildRequires: postgresql15-devel
 BuildRequires: %{smartmet_fmt_devel}
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 25.2.18
+BuildRequires: smartmet-library-macgyver-devel >= 25.9.19
 Requires: %{smartmet_boost}-locale
 Requires: %{smartmet_boost}-regex
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: smartmet-library-macgyver >= 25.2.18
+Requires: smartmet-library-macgyver >= 25.9.19
 
 %if 0%{?rhel} && 0%{rhel} == 8
 Requires: libpqxx >= 1:7.7.0, libpqxx < 1:7.8.0
@@ -66,9 +66,9 @@ BuildRequires: libpqxx-devel
 #TestRequires: gcc-c++
 #TestRequires: make
 #TestRequires: postgresql15-libs
-#TestRequires: smartmet-library-macgyver-devel >= 25.2.18
+#TestRequires: smartmet-library-macgyver-devel >= 25.9.19
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-test-db >= 25.2.18
+#TestRequires: smartmet-test-db >= 25.6.18
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet-locus < 16.12.20
 Obsoletes: libsmartmet-locus-debuginfo < 16.12.20
@@ -114,6 +114,9 @@ Requires: smartmet-library-macgyver-devel
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Sep 29 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.9.29-1.fmi
+- Fixed compiler warnings
+
 * Wed Jun  4 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.6.4-2.fmi
 - Additional database use optimisation
 
