@@ -30,7 +30,7 @@ Locus::ISO639::ISO639(Fmi::Database::PostgreSQLConnection& conn,
     }
     catch (const std::exception& e)
     {
-      std::cout << "Error reading language codes: " << entry << ": " << e.what() << std::endl;
+      std::cout << "Error reading language codes: " << entry << ": " << e.what() << '\n';
     }
   }
 

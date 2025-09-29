@@ -103,14 +103,14 @@ class Query
 
   std::map<int, int> getFmisids(const QueryOptions& theOptions, const pqxx::result& theR);
 
-  std::vector<std::string> getLanguageCodes(const std::string& language);
+  static std::vector<std::string> getLanguageCodes(const std::string& language);
 
   void SetOptions(const QueryOptions& theOptions);
 
   static std::shared_ptr<ISO639>& get_mutable_iso639_table();
 
   // ids for queries
-  enum SQLQueryId
+  enum SQLQueryId : std::uint8_t
   {
     eResolveNameVariant,
     eResolveNameVariants,
@@ -124,7 +124,7 @@ class Query
   };
 
   // ids for query parameters
-  enum SQLQueryParameterId
+  enum SQLQueryParameterId : std::uint8_t
   {
     eQueryOptions,
     eSearchWord,
@@ -153,23 +153,22 @@ class Query
                      std::any>& theParams);  // construct SQL statement
 
   template <typename ValueType>
-  typename std::enable_if<std::is_same<ValueType, std::string>::value, std::string>::type quote(
+  std::enable_if_t<std::is_same_v<ValueType, std::string>, std::string> quote(
       const ValueType& value) const
   {
     return conn->quote(value);
   }
 
   template <typename ValueType>
-  typename std::enable_if<std::is_integral<ValueType>::value, std::string>::type quote(
-      const ValueType& value) const
+  std::enable_if_t<std::is_integral_v<ValueType>, std::string> quote(const ValueType& value) const
   {
     return Fmi::to_string(value);
   }
 
   template <typename ContainerType>
-  typename std::enable_if<Fmi::is_iterable<ContainerType>::value &&
-                              !std::is_same_v<ContainerType, std::string>,
-                          std::string>::type
+  std::enable_if_t<Fmi::is_iterable<ContainerType>::value &&
+                       !std::is_same_v<ContainerType, std::string>,
+                   std::string>
   quote(const ContainerType& value) const
   {
     std::string result;
@@ -183,33 +182,29 @@ class Query
   }
 
   template <typename ValueType>
-  typename std::enable_if<std::is_same_v<ValueType, std::string> || std::is_integral_v<ValueType>,
-                          std::string>::type
+  std::enable_if_t<std::is_same_v<ValueType, std::string> || std::is_integral_v<ValueType>,
+                   std::string>
   selectByValueCond(const std::string& column, const ValueType& value)
   {
     return column + "=" + quote(value);
   }
 
   template <typename ContainerType>
-  typename std::enable_if<Fmi::is_iterable<ContainerType>::value, std::string>::type
-  selectByValueCond(const std::string& column, const ContainerType& values) const
+  std::enable_if_t<Fmi::is_iterable<ContainerType>::value, std::string> selectByValueCond(
+      const std::string& column, const ContainerType& values) const
   {
     if (values.empty())
-    {
       return "";
-    }
-    else
+
+    std::string result = column + " IN (";
+    for (const auto& item : values)
     {
-      std::string result = column + " IN (";
-      for (const auto& item : values)
-      {
-        if (!result.empty() && result.back() != '(')
-          result += ", ";
-        result += quote(item);
-      }
-      result += ")";
-      return result;
+      if (!result.empty() && result.back() != '(')
+        result += ", ";
+      result += quote(item);
     }
+    result += ")";
+    return result;
   }
 };  // class Query
 

@@ -28,6 +28,15 @@ const char* CLIENT_ENCODING = "UTF8";
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Default locale
+ */
+// ----------------------------------------------------------------------
+
+const boost::locale::generator locale_generator;
+const std::locale default_locale = locale_generator("fi_FI.UTF-8");
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Convert from UTF-8 to given locale
  */
 // ----------------------------------------------------------------------
@@ -51,6 +60,7 @@ string from_utf(const string& name, const string& ansiname, const string& encodi
   }
 }
 
+#ifdef UNUSED
 string from_utf(const string& name, const string& encoding)
 {
   try
@@ -62,6 +72,7 @@ string from_utf(const string& name, const string& encoding)
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+#endif
 
 // ----------------------------------------------------------------------
 /*!
@@ -132,14 +143,6 @@ std::set<ValueType> get_unique_values(const pqxx::result& theResult,
 
 namespace Locus
 {
-// ----------------------------------------------------------------------
-/*!
- * \brief Default locale
- */
-// ----------------------------------------------------------------------
-
-boost::locale::generator locale_generator;
-std::locale default_locale = locale_generator("fi_FI.UTF-8");
 
 // ----------------------------------------------------------------------
 /*!
@@ -303,7 +306,7 @@ std::map<int, std::string> Query::ResolveNameVariants(const QueryOptions& theOpt
   params[eQueryOptions] = theOptions;
 
   std::map<int, std::string> retval;
-  std::vector<int>::const_iterator it = theIds.begin();
+  auto it = theIds.cbegin();
   while (it != theIds.end())
   {
     constexpr const size_t max_ids = 1000;  // Limit the number of ids to prevent too large queries
@@ -319,7 +322,7 @@ std::map<int, std::string> Query::ResolveNameVariants(const QueryOptions& theOpt
         continue;
 
       const int id = row[0].as<int>();
-      std::string name = row[1].as<string>();
+      auto name = row[1].as<string>();
 
       // If name is empty or already present in result map then skip it
       if (!name.empty() and not retval.count(id))
@@ -504,8 +507,6 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
 
     params[eSearchWord] = searchword;
 
-    string collation = theOptions.GetCollation();
-
     // Set country priorities
 
     const list<string>& countries = theOptions.GetCountries();
@@ -588,7 +589,7 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
       // Search all countries
 
       if (debug)
-        cout << "Do full country seach because limited search didn't return results" << endl;
+        cout << "Do full country seach because limited search didn't return results\n";
 
       QueryOptions newoptions = theOptions;
       newoptions.SetCountries("%");
@@ -873,7 +874,7 @@ std::vector<std::string> Query::getLanguageCodes(const std::string& language)
   return codes;
 }
 
-std::map<std::string, std::string> Query::getFeatures(const QueryOptions& theOptions,
+std::map<std::string, std::string> Query::getFeatures(const QueryOptions& /* theOptions */,
                                                       const pqxx::result& theR)
 {
   std::map<std::string, std::string> features;
@@ -888,8 +889,8 @@ std::map<std::string, std::string> Query::getFeatures(const QueryOptions& theOpt
   {
     if (row.size() < 2)
       continue;  // Skip rows that do not have the expected columns
-    std::string code = row[0].as<std::string>();
-    std::string shortdesc = row[1].as<std::string>();
+    auto code = row[0].as<std::string>();
+    auto shortdesc = row[1].as<std::string>();
     if (!shortdesc.empty())
     {
       features[code] = shortdesc;
@@ -935,8 +936,8 @@ try
   {
     if (row.size() < 2)
       continue;  // Skip rows that do not have the expected columns
-    std::string iso2 = row[0].as<std::string>();
-    std::string name = row[1].as<std::string>();
+    auto iso2 = row[0].as<std::string>();
+    auto name = row[1].as<std::string>();
     if (!name.empty())
     {
       // If name is already present, keep the shorter one (result is already ordered by length)
@@ -960,8 +961,8 @@ try
     {
       if (row.size() < 1)
         continue;  // Skip rows that do not have the expected columns
-      const std::string iso2 = row[0].as<std::string>();
-      const std::string name = row[1].as<std::string>();
+      const auto iso2 = row[0].as<std::string>();
+      const auto name = row[1].as<std::string>();
       auto it = country_names.find(iso2);
       if (it == country_names.end() and !name.empty())
       {
@@ -997,7 +998,7 @@ try
   std::set<int> municipalities = get_unique_values<int>(theR, "municipalities_id");
   const std::vector<std::string> language_codes = getLanguageCodes(theOptions.GetLanguage());
 
-  for (std::set<int>::const_iterator it = municipalities.begin(); it != municipalities.end();)
+  for (auto it = municipalities.begin(); it != municipalities.end();)
   {
     std::vector<int> currMunicipalities;
     for (; it != municipalities.end() && currMunicipalities.size() < 1000; ++it)
@@ -1015,7 +1016,7 @@ try
       const int id = row[0].as<int>();
       if (row[1].is_null())
         continue;  // Skip rows with null name
-      std::string name = row[1].as<std::string>();
+      auto name = row[1].as<std::string>();
       if (!name.empty())
       {
         // If name is already present, keep the shorter one (result is already ordered by length)
@@ -1031,7 +1032,7 @@ try
   // FIXME: onko tämä oikea tapa ulkomaanasennusten tapauksessa?
   if (not is_fi)
   {
-    for (std::set<int>::const_iterator it = municipalities.begin(); it != municipalities.end();)
+    for (auto it = municipalities.begin(); it != municipalities.end();)
     {
       std::vector<int> currMunicipalities;
       for (; it != municipalities.end() && currMunicipalities.size() < 1000; ++it)
@@ -1049,7 +1050,7 @@ try
         const int id = row[0].as<int>();
         if (row[1].is_null())
           continue;  // Skip rows with null name
-        const std::string name = row[1].as<std::string>();
+        const auto name = row[1].as<std::string>();
         if (not name.empty())
         {
           municipality_names[id] = name;  // Use id as name if no other name found
@@ -1075,8 +1076,8 @@ catch (...)
  */
 // ----------------------------------------------------------------------
 
-std::map<std::string, std::string> Query::getAdministrativeNames(const QueryOptions& theOptions,
-                                                                 const pqxx::result& theR)
+std::map<std::string, std::string> Query::getAdministrativeNames(
+    const QueryOptions& /* theOptions */, const pqxx::result& theR)
 {
   constexpr const char* sql = "SELECT code, name FROM admin1codes WHERE code IN ({})";
 
@@ -1098,8 +1099,8 @@ std::map<std::string, std::string> Query::getAdministrativeNames(const QueryOpti
     if (row[admin1_col].is_null() or row[country_col].is_null())
       continue;  // Skip rows that do not have the expected columns
 
-    const std::string admin1 = row[admin1_col].as<std::string>();
-    const std::string country_iso2 = row[country_col].as<std::string>();
+    const auto admin1 = row[admin1_col].as<std::string>();
+    const auto country_iso2 = row[country_col].as<std::string>();
     if (admin1.empty() || country_iso2.empty())
       continue;  // Skip empty admin1 or country_iso2
 
@@ -1110,7 +1111,7 @@ std::map<std::string, std::string> Query::getAdministrativeNames(const QueryOpti
   // Query the admin1codes table to get the names
   // We need to query the admin1codes table in batches to avoid too large queries (total size could
   // be acceptable, but limit however single query to no more than 1000 admin1 codes).
-  for (std::set<std::string>::const_iterator it = admin_codes.begin(); it != admin_codes.end();)
+  for (auto it = admin_codes.begin(); it != admin_codes.end();)
   {
     std::vector<std::string> curr_admin_codes;
     for (; it != admin_codes.end() && curr_admin_codes.size() < 1000; ++it)
@@ -1123,8 +1124,8 @@ std::map<std::string, std::string> Query::getAdministrativeNames(const QueryOpti
     {
       if (row.size() < 2 || row[0].is_null() || row[1].is_null())
         continue;  // Skip rows that do not have the expected columns or id or their values are NULL
-      const std::string code = row[0].as<std::string>();
-      const std::string name = row[1].as<std::string>();
+      const auto code = row[0].as<std::string>();
+      const auto name = row[1].as<std::string>();
       if (!name.empty())
       {
         // Use the admin code as key and name as value
@@ -1136,7 +1137,7 @@ std::map<std::string, std::string> Query::getAdministrativeNames(const QueryOpti
   return admin_names;
 }
 
-std::map<int, int> Query::getFmisids(const QueryOptions& theOptions, const pqxx::result& theR)
+std::map<int, int> Query::getFmisids(const QueryOptions& /* theOptions */, const pqxx::result& theR)
 try
 {
   constexpr const char* sql =
@@ -1145,7 +1146,7 @@ try
 
   const std::set<std::string> ids = get_unique_values<string>(theR, "id");
   std::map<int, int> fmisids;
-  for (std::set<std::string>::const_iterator it = ids.begin(); it != ids.end();)
+  for (auto it = ids.begin(); it != ids.end();)
   {
     std::vector<std::string> currIds;
     for (; it != ids.end() and currIds.size() < 1000;)
