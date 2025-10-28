@@ -15,7 +15,6 @@ LIBS += \
 	-lboost_locale \
 	-lboost_regex \
 	-lboost_thread \
-	-lboost_system \
 	-lpqxx \
 	$(ICU_I18N_LIBS)
 
