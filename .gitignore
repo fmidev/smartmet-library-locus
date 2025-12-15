@@ -12,3 +12,4 @@ dist/
 .settings/
 .ciprep
 /smartmet-library-locus.tar.gz
+/.vscode
