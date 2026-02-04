@@ -17,15 +17,10 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 %define smartmet_boost boost
 %endif
 
-%if 0%{?rhel} && 0%{rhel} <= 9
-%define smartmet_fmt_min 11.0.1
-%define smartmet_fmt_max 12.0.0
+%define smartmet_fmt_min 12.0.0
+%define smartmet_fmt_max 13.0.0
 %define smartmet_fmt fmt-libs >= %{smartmet_fmt_min}, fmt-libs < %{smartmet_fmt_max}
 %define smartmet_fmt_devel fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
-%else
-%define smartmet_fmt fmt
-%define smartmet_fmt_devel fmt-devel
-%endif
 
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: gcc-c++
@@ -33,12 +28,12 @@ BuildRequires: make
 BuildRequires: postgresql15-devel
 BuildRequires: %{smartmet_fmt_devel}
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 25.9.19
+BuildRequires: smartmet-library-macgyver-devel >= 26.2.4
 Requires: %{smartmet_boost}-locale
 Requires: %{smartmet_boost}-regex
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: smartmet-library-macgyver >= 25.9.19
+Requires: smartmet-library-macgyver >= 26.2.4
 
 %if 0%{?rhel} && 0%{rhel} == 8
 Requires: libpqxx >= 1:7.7.0, libpqxx < 1:7.8.0
@@ -66,9 +61,9 @@ BuildRequires: libpqxx-devel
 #TestRequires: gcc-c++
 #TestRequires: make
 #TestRequires: postgresql15-libs
-#TestRequires: smartmet-library-macgyver-devel >= 25.9.19
+#TestRequires: smartmet-library-macgyver-devel >= 26.2.4
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-test-db >= 25.6.18
+#TestRequires: smartmet-test-db >= 26.2.4
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet-locus < 16.12.20
 Obsoletes: libsmartmet-locus-debuginfo < 16.12.20
