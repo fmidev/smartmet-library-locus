@@ -24,7 +24,7 @@ using namespace std;
 
 namespace
 {
-const char* CLIENT_ENCODING = "UTF8";
+constexpr const char* CLIENT_ENCODING = "UTF8";
 
 // ----------------------------------------------------------------------
 /*!
@@ -137,6 +137,25 @@ std::set<ValueType> get_unique_values(const pqxx::result& theResult,
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
+}
+
+template <typename T>
+std::vector<std::vector<T>> make_batches(const std::set<T>& items, std::size_t batch_size)
+{
+  std::vector<std::vector<T>> batches;
+  std::vector<T> current;
+  for (const auto& item : items)
+  {
+    current.push_back(item);
+    if (current.size() >= batch_size)
+    {
+      batches.push_back(std::move(current));
+      current.clear();
+    }
+  }
+  if (!current.empty())
+    batches.push_back(std::move(current));
+  return batches;
 }
 
 }  // namespace
@@ -351,43 +370,25 @@ void Query::AddCountryConditions(const QueryOptions& theOptions, string& theQuer
     const list<string>& countries = theOptions.GetCountries();
     if (!countries.empty() && !contains(countries, "%") && !contains(countries, "all"))
     {
-      // Append to the query
-
-      int n = 1;
-      for (auto it = countries.begin(); it != countries.end(); ++it, ++n)
+      std::vector<std::string> upper_countries;
+      for (auto c : countries)
       {
-        string country_iso2 = *it;
-        Fmi::ascii_toupper(country_iso2);
-
-        if (n == 1)
-          theQuery += " AND geonames.countries_iso2 IN (";
-        else
-          theQuery += ",";
-        theQuery += conn->quote(country_iso2);
+        Fmi::ascii_toupper(c);
+        upper_countries.push_back(std::move(c));
       }
-
-      theQuery += ")";
+      theQuery += " AND geonames.countries_iso2 IN (" + quote(upper_countries) + ")";
     }
 
     const list<string>& excluded_countries = theOptions.GetExcludedCountries();
     if (!excluded_countries.empty() && !contains(countries, "%") && !contains(countries, "all"))
     {
-      // Append to the query
-
-      int n = 1;
-      for (auto it = excluded_countries.begin(); it != excluded_countries.end(); ++it, ++n)
+      std::vector<std::string> lower_excluded;
+      for (auto c : excluded_countries)
       {
-        string country_iso2 = *it;
-        Fmi::ascii_tolower(country_iso2);
-
-        if (n == 1)
-          theQuery += " AND geonames.countries_iso2 NOT IN (";
-        else
-          theQuery += ",";
-        theQuery += conn->quote(country_iso2);
+        Fmi::ascii_tolower(c);
+        lower_excluded.push_back(std::move(c));
       }
-
-      theQuery += ")";
+      theQuery += " AND geonames.countries_iso2 NOT IN (" + quote(lower_excluded) + ")";
     }
   }
   catch (...)
@@ -406,24 +407,10 @@ void Query::AddFeatureConditions(const QueryOptions& theOptions, string& theQuer
 {
   try
   {
-    // Nothing added if % or all is in the list
-
     const list<string>& features = theOptions.GetFeatures();
-
     if (features.empty() || contains(features, "%") || contains(features, "all"))
       return;
-
-    // Append to the query
-
-    int n = 1;
-    for (auto it = features.begin(); it != features.end(); ++it, ++n)
-    {
-      theQuery += (n == 1 ? " AND (" : " OR ");
-      theQuery += "features_code=";
-      theQuery += conn->quote(*it);
-    }
-
-    theQuery += ")";
+    theQuery += " AND features_code IN (" + quote(features) + ")";
   }
   catch (...)
   {
@@ -444,31 +431,11 @@ void Query::AddKeywordConditions(const QueryOptions& theOptions, string& theQuer
   try
   {
     const list<string>& keywords = theOptions.GetKeywords();
-
     if (keywords.empty() || contains(keywords, "%") || contains(keywords, "all"))
       return;
-
-    // Append to the query
-
-    int n = 1;
-    for (const auto& keyword : keywords)
-    {
-      if (n == 1)
-      {
-        theQuery +=
-            " AND geonames.id IN (SELECT geonames_id FROM keywords_has_geonames WHERE keyword IN (";
-        theQuery += conn->quote(keyword);
-      }
-      else
-      {
-        theQuery += ",";
-        theQuery += conn->quote(keyword);
-      }
-      n++;
-    }
-
-    if (n > 1)
-      theQuery += "))";
+    theQuery +=
+        " AND geonames.id IN (SELECT geonames_id FROM keywords_has_geonames WHERE keyword IN (" +
+        quote(keywords) + "))";
   }
   catch (...)
   {
@@ -508,62 +475,12 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
     params[eSearchWord] = searchword;
 
     // Set country priorities
-
-    const list<string>& countries = theOptions.GetCountries();
-
-    std::string country_priorities;
-    if (countries.size() > 1)
-    {
-      country_priorities += ", CASE countries_iso2 WHEN ";
-      int n = 1;
-      for (auto it = countries.begin(); it != countries.end(); ++it, ++n)
-      {
-        if (n == 1)
-        {
-          country_priorities += conn->quote(*it);
-          country_priorities += " THEN 1 ";
-        }
-        else
-        {
-          country_priorities += " WHEN ";
-          country_priorities += conn->quote(*it);
-          country_priorities += " THEN ";
-          country_priorities += Fmi::to_string(n);
-        }
-      }
-      if (n > 1)
-        country_priorities += " ELSE 1000 END as country_priority ";
-    }
-    params[eCountryPriorities] = country_priorities;
+    params[eCountryPriorities] =
+        buildCasePriority("countries_iso2", theOptions.GetCountries(), "country_priority");
 
     // Set feature priorities
-
-    const list<string>& features = theOptions.GetFeatures();
-
-    std::string feature_priorities;
-    if (features.size() > 1)
-    {
-      feature_priorities += ", CASE features_code WHEN ";
-      int n = 1;
-      for (auto it = features.begin(); it != features.end(); ++it, ++n)
-      {
-        if (n == 1)
-        {
-          feature_priorities += conn->quote(*it);
-          feature_priorities += " THEN 1 ";
-        }
-        else
-        {
-          feature_priorities += " WHEN ";
-          feature_priorities += conn->quote(*it);
-          feature_priorities += " THEN ";
-          feature_priorities += Fmi::to_string(n);
-        }
-      }
-      if (n > 1)
-        feature_priorities += " ELSE 1000 END as feature_priority ";
-    }
-    params[eFeaturePriorities] = feature_priorities;
+    params[eFeaturePriorities] =
+        buildCasePriority("features_code", theOptions.GetFeatures(), "feature_priority");
 
     string sqlStmt = constructSQLStatement(eFetchByName, params);
 
@@ -661,11 +578,7 @@ Query::return_type Query::FetchByLonLat(const QueryOptions& theOptions,
     string sqlStmt = constructSQLStatement(eFetchByLonLat, params);
     pqxx::result res = conn->executeNonTransaction(sqlStmt);
 
-    auto ret = build_locations(theOptions, res, "", "");
-
-    auto copyret = std::make_shared<Locus::Query::return_type>(ret);
-
-    return ret;
+    return build_locations(theOptions, res, "", "");
   }
   catch (...)
   {
@@ -790,75 +703,49 @@ std::map<int, std::string> Query::getNameVariants(const QueryOptions& theOptions
   std::map<int, std::string> name_variants;
   std::vector<int> variant_resolve_postponed;
 
-  // Does the result have a field for overriding names?
-  auto override_field_ind = find_column(theR, "override_name");
-  bool has_override_field = bool(override_field_ind);
-  for (unsigned int field = 0; !has_override_field && field < unsigned(theR.columns()); ++field)
-  {
-    if (string(theR.column_name(field)) == string("override_name"))
-      has_override_field = true;
-  }
+  const auto override_field_ind = find_column(theR, "override_name");
 
   for (pqxx::result::const_iterator row = theR.begin(); row != theR.end(); ++row)
   {
     if (row["timezone"].is_null())
       continue;
 
-    auto id = row["id"].as<int>();
+    const auto id = row["id"].as<int>();
 
-    // Determine name
-    string name;
-
-    // Use override if there is one
-
-    bool override_done = false;
-    if (override_field_ind)
+    // Use override name if available
+    if (override_field_ind && !row[*override_field_ind].is_null())
     {
-      const auto& override = row[*override_field_ind];
-      string altname = !override.is_null() ? override.as<string>() : "NULL";
-      if (!altname.empty() && altname != "NULL")
+      const auto altname = row[*override_field_ind].as<string>();
+      if (!altname.empty())
       {
-        name = altname;
-        override_done = true;
+        name_variants[id] = altname;
+        continue;
       }
     }
 
-    // Search for possible translations (postpone resolution if one can do it
-    // for several sites in the same SQL request)
+    // Search for possible translations
+    if (theOptions.GetLanguage().empty())
+      continue;
 
-    if (!override_done && !theOptions.GetLanguage().empty())
+    if (theOptions.GetAutoCompleteMode())
     {
-      string variant;
-      if (!theOptions.GetAutoCompleteMode())
-      {
-        variant_resolve_postponed.push_back(id);
-      }
-      else
-      {
-        variant = ResolveNameVariant(theOptions, id, theSearchWord);
-      }
-
+      const string variant = ResolveNameVariant(theOptions, id, theSearchWord);
       if (!variant.empty())
-        name = variant;
+        name_variants[id] = variant;
     }
-
-    if (!name.empty())
-      name_variants[id] = name;  // Store current name for later use
+    else
+    {
+      variant_resolve_postponed.push_back(id);
+    }
   }
 
-  // Resolve postponed name variants
+  // Resolve postponed name variants in batch
   if (!variant_resolve_postponed.empty())
   {
-    std::map<int, std::string> variants =
-        ResolveNameVariants(theOptions, variant_resolve_postponed);
-
-    for (const auto& item : variants)
+    const auto variants = ResolveNameVariants(theOptions, variant_resolve_postponed);
+    for (const auto& [id, name] : variants)
     {
-      const auto& id = item.first;
-      const auto& name = item.second;
-
-      // If name is empty or already present in result map then skip it
-      if (!name.empty() && !name_variants.count(id))
+      if (!name.empty() && name_variants.count(id) == 0)
         name_variants[id] = name;
     }
   }
@@ -979,84 +866,56 @@ catch (const Fmi::Exception& e)
   throw;
 }
 
+void Query::fetchFinnishMunicipalityNames(std::map<int, std::string>& names,
+                                           const std::vector<int>& ids) const
+{
+  constexpr const char* sql = "SELECT id, name FROM municipalities WHERE id IN ({})";
+  pqxx::result res = conn->executeNonTransaction(fmt::format(sql, quote(ids)));
+  for (const auto& row : res)
+  {
+    if (row.size() < 2 || row[1].is_null())
+      continue;
+    const int id = row[0].as<int>();
+    const auto name = row[1].as<std::string>();
+    if (!name.empty())
+      names.try_emplace(id, name);
+  }
+}
+
+void Query::fetchAlternateMunicipalityNames(std::map<int, std::string>& names,
+                                             const std::vector<int>& ids,
+                                             const std::vector<std::string>& language_codes) const
+{
+  constexpr const char* sql =
+      "SELECT municipalities_id id, name FROM alternate_municipalities"
+      " WHERE municipalities_id IN ({}) AND language IN ({})";
+  pqxx::result res =
+      conn->executeNonTransaction(fmt::format(sql, quote(ids), quote(language_codes)));
+  for (const auto& row : res)
+  {
+    if (row.size() < 2 || row[1].is_null())
+      continue;
+    const int id = row[0].as<int>();
+    const auto name = row[1].as<std::string>();
+    if (!name.empty())
+      names[id] = name;  // Override with translated name
+  }
+}
+
 std::map<int, std::string> Query::getMunicipalityNames(const QueryOptions& theOptions,
                                                        const pqxx::result& theR)
 try
 {
-  constexpr const char* sql1 = "SELECT id, name FROM municipalities WHERE id IN ({})";
-
-  constexpr const char* sql2 =
-      "SELECT"
-      "   municipalities_id id, name "
-      "FROM"
-      "   alternate_municipalities "
-      "WHERE municipalities_id IN ({})"
-      " AND language IN ({})";
-
   const bool is_fi = theOptions.GetLanguage() == "fi";
   std::map<int, std::string> municipality_names;
-  std::set<int> municipalities = get_unique_values<int>(theR, "municipalities_id");
+  const std::set<int> municipalities = get_unique_values<int>(theR, "municipalities_id");
   const std::vector<std::string> language_codes = getLanguageCodes(theOptions.GetLanguage());
 
-  for (auto it = municipalities.begin(); it != municipalities.end();)
+  for (const auto& batch : make_batches(municipalities, 1000))
   {
-    std::vector<int> currMunicipalities;
-    for (; it != municipalities.end() && currMunicipalities.size() < 1000; ++it)
-    {
-      currMunicipalities.push_back(*it);
-    }
-
-    // Query the municipalities table to get the names
-    const std::string sqlStmt1 = fmt::format(sql1, quote(currMunicipalities));
-    pqxx::result res = conn->executeNonTransaction(sqlStmt1);
-    for (const auto& row : res)
-    {
-      if (row.size() < 2)
-        continue;  // Skip rows that do not have the expected columns
-      const int id = row[0].as<int>();
-      if (row[1].is_null())
-        continue;  // Skip rows with null name
-      auto name = row[1].as<std::string>();
-      if (!name.empty())
-      {
-        // If name is already present, keep the shorter one (result is already ordered by length)
-        auto it = municipality_names.find(id);
-        if (it == municipality_names.end())
-        {
-          municipality_names[id] = name;
-        }
-      }
-    }
-  }
-
-  // FIXME: onko tämä oikea tapa ulkomaanasennusten tapauksessa?
-  if (not is_fi)
-  {
-    for (auto it = municipalities.begin(); it != municipalities.end();)
-    {
-      std::vector<int> currMunicipalities;
-      for (; it != municipalities.end() && currMunicipalities.size() < 1000; ++it)
-      {
-        currMunicipalities.push_back(*it);
-      }
-
-      const std::string sqlStmt2 =
-          fmt::format(sql2, quote(currMunicipalities), quote(language_codes));
-      const auto res = conn->executeNonTransaction(sqlStmt2);
-      for (const auto& row : res)
-      {
-        if (row.size() < 1)
-          continue;  // Skip rows that do not have the expected columns
-        const int id = row[0].as<int>();
-        if (row[1].is_null())
-          continue;  // Skip rows with null name
-        const auto name = row[1].as<std::string>();
-        if (not name.empty())
-        {
-          municipality_names[id] = name;  // Use id as name if no other name found
-        }
-      }
-    }
+    fetchFinnishMunicipalityNames(municipality_names, batch);
+    if (!is_fi)
+      fetchAlternateMunicipalityNames(municipality_names, batch, language_codes);
   }
 
   return municipality_names;
@@ -1129,7 +988,7 @@ std::map<std::string, std::string> Query::getAdministrativeNames(
       if (!name.empty())
       {
         // Use the admin code as key and name as value
-        admin_names[*it] = name;
+        admin_names[code] = name;
       }
     }
   }
@@ -1188,6 +1047,121 @@ catch (...)
  */
 // ----------------------------------------------------------------------
 
+std::optional<SimpleLocation> Query::buildSingleLocation(
+    const QueryOptions& opts,
+    const pqxx::result::const_iterator& row,
+    const std::map<int, std::string>& name_variants,
+    const std::map<std::string, std::string>& country_cache,
+    const std::map<int, std::string>& municipality_cache,
+    const std::map<std::string, std::string>& admin_cache,
+    const std::map<int, int>& fmisids,
+    const std::map<std::string, std::string>& feature_cache,
+    const std::string& theArea)
+{
+  if (row["timezone"].is_null())
+    return std::nullopt;
+
+  const int id = row["id"].as<int>();
+  string name = (!row["name"].is_null() ? row["name"].as<string>() : "NULL");
+
+  const auto it1 = name_variants.find(id);
+  if (it1 != name_variants.end())
+    name = it1->second;
+
+  if (!row["ansiname"].is_null() && opts.GetCharset() != "utf8")
+    name = from_utf(name, row["ansiname"].as<string>(), opts.GetCharset());
+
+  int elevation = 0;
+  if (!row["elevation"].is_null() && row["elevation"].as<int>() != 0)
+    elevation = row["elevation"].as<int>();
+  else if (!row["dem"].is_null())
+    elevation = row["dem"].as<int>();
+
+  string country;
+  string iso2;
+  if (!row["iso2"].is_null())
+  {
+    iso2 = row["iso2"].as<string>();
+    const auto pos = country_cache.find(iso2);
+    if (pos != country_cache.end())
+      country = pos->second;
+  }
+
+  string description;
+  string features_code;
+  if (!row["features_code"].is_null())
+  {
+    features_code = row["features_code"].as<string>();
+    const auto pos = feature_cache.find(features_code);
+    if (pos != feature_cache.end())
+      description = pos->second;
+  }
+
+  // Resolve administrative area name
+  string administrative;
+  if (!row["municipalities_id"].is_null())
+  {
+    const auto pos = municipality_cache.find(row["municipalities_id"].as<int>());
+    if (pos != municipality_cache.end())
+      administrative = pos->second;
+  }
+  else if (const auto admin1 = row["admin1"].as<string>(); !admin1.empty())
+  {
+    const auto pos = admin_cache.find(iso2 + "." + admin1);
+    if (pos != admin_cache.end())
+      administrative = pos->second;
+  }
+
+  if (!theArea.empty())
+  {
+    const string lc_area = boost::locale::to_lower(theArea, default_locale);
+    if (lc_area != boost::locale::to_lower(country, default_locale) &&
+        lc_area != boost::locale::to_lower(administrative, default_locale))
+      return std::nullopt;
+  }
+
+  SimpleLocation loc(name,
+                     row["lon"].as<float>(),
+                     row["lat"].as<float>(),
+                     country,
+                     features_code,
+                     description,
+                     row["timezone"].as<string>(),
+                     administrative,
+                     row["population"].as<unsigned int>(),
+                     iso2,
+                     row["id"].as<int>(),
+                     elevation);
+
+  const auto fmisid_it = fmisids.find(id);
+  if (fmisid_it != fmisids.end())
+    loc.fmisid = fmisid_it->second;
+
+  return loc;
+}
+
+void Query::sortByExactMatch(return_type& locations, const std::string& theSearchWord)
+{
+  // Remove trailing "%" from searchword
+  const string tmp = theSearchWord.substr(0, theSearchWord.size() - 1);
+
+  return_type bestmatches;
+  return_type secondarymatches;
+  for (const auto& location : locations)
+  {
+    if (boost::iequals(tmp, location.name))
+      bestmatches.push_back(location);
+    else
+      secondarymatches.push_back(location);
+  }
+
+  locations.clear();
+  for (const auto& match : bestmatches)
+    locations.push_back(match);
+  for (const auto& match : secondarymatches)
+    locations.push_back(match);
+}
+
 Query::return_type Query::build_locations(const QueryOptions& theOptions,
                                           const pqxx::result& theR,
                                           const string& theSearchWord,
@@ -1195,171 +1169,32 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
 {
   try
   {
-    return_type locations;
-
     if (theR.empty())
-      return locations;
+      return {};
 
-    // Caches subquery results
+    const auto name_variants = getNameVariants(theOptions, theR, theSearchWord);
+    const auto country_cache = getCountryNames(theOptions, theR);
+    const auto municipality_cache = getMunicipalityNames(theOptions, theR);
+    const auto admin_cache = getAdministrativeNames(theOptions, theR);
+    const auto fmisids = getFmisids(theOptions, theR);
+    const auto feature_cache = getFeatures(theOptions, theR);
 
-    const std::map<int, std::string> name_variants =
-        getNameVariants(theOptions, theR, theSearchWord);
-    const std::map<std::string, std::string> country_cache = getCountryNames(theOptions, theR);
-    const std::map<int, std::string> municipality_cache = getMunicipalityNames(theOptions, theR);
-    const std::map<std::string, std::string> admin_cache = getAdministrativeNames(theOptions, theR);
-    const std::map<int, int> fmisids = getFmisids(theOptions, theR);
-    const map<string, string> feature_cache = getFeatures(theOptions, theR);
-
-    // Process one location at a time
-
+    return_type locations;
     for (pqxx::result::const_iterator row = theR.begin(); row != theR.end(); ++row)
     {
-      // Do not handle locations without timezones. This is just a safety check,
-      // NULL timezones should be removed already in the SQL query, otherwise
-      // you might get zero results if the result count limit is 1.
-
-      if (row["timezone"].is_null())
-        continue;
-
-      const int id = row["id"].as<int>();
-      std::string name = (!row["name"].is_null() ? row["name"].as<string>() : "NULL");
-
-      // Check whether name variant should be used
-      auto it1 = name_variants.find(id);
-      if (it1 != name_variants.end())
-        name = it1->second;
-
-      if ((!row["ansiname"].is_null()) && (theOptions.GetCharset() != "utf8"))
-        name = from_utf(name, row["ansiname"].as<string>(), theOptions.GetCharset());
-
-      // Elevation
-
-      int elevation = 0;
-
-      if (!row["elevation"].is_null() && (row["elevation"].as<int>() != 0))
-        elevation = row["elevation"].as<int>();
-      else if (!row["dem"].is_null())
-        elevation = row["dem"].as<int>();
-
-      // Country and description
-
-      string country;
-      string iso2;
-      if (!row["iso2"].is_null())
+      auto loc = buildSingleLocation(theOptions, row, name_variants, country_cache,
+                                     municipality_cache, admin_cache, fmisids, feature_cache,
+                                     theArea);
+      if (loc)
       {
-        iso2 = row["iso2"].as<string>();
-        const auto pos = country_cache.find(iso2);
-        if (pos != country_cache.end())
-          country = pos->second;
-      }
-
-      // Feature code and description
-
-      string description;
-      string features_code;
-      if (!row["features_code"].is_null())
-      {
-        features_code = row["features_code"].as<string>();
-        const auto pos = feature_cache.find(features_code);
-        if (pos != feature_cache.end())
-          description = pos->second;
-      }
-
-      // Administrative areas
-
-      string administrative;
-      if (row["municipalities_id"].is_null())
-      {
-        // If municipalities_id is NULL, we try to resolve administrative area
-        // from admin1 and iso2 fields
-
-        auto admin1 = row["admin1"].as<string>();
-        if (!admin1.empty())
-        {
-          auto localiso2 = row["iso2"].as<string>();
-          string key = admin1 + '|' + localiso2;
-          const auto pos = admin_cache.find(key);
-          if (pos != admin_cache.end())
-            administrative = pos->second;
-        }
-      }
-      else
-      {
-        // If municipalities_id is not NULL, we try to resolve administrative area
-        // from municipalities_id field
-
-        const int municipalities_id = row["municipalities_id"].as<int>();
-        auto pos = municipality_cache.find(municipalities_id);
-        if (pos != municipality_cache.end())
-          administrative = pos->second;
-      }
-
-      // Check if area is correct
-      bool ok = true;
-
-      if (!theArea.empty())
-      {
-        string lc_area = boost::locale::to_lower(theArea, default_locale);
-        ok = (lc_area == boost::locale::to_lower(country, default_locale) ||
-              lc_area == boost::locale::to_lower(administrative, default_locale));
-      }
-
-      if (ok)
-      {
-        SimpleLocation loc(name,
-                           row["lon"].as<float>(),
-                           row["lat"].as<float>(),
-                           country,
-                           features_code,
-                           description,
-                           row["timezone"].as<string>(),
-                           administrative,
-                           row["population"].as<unsigned int>(),
-                           iso2,
-                           row["id"].as<int>(),
-                           elevation);
-
-        const auto fmisid_it = fmisids.find(id);
-        if (fmisid_it != fmisids.end())
-          loc.fmisid = fmisid_it->second;
-
-        locations.emplace_back(loc);
-      }
-
-      // See if locations-sequence is already long enough
-
-      if (theOptions.GetResultLimit() > 0 && locations.size() >= theOptions.GetResultLimit())
-      {
-        break;
+        locations.emplace_back(std::move(*loc));
+        if (theOptions.GetResultLimit() > 0 && locations.size() >= theOptions.GetResultLimit())
+          break;
       }
     }
-
-    // Sort exact matchs first if autocompletemode
 
     if (theOptions.GetAutoCompleteMode())
-    {
-      vector<SimpleLocation> bestmatches;
-      vector<SimpleLocation> secondarymatches;
-
-      // Remove "%" from searchword
-      string tmp = theSearchWord.substr(0, theSearchWord.size() - 1);
-
-      for (const auto& location : locations)
-      {
-        if (boost::iequals(tmp, location.name))
-          bestmatches.push_back(location);
-        else
-          secondarymatches.push_back(location);
-      }
-
-      locations.clear();
-
-      for (const auto& match : bestmatches)
-        locations.push_back(match);
-
-      for (const auto& match : secondarymatches)
-        locations.push_back(match);
-    }
+      sortByExactMatch(locations, theSearchWord);
 
     return locations;
   }
@@ -1369,440 +1204,263 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
   }
 }
 
+std::string Query::languageCodeCondition(const std::string& language) const
+{
+  const std::vector<std::string> codes = get_iso639_table()->get_codes(language);
+  if (codes.empty())
+    return "=" + conn->quote(language);
+  if (codes.size() == 1)
+    return "=" + conn->quote(codes.front());
+  return " IN (" + quote(codes) + ")";
+}
+
+std::string Query::buildCasePriority(const std::string& column,
+                                      const std::list<std::string>& items,
+                                      const std::string& alias) const
+{
+  if (items.size() <= 1)
+    return "";
+  std::string result = ", CASE " + column;
+  int n = 1;
+  for (const auto& item : items)
+    result += " WHEN " + conn->quote(item) + " THEN " + Fmi::to_string(n++);
+  return result + " ELSE 1000 END AS " + alias;
+}
+
+std::string Query::buildResolveNameVariantSQL(
+    const QueryOptions& opts,
+    const std::map<SQLQueryParameterId, std::any>& params) const
+{
+  const auto theGeonamesId = std::any_cast<int>(params.at(eGeonamesId));
+  const auto theSearchWord = std::any_cast<string>(params.at(eSearchWord));
+  string language = opts.GetLanguage();
+  Fmi::ascii_tolower(language);
+
+  std::string sql =
+      "SELECT name,length(name) AS l, priority FROM alternate_geonames WHERE geonames_id=";
+  sql += Fmi::to_string(theGeonamesId);
+  sql += " AND language" + languageCodeCondition(language);
+  if (opts.GetAutoCompleteMode())
+    sql += " AND name LIKE " + conn->quote(theSearchWord);
+  sql +=
+      " AND historic=false AND colloquial=false ORDER BY priority ASC, preferred DESC, l ASC, name ASC LIMIT 1";
+  return sql;
+}
+
+std::string Query::buildResolveNameVariantsSQL(
+    const QueryOptions& opts,
+    const std::map<SQLQueryParameterId, std::any>& params) const
+{
+  const auto theGeonamesIds = std::any_cast<std::vector<int>>(params.at(eGeonamesId));
+  string language = opts.GetLanguage();
+  Fmi::ascii_tolower(language);
+
+  std::string sql =
+      "SELECT geonames_id, name,length(name) AS l, priority FROM alternate_geonames WHERE ";
+  sql += selectByValueCond("geonames_id", theGeonamesIds);
+  sql += " AND language" + languageCodeCondition(language);
+  sql +=
+      " AND historic=false AND colloquial=false ORDER BY priority ASC, preferred DESC, l ASC, name ASC";
+  return sql;
+}
+
+std::string Query::buildFetchByNameSQL(const QueryOptions& opts,
+                                        const std::map<SQLQueryParameterId, std::any>& params) const
+{
+  const auto theSearchWord = std::any_cast<string>(params.at(eSearchWord));
+  const auto theCountryPriorities = std::any_cast<string>(params.at(eCountryPriorities));
+  const auto theFeaturePriorities = std::any_cast<string>(params.at(eFeaturePriorities));
+
+  auto addPopulationConditions = [&](std::string& sql)
+  {
+    if (opts.GetPopulationMin() > 0)
+      sql += " AND population>=" + Fmi::to_string(opts.GetPopulationMin());
+    if (opts.GetPopulationMax() > 0)
+      sql += " AND population<=" + Fmi::to_string(opts.GetPopulationMax());
+  };
+
+  auto addCollation = [&](std::string& sql)
+  {
+    if (conn->collateSupported())
+      sql += " COLLATE " + conn->quote(opts.GetCollation());
+  };
+
+  auto buildSelect = [&](bool withVariants) -> std::string
+  {
+    std::string sql =
+        "SELECT DISTINCT geonames.name AS name,"
+        " geonames.ansiname AS ansiname,"
+        " lat, lon, countries_iso2 AS iso2,"
+        " features_code, timezone, geonames.id as id, geonames.priority as geonames_priority,"
+        " municipalities_id, admin1, population,"
+        " elevation, dem,"
+        " CASE WHEN population>50000 THEN population ELSE 0 END AS population_priority ";
+    sql += theCountryPriorities;
+    sql += ' ';
+    sql += theFeaturePriorities;
+
+    if (!withVariants)
+    {
+      sql += " FROM geonames WHERE LOWER(geonames.name) LIKE LOWER(";
+      sql += conn->quote(theSearchWord);
+      sql += ')';
+      addCollation(sql);
+      sql += " AND timezone IS NOT NULL";
+    }
+    else
+    {
+      string language = opts.GetLanguage();
+      Fmi::ascii_tolower(language);
+      sql += " FROM geonames, alternate_geonames WHERE LOWER(alternate_geonames.name) LIKE LOWER(";
+      sql += conn->quote(theSearchWord);
+      sql += ")";
+      addCollation(sql);
+      sql += " AND alternate_geonames.geonames_id=geonames.id AND alternate_geonames.language LIKE ";
+      sql += conn->quote(language);
+      if (opts.GetAutoCompleteMode())
+      {
+        sql += " AND alternate_geonames.language";
+        sql += languageCodeCondition(language);
+      }
+    }
+
+    addPopulationConditions(sql);
+    AddFeatureConditions(opts, sql);
+    AddCountryConditions(opts, sql);
+    AddKeywordConditions(opts, sql);
+    return sql;
+  };
+
+  std::string sql;
+  if (opts.GetSearchVariants())
+    sql = "(" + buildSelect(false) + ") UNION (" + buildSelect(true) + ")";
+  else
+    sql = buildSelect(false);
+
+  sql += " ORDER BY geonames_priority, population_priority DESC, ";
+  sql += (theCountryPriorities.empty() ? "" : "country_priority, ");
+  sql += (theFeaturePriorities.empty() ? "" : "feature_priority, ");
+  sql += " population DESC, name";
+  if (conn->collateSupported())
+    sql += " COLLATE " + conn->quote(opts.GetCollation());
+
+  return sql;
+}
+
+std::string Query::buildFetchByLonLatSQL(
+    const QueryOptions& opts,
+    const std::map<SQLQueryParameterId, std::any>& params) const
+{
+  const auto theLongitude = std::any_cast<float>(params.at(eLongitude));
+  const auto theLatitude = std::any_cast<float>(params.at(eLatitude));
+  const auto theRadius = std::any_cast<float>(params.at(eRadius));
+
+  const std::string point =
+      Fmi::to_string(theLongitude) + " " + Fmi::to_string(theLatitude);
+
+  std::string sql =
+      "WITH candidates AS ("
+      "SELECT geonames.id AS id, geonames.name AS name,"
+      "geonames.ansiname AS ansiname, lat, lon,"
+      "countries_iso2 AS iso2, features_code, timezone,"
+      "population, elevation, dem, municipalities_id,"
+      "admin1, ST_Distance(ST_GeographyFromText('POINT(";
+  sql += point;
+  sql += ")'), the_geog, true) as distance FROM geonames WHERE timezone IS NOT NULL";
+
+  if (opts.GetPopulationMin() > 0)
+    sql += " AND population>=" + Fmi::to_string(opts.GetPopulationMin());
+  if (opts.GetPopulationMax() > 0)
+    sql += " AND population<=" + Fmi::to_string(opts.GetPopulationMax());
+
+  AddCountryConditions(opts, sql);
+  AddFeatureConditions(opts, sql);
+  AddKeywordConditions(opts, sql);
+
+  sql += " ORDER BY the_geom <-> ST_GeomFromText('POINT(" + point + ")',4326)";
+
+  const int limit_safety_margin = 10;
+  if (opts.GetResultLimit() > 0)
+    sql += " LIMIT " + Fmi::to_string(limit_safety_margin + opts.GetResultLimit());
+
+  sql += ") SELECT * from candidates";
+  if (theRadius > 0)
+    sql += " WHERE distance<=" + Fmi::to_string(theRadius * 1000);
+  sql += " ORDER BY distance";
+  if (opts.GetResultLimit() > 0)
+    sql += " LIMIT " + Fmi::to_string(opts.GetResultLimit());
+
+  return sql;
+}
+
+std::string Query::buildFetchByIdSQL(
+    const std::map<SQLQueryParameterId, std::any>& params)
+{
+  const auto theId = std::any_cast<int>(params.at(eGeonameId));
+  return "SELECT id, name, ansiname, lat, lon, countries_iso2 AS iso2, features_code,"
+         " timezone, municipalities_id, admin1, population,"
+         " elevation, dem"
+         " FROM geonames WHERE id=" +
+         Fmi::to_string(theId);
+}
+
+std::string Query::buildFetchByKeywordSQL(
+    SQLQueryId queryId,
+    const QueryOptions& /* opts */,
+    const std::map<SQLQueryParameterId, std::any>& params) const
+{
+  const auto theKeyword = std::any_cast<string>(params.at(eKeyword));
+
+  if (queryId == eFetchByKeyword1)
+    return "SELECT keyword FROM keywords WHERE keyword=" + conn->quote(theKeyword);
+
+  // eFetchByKeyword2
+  return "SELECT geonames.id AS id, geonames.name AS name,\n "
+         "geonames.ansiname AS ansiname,lat,lon,\n "
+         "countries_iso2 AS iso2, features_code, timezone,\n "
+         "population, elevation, dem,\n "
+         "municipalities_id, admin1,\n "
+         "keywords_has_geonames.name AS override_name FROM \n "
+         "geonames, keywords_has_geonames WHERE\n "
+         "keywords_has_geonames.keyword=" +
+         conn->quote(theKeyword) +
+         " AND geonames.id=keywords_has_geonames.geonames_id"
+         " ORDER BY name";
+}
+
+std::string Query::buildCountKeywordLocationsSQL(
+    const std::map<SQLQueryParameterId, std::any>& params) const
+{
+  const auto theKeyword = std::any_cast<string>(params.at(eKeyword));
+  return "SELECT count(*) AS count FROM keywords_has_geonames WHERE keyword=" +
+         conn->quote(theKeyword);
+}
+
 string Query::constructSQLStatement(SQLQueryId theQueryId,
                                     const map<SQLQueryParameterId, std::any>& theParams)
 {
   try
   {
-    std::string sql;
-
-    const auto constructLanguageCodeCondition = [this](const std::string& language) -> std::string
-    {
-      const std::vector<std::string> codes = get_iso639_table()->get_codes(language);
-      if (codes.empty())
-        return "=" + conn->quote(language);
-
-      if (codes.size() == 1)
-        return "=" + conn->quote(codes.at(0));
-
-      std::string result = " in (";
-      for (std::size_t i = 0; i < codes.size(); i++)
-      {
-        if (i)
-          result += ", ";
-
-        result += conn->quote(codes.at(i));
-      }
-      result += ") ";
-      return result;
-    };
-
-    const auto& theOptions = std::any_cast<const QueryOptions&>(theParams.at(eQueryOptions));
-
+    const auto& opts = std::any_cast<const QueryOptions&>(theParams.at(eQueryOptions));
     switch (theQueryId)
     {
       case eResolveNameVariant:
-      {
-        auto theGeonamesId = std::any_cast<int>(theParams.at(eGeonamesId));
-        auto theSearchWord = std::any_cast<string>(theParams.at(eSearchWord));
-        string language = theOptions.GetLanguage();
-        Fmi::ascii_tolower(language);
-
-        if (!theOptions.GetAutoCompleteMode())
-        {
-          sql +=
-              "SELECT name,length(name) AS l, priority FROM alternate_geonames WHERE geonames_id=";
-          sql += Fmi::to_string(theGeonamesId);
-          sql += " AND language" + constructLanguageCodeCondition(language);
-          sql +=
-              " AND historic=false AND colloquial=false ORDER BY priority ASC, preferred DESC, l "
-              "ASC, name ASC LIMIT 1";
-        }
-        else
-        {
-          sql +=
-              "SELECT name,length(name) As l, priority FROM alternate_geonames WHERE geonames_id=";
-          sql += Fmi::to_string(theGeonamesId);
-          sql += " AND language" + constructLanguageCodeCondition(language);
-          sql += " AND name LIKE ";
-          sql += conn->quote(theSearchWord);
-          sql +=
-              " AND historic=false AND colloquial=false ORDER BY priority ASC, preferred DESC, l "
-              "ASC, name ASC LIMIT 1";
-        }
-        break;
-      }
+        return buildResolveNameVariantSQL(opts, theParams);
       case eResolveNameVariants:
-      {
-        auto theGeonamesIds = std::any_cast<std::vector<int>>(theParams.at(eGeonamesId));
-        string language = theOptions.GetLanguage();
-        Fmi::ascii_tolower(language);
-
-        sql +=
-            "SELECT geonames_id, name,length(name) AS l, priority FROM alternate_geonames WHERE ";
-        sql += selectByValueCond("geonames_id", theGeonamesIds);
-        sql += " AND language" + constructLanguageCodeCondition(language);
-        sql +=
-            " AND historic=false AND colloquial=false ORDER BY priority ASC, preferred DESC, l "
-            "ASC, name ASC";
-      }
-      break;
-
+        return buildResolveNameVariantsSQL(opts, theParams);
       case eFetchByName:
-      {
-        if (theOptions.GetSearchVariants())
-          sql += "(";
-
-        auto theSearchWord = std::any_cast<string>(theParams.at(eSearchWord));
-        auto theCountryPriorities = std::any_cast<string>(theParams.at(eCountryPriorities));
-        auto theFeaturePriorities = std::any_cast<string>(theParams.at(eFeaturePriorities));
-
-        sql +=
-            "SELECT DISTINCT geonames.name AS name,"
-            " geonames.ansiname AS ansiname,"
-            " lat, lon, countries_iso2 AS iso2,"
-            " features_code, timezone, geonames.id as id, geonames.priority as geonames_priority,"
-            " municipalities_id, admin1, population, "
-            " elevation, dem, "
-            " CASE WHEN population>50000 THEN population ELSE 0 END AS population_priority ";
-        sql += theCountryPriorities;
-        sql += ' ';
-        sql += theFeaturePriorities;
-        sql += " FROM geonames WHERE LOWER(geonames.name) LIKE LOWER(";
-        sql += conn->quote(theSearchWord);
-        sql += ')';
-
-        if (conn->collateSupported())
-        {
-          sql += " COLLATE ";
-          sql += conn->quote(theOptions.GetCollation());
-        }
-
-        // PHP version does not do this, but we cannot tolerate it in brainstorm
-        sql += " AND timezone IS NOT NULL";
-
-        if (theOptions.GetPopulationMin() > 0)
-        {
-          sql += " AND population>=";
-          sql += Fmi::to_string(theOptions.GetPopulationMin());
-        }
-        if (theOptions.GetPopulationMax() > 0)
-        {
-          sql += " AND population<=";
-          sql += Fmi::to_string(theOptions.GetPopulationMax());
-        }
-
-        AddFeatureConditions(theOptions, sql);
-        AddCountryConditions(theOptions, sql);
-        AddKeywordConditions(theOptions, sql);
-
-        if (theOptions.GetSearchVariants())
-        {
-          string language = theOptions.GetLanguage();
-          Fmi::ascii_tolower(language);
-
-          sql +=
-              ") UNION (SELECT DISTINCT geonames.name AS name,"
-              " geonames.ansiname AS ansiname, lat, lon,"
-              " countries_iso2 AS iso2, features_code, timezone,"
-              " geonames.id as id, geonames.priority as geonames_priority, municipalities_id,"
-              " admin1, population, "
-              " elevation, dem, "
-              " CASE WHEN population>50000 THEN population ELSE 0 END AS population_priority ";
-          sql += theCountryPriorities;
-          sql += ' ';
-          sql += theFeaturePriorities;
-          sql +=
-              " FROM geonames, alternate_geonames WHERE LOWER(alternate_geonames.name) LIKE LOWER(";
-          sql += conn->quote(theSearchWord);
-          sql += ")";
-
-          if (conn->collateSupported())
-          {
-            sql += " COLLATE ";
-            sql += conn->quote(theOptions.GetCollation());
-          }
-
-          // FIXME: update this
-          sql +=
-              " AND alternate_geonames.geonames_id=geonames.id AND alternate_geonames.language "
-              "LIKE ";
-          sql += conn->quote(language);
-
-          if (theOptions.GetPopulationMin() > 0)
-          {
-            sql += " AND population>=";
-            sql += Fmi::to_string(theOptions.GetPopulationMin());
-          }
-          if (theOptions.GetPopulationMax() > 0)
-          {
-            sql += " AND population<=";
-            sql += Fmi::to_string(theOptions.GetPopulationMax());
-          }
-          if (theOptions.GetAutoCompleteMode())
-          {
-            sql += " AND alternate_geonames.language";
-            sql += constructLanguageCodeCondition(language);
-          }
-
-          AddFeatureConditions(theOptions, sql);
-          AddCountryConditions(theOptions, sql);
-          AddKeywordConditions(theOptions, sql);
-          sql += ')';
-        }
-
-        sql += " ORDER BY geonames_priority, population_priority DESC, ";
-        sql += (theCountryPriorities.empty() ? "" : "country_priority, ");
-        sql += (theFeaturePriorities.empty() ? "" : "feature_priority, ");
-        sql += " population DESC, name";
-
-        if (conn->collateSupported())
-        {
-          sql += " COLLATE ";
-          sql += conn->quote(theOptions.GetCollation());
-        }
-
-        break;
-      }
+        return buildFetchByNameSQL(opts, theParams);
       case eFetchByLonLat:
-      {
-        auto theLongitude = std::any_cast<float>(theParams.at(eLongitude));
-        auto theLatitude = std::any_cast<float>(theParams.at(eLatitude));
-        auto theRadius = std::any_cast<float>(theParams.at(eRadius));
-
-        sql +=
-            "WITH candidates AS ("
-            "SELECT geonames.id AS id, geonames.name AS name,"
-            "geonames.ansiname AS ansiname, lat, lon,"
-            "countries_iso2 AS iso2, features_code, timezone,"
-            "population, elevation, dem, municipalities_id,"
-            "admin1, ST_Distance(ST_GeographyFromText('POINT(";
-        sql += Fmi::to_string(theLongitude);
-        sql += ' ';
-        sql += Fmi::to_string(theLatitude);
-        sql += ")'), the_geog, true) as distance FROM geonames WHERE ";
-
-        // PHP version does not do this, but we cannot tolerate it in brainstorm
-        sql += " timezone IS NOT NULL";
-
-        if (theOptions.GetPopulationMin() > 0)
-        {
-          sql += " AND population>=";
-          sql += Fmi::to_string(theOptions.GetPopulationMin());
-        }
-        if (theOptions.GetPopulationMax() > 0)
-        {
-          sql += " AND population<=";
-          sql += Fmi::to_string(theOptions.GetPopulationMax());
-        }
-
-        AddCountryConditions(theOptions, sql);
-        AddFeatureConditions(theOptions, sql);
-        AddKeywordConditions(theOptions, sql);
-
-        sql += " ORDER BY the_geom <-> ST_GeomFromText('POINT(";
-        sql += Fmi::to_string(theLongitude);
-        sql += ' ';
-        sql += Fmi::to_string(theLatitude);
-        sql += ")',4326)";
-
-        // <-> ordering is appriximate, so we need to fetch more results
-        // than wanted to make sure the final list is properly ordered.
-        // HOWEVER: It is important to keep this number small, increasing
-        // the margin increases execution time rapidly
-
-        const int limit_safety_margin = 10;
-
-        if (theOptions.GetResultLimit() > 0)
-        {
-          sql += " LIMIT ";
-          sql += Fmi::to_string(limit_safety_margin + theOptions.GetResultLimit());
-        }
-
-        sql += ") SELECT * from candidates";
-
-        // This best best done in the outer select since postgresql 9.1
-        if (theRadius > 0)
-        {
-          sql += " WHERE distance<=";
-          sql += Fmi::to_string(theRadius * 1000);
-        }
-
-        sql += " ORDER BY distance";
-        if (theOptions.GetResultLimit() > 0)
-        {
-          sql += " LIMIT ";
-          sql += Fmi::to_string(theOptions.GetResultLimit());
-        }
-
-        break;
-      }
+        return buildFetchByLonLatSQL(opts, theParams);
       case eFetchById:
-      {
-        auto theId = std::any_cast<int>(theParams.at(eGeonameId));
-
-        sql +=
-            "SELECT id, name, ansiname, lat, lon, countries_iso2 AS iso2, features_code,"
-            " timezone, municipalities_id, admin1, population,"
-            " elevation, dem "
-            " FROM geonames WHERE id=";
-        sql += Fmi::to_string(theId);
-        break;
-      }
+        return buildFetchByIdSQL(theParams);
       case eFetchByKeyword1:
       case eFetchByKeyword2:
-      case eFetchByKeyword3:
-      {
-        auto theKeyword = std::any_cast<string>(theParams.at(eKeyword));
-
-        if (theQueryId == eFetchByKeyword1)
-        {
-          sql += "SELECT keyword FROM keywords WHERE keyword=";
-          sql += conn->quote(theKeyword);
-        }
-        else if (theQueryId == eFetchByKeyword2)
-        {
-          sql +=
-              "SELECT geonames.id AS id, geonames.name AS name,\n "
-              "geonames.ansiname AS ansiname,lat,lon,\n "
-              "countries_iso2 AS iso2, features_code, timezone,\n "
-              "population, elevation, dem,\n "
-              "municipalities_id, admin1,\n "
-              "keywords_has_geonames.name AS override_name FROM \n "
-              "geonames, keywords_has_geonames WHERE\n "
-              "keywords_has_geonames.keyword=";
-          sql += conn->quote(theKeyword);
-          sql +=
-              " AND geonames.id=keywords_has_geonames.geonames_id"
-              " ORDER BY name";
-        }
-        else if (theQueryId == eFetchByKeyword3)
-        {
-          // long version
-          sql +=
-              "SELECT georesults.*,\n"
-              "       municipalities.name AS mname,\n"
-              "       altname_translations.name AS altname,\n"
-              "       alternate_municipalities.name AS altmname,\n"
-              "       admin1codes.name AS adminname,\n"
-              "       iso2_translations.name AS altcname\n"
-              "\n"
-              "FROM\n"
-              "(\n"
-
-              // -- basic geonames results
-
-              "  SELECT geonames.admin1,\n"
-              "         geonames.ansiname AS ansiname,\n"
-              "         geonames.countries_iso2 AS iso2,\n"
-              "         geonames.elevation,\n"
-              "         geonames.features_code,\n"
-              "         geonames.dem,\n"
-              "         geonames.id AS id,\n"
-              "         geonames.lat,\n"
-              "         geonames.lon,\n"
-              "         geonames.municipalities_id,\n"
-              "         geonames.name AS name,\n"
-              "         geonames.population,\n"
-              "         geonames.timezone,\n"
-              "         countries.name AS cname,\n"
-              "         features.shortdesc AS shortdesc,\n"
-              "         keywords_has_geonames.name AS override_name\n"
-              "  FROM geonames, keywords_has_geonames, features, countries\n"
-              "  WHERE geonames.id=keywords_has_geonames.geonames_id\n"
-              "  AND keywords_has_geonames.keyword=";
-          sql += conn->quote(theKeyword);
-          sql +=
-              "  AND features.code=geonames.features_code\n"
-              "  AND geonames.countries_iso2=countries.iso2\n"
-              ")\n"
-              "AS georesults\n"
-
-              // -- left join to add municipality if available
-
-              "LEFT JOIN municipalities\n"
-              "ON (municipalities.id=georesults.municipalities_id\n"
-              "    AND municipalities.countries_iso2=georesults.iso2)\n"
-              "\n"
-              "-- left join to add alternate municipality if available\n"
-              "\n"
-              "LEFT JOIN alternate_municipalities\n"
-              "ON (georesults.municipalities_id=alternate_municipalities.municipalities_id\n"
-              "    AND alternate_municipalities.language";
-          sql += constructLanguageCodeCondition(theOptions.GetLanguage());
-          sql +=
-              "   )\n"
-              "\n"
-              "-- left join to add admin name if available\n"
-              "\n"
-              "LEFT JOIN admin1codes\n"
-              "ON (admin1codes.code=georesults.admin1 AND admin1codes.geonames_id=georesults.id)\n"
-
-              //  left join to add alternate name if available
-
-              "LEFT JOIN\n"
-              "(\n"
-              "  SELECT id,name FROM\n"
-              "  (\n"
-              "    SELECT geonames.id AS id,\n"
-              "           alternate_geonames.name AS name,\n"
-              "           length(alternate_geonames.name) AS l\n"
-              "    FROM geonames, alternate_geonames, keywords_has_geonames\n"
-              "    WHERE geonames.id=alternate_geonames.geonames_id\n"
-              "    AND keywords_has_geonames.geonames_id=geonames.id\n"
-              "    AND keywords_has_geonames.keyword=";
-          sql += conn->quote(theKeyword);
-          sql += "    AND alternate_geonames.language";
-          sql += constructLanguageCodeCondition(theOptions.GetLanguage());
-          sql +=
-              "    ORDER BY preferred DESC,l\n"
-              "  )\n"
-              "  AS altname_tmp\n"
-              "  GROUP BY id, name \n"
-              ")\n"
-              "AS altname_translations\n"
-              "ON (georesults.id=altname_translations.id)\n"
-
-              // -- left join to add alternate country name if available
-
-              "LEFT JOIN\n"
-              "(\n"
-              "  SELECT iso2,name FROM\n"
-              "  (\n"
-              "    SELECT countries_iso2 AS iso2,\n"
-              "           alternate_geonames.name AS name,\n"
-              "           length(alternate_geonames.name) AS l\n"
-              "    FROM geonames, alternate_geonames\n"
-              "    WHERE geonames.features_code='PCLI'\n"
-              "    AND geonames.id=alternate_geonames.geonames_id\n"
-              "    AND alternate_geonames.language";
-          sql += constructLanguageCodeCondition(theOptions.GetLanguage());
-          sql +=
-              "    ORDER BY preferred DESC,l\n"
-              "  )\n"
-              "  AS iso2_tmp\n"
-              "  GROUP BY iso2, name\n"
-              ")\n"
-              "AS iso2_translations\n"
-              "ON (georesults.iso2=iso2_translations.iso2)\n"
-              "ORDER BY id;\n";
-        }
-        break;
-      }
+        return buildFetchByKeywordSQL(theQueryId, opts, theParams);
       case eCountKeywordLocations:
-      {
-        auto theKeyword = std::any_cast<string>(theParams.at(eKeyword));
-
-        sql += "SELECT count(*) AS count FROM keywords_has_geonames WHERE keyword=";
-        sql += conn->quote(theKeyword);
-        break;
-      }
-        // With -Weverything complains as all cases are covered
-        //    default:
-        //      break;
+        return buildCountKeywordLocationsSQL(theParams);
     }
-
-    return sql;
+    return {};
   }
   catch (...)
   {

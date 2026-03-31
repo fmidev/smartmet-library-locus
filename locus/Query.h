@@ -13,6 +13,8 @@
 #include <macgyver/StringConversion.h>
 #include <macgyver/TypeTraits.h>
 #include <any>
+#include <list>
+#include <map>
 #include <memory>
 #include <optional>
 #include <pqxx/pqxx>
@@ -119,7 +121,6 @@ class Query
     eFetchById,
     eFetchByKeyword1,
     eFetchByKeyword2,
-    eFetchByKeyword3,
     eCountKeywordLocations
   };
 
@@ -206,6 +207,46 @@ class Query
     result += ")";
     return result;
   }
+  // SQL generation helpers
+  std::string languageCodeCondition(const std::string& language) const;
+  std::string buildCasePriority(const std::string& column,
+                                const std::list<std::string>& items,
+                                const std::string& alias) const;
+  std::string buildResolveNameVariantSQL(
+      const QueryOptions& opts,
+      const std::map<SQLQueryParameterId, std::any>& params) const;
+  std::string buildResolveNameVariantsSQL(
+      const QueryOptions& opts,
+      const std::map<SQLQueryParameterId, std::any>& params) const;
+  std::string buildFetchByNameSQL(const QueryOptions& opts,
+                                   const std::map<SQLQueryParameterId, std::any>& params) const;
+  std::string buildFetchByLonLatSQL(const QueryOptions& opts,
+                                     const std::map<SQLQueryParameterId, std::any>& params) const;
+  static std::string buildFetchByIdSQL(const std::map<SQLQueryParameterId, std::any>& params);
+  std::string buildFetchByKeywordSQL(
+      SQLQueryId queryId,
+      const QueryOptions& opts,
+      const std::map<SQLQueryParameterId, std::any>& params) const;
+  std::string buildCountKeywordLocationsSQL(
+      const std::map<SQLQueryParameterId, std::any>& params) const;
+
+  // Location building helpers
+  static std::optional<SimpleLocation> buildSingleLocation(
+      const QueryOptions& opts,
+      const pqxx::result::const_iterator& row,
+      const std::map<int, std::string>& name_variants,
+      const std::map<std::string, std::string>& country_cache,
+      const std::map<int, std::string>& municipality_cache,
+      const std::map<std::string, std::string>& admin_cache,
+      const std::map<int, int>& fmisids,
+      const std::map<std::string, std::string>& feature_cache,
+      const std::string& theArea);
+  static void sortByExactMatch(return_type& locations, const std::string& theSearchWord);
+  void fetchFinnishMunicipalityNames(std::map<int, std::string>& names,
+                                      const std::vector<int>& ids) const;
+  void fetchAlternateMunicipalityNames(std::map<int, std::string>& names,
+                                        const std::vector<int>& ids,
+                                        const std::vector<std::string>& language_codes) const;
 };  // class Query
 
 }  // namespace Locus
