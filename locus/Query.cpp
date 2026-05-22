@@ -158,6 +158,26 @@ std::vector<std::vector<T>> make_batches(const std::set<T>& items, std::size_t b
   return batches;
 }
 
+Locus::MainResultColumns getMainResultColumns(const pqxx::result& res)
+{
+  Locus::MainResultColumns c;
+  c.timezone = static_cast<int>(res.column_number("timezone"));
+  c.id = static_cast<int>(res.column_number("id"));
+  c.name = static_cast<int>(res.column_number("name"));
+  c.ansiname = static_cast<int>(res.column_number("ansiname"));
+  c.elevation = static_cast<int>(res.column_number("elevation"));
+  c.dem = static_cast<int>(res.column_number("dem"));
+  c.iso2 = static_cast<int>(res.column_number("iso2"));
+  c.features_code = static_cast<int>(res.column_number("features_code"));
+  c.municipalities_id = static_cast<int>(res.column_number("municipalities_id"));
+  c.admin1 = static_cast<int>(res.column_number("admin1"));
+  c.lon = static_cast<int>(res.column_number("lon"));
+  c.lat = static_cast<int>(res.column_number("lat"));
+  c.population = static_cast<int>(res.column_number("population"));
+  c.override_name = find_column(res, "override_name");
+  return c;
+}
+
 }  // namespace
 
 namespace Locus
@@ -688,7 +708,7 @@ unsigned int Query::CountKeywordLocations(const QueryOptions& theOptions, const 
     string sqlStmt = constructSQLStatement(eCountKeywordLocations, params);
     pqxx::result res = conn->executeNonTransaction(sqlStmt);
 
-    return res[0]["count"].as<unsigned int>();
+    return res[0][0].as<unsigned int>();
   }
   catch (...)
   {
@@ -698,24 +718,23 @@ unsigned int Query::CountKeywordLocations(const QueryOptions& theOptions, const 
 
 std::map<int, std::string> Query::getNameVariants(const QueryOptions& theOptions,
                                                   const pqxx::result& theR,
+                                                  const MainResultColumns& cols,
                                                   const string& theSearchWord)
 {
   std::map<int, std::string> name_variants;
   std::vector<int> variant_resolve_postponed;
 
-  const auto override_field_ind = find_column(theR, "override_name");
-
   for (pqxx::result::const_iterator row = theR.begin(); row != theR.end(); ++row)
   {
-    if (row["timezone"].is_null())
+    if ((*row)[cols.timezone].is_null())
       continue;
 
-    const auto id = row["id"].as<int>();
+    const auto id = (*row)[cols.id].as<int>();
 
     // Use override name if available
-    if (override_field_ind && !row[*override_field_ind].is_null())
+    if (cols.override_name && !(*row)[*cols.override_name].is_null())
     {
-      const auto altname = row[*override_field_ind].as<string>();
+      const auto altname = (*row)[*cols.override_name].as<string>();
       if (!altname.empty())
       {
         name_variants[id] = altname;
@@ -1019,12 +1038,11 @@ try
     // Get the fmisids from the result set
     for (const auto& row : res)
     {
-      if (row.size() < 2 || row["name"].is_null())
+      if (row.size() < 2 || row[1].is_null())
         continue;  // Skip rows that do not have the expected columns or id
 
       const int id = row[0].as<int>();
-      const auto& field = row[1];
-      const int fmisid = field.as<int>();
+      const int fmisid = row[1].as<int>();
 
       fmisids[id] = fmisid;
     }
@@ -1050,6 +1068,7 @@ catch (...)
 std::optional<SimpleLocation> Query::buildSingleLocation(
     const QueryOptions& opts,
     const pqxx::result::const_iterator& row,
+    const MainResultColumns& cols,
     const std::map<int, std::string>& name_variants,
     const std::map<std::string, std::string>& country_cache,
     const std::map<int, std::string>& municipality_cache,
@@ -1058,30 +1077,30 @@ std::optional<SimpleLocation> Query::buildSingleLocation(
     const std::map<std::string, std::string>& feature_cache,
     const std::string& theArea)
 {
-  if (row["timezone"].is_null())
+  if ((*row)[cols.timezone].is_null())
     return std::nullopt;
 
-  const int id = row["id"].as<int>();
-  string name = (!row["name"].is_null() ? row["name"].as<string>() : "NULL");
+  const int id = (*row)[cols.id].as<int>();
+  string name = (!(*row)[cols.name].is_null() ? (*row)[cols.name].as<string>() : "NULL");
 
   const auto it1 = name_variants.find(id);
   if (it1 != name_variants.end())
     name = it1->second;
 
-  if (!row["ansiname"].is_null() && opts.GetCharset() != "utf8")
-    name = from_utf(name, row["ansiname"].as<string>(), opts.GetCharset());
+  if (!(*row)[cols.ansiname].is_null() && opts.GetCharset() != "utf8")
+    name = from_utf(name, (*row)[cols.ansiname].as<string>(), opts.GetCharset());
 
   int elevation = 0;
-  if (!row["elevation"].is_null() && row["elevation"].as<int>() != 0)
-    elevation = row["elevation"].as<int>();
-  else if (!row["dem"].is_null())
-    elevation = row["dem"].as<int>();
+  if (!(*row)[cols.elevation].is_null() && (*row)[cols.elevation].as<int>() != 0)
+    elevation = (*row)[cols.elevation].as<int>();
+  else if (!(*row)[cols.dem].is_null())
+    elevation = (*row)[cols.dem].as<int>();
 
   string country;
   string iso2;
-  if (!row["iso2"].is_null())
+  if (!(*row)[cols.iso2].is_null())
   {
-    iso2 = row["iso2"].as<string>();
+    iso2 = (*row)[cols.iso2].as<string>();
     const auto pos = country_cache.find(iso2);
     if (pos != country_cache.end())
       country = pos->second;
@@ -1089,9 +1108,9 @@ std::optional<SimpleLocation> Query::buildSingleLocation(
 
   string description;
   string features_code;
-  if (!row["features_code"].is_null())
+  if (!(*row)[cols.features_code].is_null())
   {
-    features_code = row["features_code"].as<string>();
+    features_code = (*row)[cols.features_code].as<string>();
     const auto pos = feature_cache.find(features_code);
     if (pos != feature_cache.end())
       description = pos->second;
@@ -1099,13 +1118,13 @@ std::optional<SimpleLocation> Query::buildSingleLocation(
 
   // Resolve administrative area name
   string administrative;
-  if (!row["municipalities_id"].is_null())
+  if (!(*row)[cols.municipalities_id].is_null())
   {
-    const auto pos = municipality_cache.find(row["municipalities_id"].as<int>());
+    const auto pos = municipality_cache.find((*row)[cols.municipalities_id].as<int>());
     if (pos != municipality_cache.end())
       administrative = pos->second;
   }
-  else if (const auto admin1 = row["admin1"].as<string>(); !admin1.empty())
+  else if (const auto admin1 = (*row)[cols.admin1].as<string>(); !admin1.empty())
   {
     const auto pos = admin_cache.find(iso2 + "." + admin1);
     if (pos != admin_cache.end())
@@ -1121,16 +1140,16 @@ std::optional<SimpleLocation> Query::buildSingleLocation(
   }
 
   SimpleLocation loc(name,
-                     row["lon"].as<float>(),
-                     row["lat"].as<float>(),
+                     (*row)[cols.lon].as<float>(),
+                     (*row)[cols.lat].as<float>(),
                      country,
                      features_code,
                      description,
-                     row["timezone"].as<string>(),
+                     (*row)[cols.timezone].as<string>(),
                      administrative,
-                     row["population"].as<unsigned int>(),
+                     (*row)[cols.population].as<unsigned int>(),
                      iso2,
-                     row["id"].as<int>(),
+                     id,
                      elevation);
 
   const auto fmisid_it = fmisids.find(id);
@@ -1172,7 +1191,8 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
     if (theR.empty())
       return {};
 
-    const auto name_variants = getNameVariants(theOptions, theR, theSearchWord);
+    const MainResultColumns cols = getMainResultColumns(theR);
+    const auto name_variants = getNameVariants(theOptions, theR, cols, theSearchWord);
     const auto country_cache = getCountryNames(theOptions, theR);
     const auto municipality_cache = getMunicipalityNames(theOptions, theR);
     const auto admin_cache = getAdministrativeNames(theOptions, theR);
@@ -1182,7 +1202,7 @@ Query::return_type Query::build_locations(const QueryOptions& theOptions,
     return_type locations;
     for (pqxx::result::const_iterator row = theR.begin(); row != theR.end(); ++row)
     {
-      auto loc = buildSingleLocation(theOptions, row, name_variants, country_cache,
+      auto loc = buildSingleLocation(theOptions, row, cols, name_variants, country_cache,
                                      municipality_cache, admin_cache, fmisids, feature_cache,
                                      theArea);
       if (loc)

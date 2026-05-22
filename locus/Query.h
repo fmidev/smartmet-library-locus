@@ -23,6 +23,24 @@
 
 namespace Locus
 {
+struct MainResultColumns
+{
+  int timezone;
+  int id;
+  int name;
+  int ansiname;
+  int elevation;
+  int dem;
+  int iso2;
+  int features_code;
+  int municipalities_id;
+  int admin1;
+  int lon;
+  int lat;
+  int population;
+  std::optional<int> override_name;
+};
+
 class Query
 {
  public:
@@ -89,6 +107,7 @@ class Query
 
   std::map<int, std::string> getNameVariants(const QueryOptions& theOptions,
                                              const pqxx::result& theR,
+                                             const MainResultColumns& cols,
                                              const std::string& theSearchWord = "%");
 
   std::map<std::string, std::string> getFeatures(const QueryOptions& theOptions,
@@ -234,6 +253,7 @@ class Query
   static std::optional<SimpleLocation> buildSingleLocation(
       const QueryOptions& opts,
       const pqxx::result::const_iterator& row,
+      const MainResultColumns& cols,
       const std::map<int, std::string>& name_variants,
       const std::map<std::string, std::string>& country_cache,
       const std::map<int, std::string>& municipality_cache,
