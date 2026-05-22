@@ -9,17 +9,22 @@ Locus::ISO639::ISO639(Fmi::Database::PostgreSQLConnection& conn,
   std::string sql = "select iso_639_1, iso_639_2, iso_639_3, name from languages";
   pqxx::result res = conn.executeNonTransaction(sql);
 
+  const auto idx_iso_639_1 = res.column_number("iso_639_1");
+  const auto idx_iso_639_2 = res.column_number("iso_639_2");
+  const auto idx_iso_639_3 = res.column_number("iso_639_3");
+  const auto idx_name = res.column_number("name");
+
   for (pqxx::result::const_iterator row = res.begin(); row != res.end(); ++row)
   {
     Entry entry;
-    entry.iso639_3 = row["iso_639_3"].as<std::string>();
-    entry.name = row["name"].as<std::string>();
-    const auto& c1 = row["iso_639_1"];
+    entry.iso639_3 = (*row)[idx_iso_639_3].as<std::string>();
+    entry.name = (*row)[idx_name].as<std::string>();
+    const auto c1 = (*row)[idx_iso_639_1];
     if (!c1.is_null())
     {
       entry.iso639_1 = c1.as<std::string>();
     }
-    const auto& c2 = row["iso_639_2"];
+    const auto c2 = (*row)[idx_iso_639_2];
     if (!c2.is_null())
     {
       entry.iso639_2 = c2.as<std::string>();
