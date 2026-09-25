@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
+Full developer documentation: `docs/developer-guide.md`.
+
 `smartmet-library-locus` is a C++ geocoding library that resolves place names to coordinates with multilingual support (ISO 639 language codes). It queries a PostgreSQL/PostGIS `fminames` database (GeoNames-derived). Used by `smartmet-engine-geonames` and `smartmet-plugin-autocomplete`.
 
 ## Build Commands

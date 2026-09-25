@@ -17,6 +17,10 @@ The locus library provides geographic name and location lookup services for Smar
 
 Used by [smartmet-engine-geonames](https://github.com/fmidev/smartmet-engine-geonames) and the [smartmet-plugin-autocomplete](https://github.com/fmidev/smartmet-plugin-autocomplete) to provide location search functionality.
 
+## Documentation
+
+- [Developer guide](docs/developer-guide.md): search behaviour, options and pitfalls
+
 ## License
 
 MIT — see [LICENSE](LICENSE)
