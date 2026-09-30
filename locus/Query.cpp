@@ -399,16 +399,18 @@ void Query::AddCountryConditions(const QueryOptions& theOptions, string& theQuer
       theQuery += " AND geonames.countries_iso2 IN (" + quote(upper_countries) + ")";
     }
 
+    // Exclusions apply also when all countries are searched. The database
+    // stores the codes in upper case.
     const list<string>& excluded_countries = theOptions.GetExcludedCountries();
-    if (!excluded_countries.empty() && !contains(countries, "%") && !contains(countries, "all"))
+    if (!excluded_countries.empty())
     {
-      std::vector<std::string> lower_excluded;
+      std::vector<std::string> upper_excluded;
       for (auto c : excluded_countries)
       {
-        Fmi::ascii_tolower(c);
-        lower_excluded.push_back(std::move(c));
+        Fmi::ascii_toupper(c);
+        upper_excluded.push_back(std::move(c));
       }
-      theQuery += " AND geonames.countries_iso2 NOT IN (" + quote(lower_excluded) + ")";
+      theQuery += " AND geonames.countries_iso2 NOT IN (" + quote(upper_excluded) + ")";
     }
   }
   catch (...)
