@@ -470,6 +470,8 @@ string QueryOptions::Hash() const
       hash << f << ':';
     for (const string& c : excluded_countries)
       hash << c << ':';
+    for (const string& k : keywords)
+      hash << "keyword=" << k << ':';
 
     return hash.str();
   }

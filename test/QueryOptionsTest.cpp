@@ -23,6 +23,17 @@ void hash()
   if (options.Hash() != result)
     TEST_FAILED("Default hash should be " + result + ", not " + options.Hash());
 
+  // Keywords must change the hash
+  options.SetKeywords("ski_resorts");
+  if (options.Hash() == result)
+    TEST_FAILED("Hash should change when keywords are set");
+
+  // and must not collide with the same text as an excluded country
+  Locus::QueryOptions options2;
+  options2.SetExcludedCountries("ski_resorts");
+  if (options.Hash() == options2.Hash())
+    TEST_FAILED("Keywords and excluded countries should give different hashes");
+
   TEST_PASSED();
 }
 
