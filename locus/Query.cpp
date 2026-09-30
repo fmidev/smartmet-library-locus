@@ -492,6 +492,11 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
     vector<string> qparts;
     if (!theName.empty())
       boost::algorithm::split(qparts, theName, boost::algorithm::is_any_of(","));
+
+    // Allow spaces around the comma, as in "Helsinki, Suomi"
+    for (auto& part : qparts)
+      boost::algorithm::trim(part);
+
     string searchword = (qparts.empty() ? string("") : qparts[0]);
 
     params[eSearchWord] = searchword;

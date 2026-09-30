@@ -262,6 +262,27 @@ void excluded_countries()
 
 // ----------------------------------------------------------------------
 
+void search_with_area_and_spaces()
+{
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+  Query::return_type ret;
+
+  QueryOptions options;
+
+  ret = lq.FetchByName(options, "Kumpula, Helsinki");
+  if (ret.size() != 1)
+    TEST_FAILED("Should find 1 'Kumpula, Helsinki', not " + lexical_cast<string>(ret.size()));
+
+  ret = lq.FetchByName(options, "Kumpula , Suomi");
+  if (ret.size() != 8)
+    TEST_FAILED("Should find 8 'Kumpula , Suomi' locations, not " +
+                lexical_cast<string>(ret.size()));
+
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
+
 void escape()
 {
   Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
@@ -789,6 +810,7 @@ class tests : public tframe::tests
     TEST(name_id_search);
     TEST(utf8_region_search);
     TEST(search_with_area);
+    TEST(search_with_area_and_spaces);
     TEST(excluded_countries);
     TEST(specific_countries);
     TEST(specific_features);
