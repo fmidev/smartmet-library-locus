@@ -1168,8 +1168,10 @@ std::optional<SimpleLocation> Query::buildSingleLocation(
 
 void Query::sortByExactMatch(return_type& locations, const std::string& theSearchWord)
 {
-  // Remove trailing "%" from searchword
-  const string tmp = theSearchWord.substr(0, theSearchWord.size() - 1);
+  // Remove the trailing "%" wildcard from the searchword, if there is one
+  string tmp = theSearchWord;
+  if (!tmp.empty() && tmp.back() == '%')
+    tmp.pop_back();
 
   return_type bestmatches;
   return_type secondarymatches;
