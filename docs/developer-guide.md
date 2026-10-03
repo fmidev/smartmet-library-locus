@@ -66,7 +66,7 @@ Places without a time zone are never returned.
 | Option | Default | Meaning |
 |--------|---------|---------|
 | `SetCountries()` | `fi` | Country codes to search, comma separated or a list. `all` or `%` means every country. The order also sets the country priority of the results. |
-| `SetExcludedCountries()` | none | Countries to leave out (but see the pitfalls). |
+| `SetExcludedCountries()` | none | Countries to leave out, also when every country is searched. |
 | `SetFeatures()` | `PPLC,ADMD,PPLA,…,PRK` | GeoNames feature codes to search; the order sets the priority. `all` or `%` means every feature. |
 | `SetKeywords()` | none | Restrict to places of these keywords. |
 | `SetLanguage()` | `fi` | Language of the returned names. |
@@ -79,13 +79,13 @@ Places without a time zone are never returned.
 | `SetCharset()` | `utf8` | Result character set; other than UTF-8 converts names, falling back to the ASCII name. |
 
 `HashValue()` covers every option, and the geonames engine uses it with the name as its
-cache key. The older string `Hash()` is deprecated and leaves out the keywords.
+cache key. The older string `Hash()` is deprecated.
 
 ## 4. How a name search works
 
-1. The name is split at the first comma: `Helsinki,Suomi` searches for `Helsinki`, and then
-   keeps only the results whose country name or administrative area is `Suomi`, compared
-   in lower case. The country and area names are in the result language.
+1. The name is split at the first comma, and spaces around the parts are removed:
+   `Helsinki, Suomi` searches for `Helsinki`, and then keeps only the results whose
+   country name or administrative area is `Suomi`, compared in lower case. The country and area names are in the result language.
 2. The search word is used as a SQL `LIKE` pattern, compared in lower case. `%` and `_`
    are therefore wildcards: `Hel%` matches every name starting with `Hel`.
 3. With `SetSearchVariants(true)`, the query is the union of a match on the main name and a
@@ -97,7 +97,7 @@ cache key. The older string `Hash()` is deprecated and leaves out the keywords.
    country, feature, administrative area names and FMI station ids, with one query each
    for the whole result set.
 6. The result limit is applied while building the results. In autocomplete mode, exact
-   matches of the search word (without its trailing `%`) are then moved first.
+   matches of the search word (without a trailing `%`) are then moved first.
 7. If nothing was found and `SetFullCountrySearch(true)` is set, the search is repeated
    with every country.
 
@@ -140,15 +140,8 @@ their layout requires rebuilding the engine. When adding an option, add it to
 
 ## 9. Known pitfalls
 
-* **No space after the comma.** `Helsinki,Suomi` works, but `Helsinki, Suomi` finds
-  nothing: the area part keeps its leading space and matches no country or area name.
-* **`SetExcludedCountries()` has no effect.** The excluded codes are compared in lower
-  case, while the database stores upper-case codes, and the exclusion is also skipped when
-  every country is searched.
 * **The search word is a `LIKE` pattern.** A name containing `%` or `_` matches more than
   itself.
-* **Autocomplete mode assumes a trailing `%`.** The exact-match sorting drops the last
-  character of the search word.
 * **The default country is Finland.** A plain `FetchByName()` for a foreign place finds
   nothing unless the countries are set or `SetFullCountrySearch(true)` is used.
 * **Call `load_iso639_table()`**, or language aliases (`fin`, `swe`, …) do not work.
