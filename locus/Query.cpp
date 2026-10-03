@@ -399,16 +399,18 @@ void Query::AddCountryConditions(const QueryOptions& theOptions, string& theQuer
       theQuery += " AND geonames.countries_iso2 IN (" + quote(upper_countries) + ")";
     }
 
+    // Exclusions apply also when all countries are searched. The database
+    // stores the codes in upper case.
     const list<string>& excluded_countries = theOptions.GetExcludedCountries();
-    if (!excluded_countries.empty() && !contains(countries, "%") && !contains(countries, "all"))
+    if (!excluded_countries.empty())
     {
-      std::vector<std::string> lower_excluded;
+      std::vector<std::string> upper_excluded;
       for (auto c : excluded_countries)
       {
-        Fmi::ascii_tolower(c);
-        lower_excluded.push_back(std::move(c));
+        Fmi::ascii_toupper(c);
+        upper_excluded.push_back(std::move(c));
       }
-      theQuery += " AND geonames.countries_iso2 NOT IN (" + quote(lower_excluded) + ")";
+      theQuery += " AND geonames.countries_iso2 NOT IN (" + quote(upper_excluded) + ")";
     }
   }
   catch (...)
@@ -490,6 +492,11 @@ Query::return_type Query::FetchByName(const QueryOptions& theOptions, const stri
     vector<string> qparts;
     if (!theName.empty())
       boost::algorithm::split(qparts, theName, boost::algorithm::is_any_of(","));
+
+    // Allow spaces around the comma, as in "Helsinki, Suomi"
+    for (auto& part : qparts)
+      boost::algorithm::trim(part);
+
     string searchword = (qparts.empty() ? string("") : qparts[0]);
 
     params[eSearchWord] = searchword;
@@ -1161,8 +1168,10 @@ std::optional<SimpleLocation> Query::buildSingleLocation(
 
 void Query::sortByExactMatch(return_type& locations, const std::string& theSearchWord)
 {
-  // Remove trailing "%" from searchword
-  const string tmp = theSearchWord.substr(0, theSearchWord.size() - 1);
+  // Remove the trailing "%" wildcard from the searchword, if there is one
+  string tmp = theSearchWord;
+  if (!tmp.empty() && tmp.back() == '%')
+    tmp.pop_back();
 
   return_type bestmatches;
   return_type secondarymatches;

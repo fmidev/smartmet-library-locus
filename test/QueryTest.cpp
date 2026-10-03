@@ -230,6 +230,59 @@ void search_with_area()
 
 // ----------------------------------------------------------------------
 
+void excluded_countries()
+{
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+  Query::return_type ret;
+
+  QueryOptions options;
+  options.SetCountries("all");
+  ret = lq.FetchByName(options, "Helsinki");
+  bool found = false;
+  for (const auto& loc : ret)
+    found |= (loc.iso2 == "FI");
+  if (!found)
+    TEST_FAILED("Should find Helsinki in Finland when all countries are searched");
+
+  // Exclusions are case insensitive and apply also when all countries are searched
+  options.SetExcludedCountries("fi");
+  ret = lq.FetchByName(options, "Helsinki");
+  for (const auto& loc : ret)
+    if (loc.iso2 == "FI")
+      TEST_FAILED("Should not find locations in Finland when it is excluded");
+
+  options.SetCountries("fi,se");
+  ret = lq.FetchByName(options, "Helsinki");
+  for (const auto& loc : ret)
+    if (loc.iso2 == "FI")
+      TEST_FAILED("Should not find locations in Finland when it is excluded (countries=fi,se)");
+
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
+
+void search_with_area_and_spaces()
+{
+  Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
+  Query::return_type ret;
+
+  QueryOptions options;
+
+  ret = lq.FetchByName(options, "Kumpula, Helsinki");
+  if (ret.size() != 1)
+    TEST_FAILED("Should find 1 'Kumpula, Helsinki', not " + lexical_cast<string>(ret.size()));
+
+  ret = lq.FetchByName(options, "Kumpula , Suomi");
+  if (ret.size() != 8)
+    TEST_FAILED("Should find 8 'Kumpula , Suomi' locations, not " +
+                lexical_cast<string>(ret.size()));
+
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
+
 void escape()
 {
   Query lq(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE, DATABASE_PORT);
@@ -757,6 +810,8 @@ class tests : public tframe::tests
     TEST(name_id_search);
     TEST(utf8_region_search);
     TEST(search_with_area);
+    TEST(search_with_area_and_spaces);
+    TEST(excluded_countries);
     TEST(specific_countries);
     TEST(specific_features);
     TEST(specific_keywords);
