@@ -26,7 +26,7 @@ class ISO639
   };
 
   ISO639() = default;
-  ISO639(Fmi::Database::PostgreSQLConnection& conn,
+  ISO639(const Fmi::Database::PostgreSQLConnection& conn,
          const std::vector<std::string>& special_codes = std::vector<std::string>());
 
   void add(const Entry& entry);

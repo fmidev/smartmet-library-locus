@@ -3,7 +3,7 @@
 #include <macgyver/Exception.h>
 #include <iostream>
 
-Locus::ISO639::ISO639(Fmi::Database::PostgreSQLConnection& conn,
+Locus::ISO639::ISO639(const Fmi::Database::PostgreSQLConnection& conn,
                       const std::vector<std::string>& special_codes)
 {
   std::string sql = "select iso_639_1, iso_639_2, iso_639_3, name from languages";
