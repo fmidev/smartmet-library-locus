@@ -110,6 +110,7 @@ Requires: smartmet-library-macgyver-devel
 %changelog
 * Tue Oct 13 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.13-1.fmi
 - Declare member functions and parameters const where nothing is modified (const correctness), no functional changes
+- Fixed clang-tidy correctness findings (member initialization, rule of five, printf formats, dead stores)
 
 * Sat Oct 03 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.3-1.fmi
 - Include the keywords in the deprecated QueryOptions::Hash()

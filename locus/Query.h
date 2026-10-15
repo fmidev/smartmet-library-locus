@@ -25,19 +25,19 @@ namespace Locus
 {
 struct MainResultColumns
 {
-  int timezone;
-  int id;
-  int name;
-  int ansiname;
-  int elevation;
-  int dem;
-  int iso2;
-  int features_code;
-  int municipalities_id;
-  int admin1;
-  int lon;
-  int lat;
-  int population;
+  int timezone = 0;
+  int id = 0;
+  int name = 0;
+  int ansiname = 0;
+  int elevation = 0;
+  int dem = 0;
+  int iso2 = 0;
+  int features_code = 0;
+  int municipalities_id = 0;
+  int admin1 = 0;
+  int lon = 0;
+  int lat = 0;
+  int population = 0;
   std::optional<int> override_name;
 };
 
