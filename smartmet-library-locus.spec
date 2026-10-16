@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: locus library
 Name: %{SPECNAME}
-Version: 26.10.15
+Version: 26.10.16
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -28,12 +28,12 @@ BuildRequires: make
 BuildRequires: postgresql15-devel
 BuildRequires: %{smartmet_fmt_devel}
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 26.10.15
+BuildRequires: smartmet-library-macgyver-devel >= 26.10.16
 Requires: %{smartmet_boost}-locale
 Requires: %{smartmet_boost}-regex
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: smartmet-library-macgyver >= 26.10.15
+Requires: smartmet-library-macgyver >= 26.10.16
 %if 0%{?rhel} && 0%{rhel} == 8
 Requires: libpqxx >= 1:7.7.0, libpqxx < 1:7.8.0
 BuildRequires: libpqxx-devel >= 1:7.7.0, libpqxx-devel < 1:7.8.0
@@ -60,7 +60,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: gcc-c++
 #TestRequires: make
 #TestRequires: postgresql15-libs
-#TestRequires: smartmet-library-macgyver-devel >= 26.10.15
+#TestRequires: smartmet-library-macgyver-devel >= 26.10.16
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-test-db >= 26.2.17
 Provides: %{SPECNAME}
@@ -108,6 +108,9 @@ Requires: smartmet-library-macgyver-devel
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Oct 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.16-1.fmi
+- Rebuilt due to ABI changes in macgyver, spine, newbase and other libraries
+
 * Thu Oct 15 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.15-1.fmi
 - Declare member functions and parameters const where nothing is modified (const correctness), no functional changes
 - Fixed clang-tidy correctness findings (member initialization, rule of five, printf formats, dead stores)
